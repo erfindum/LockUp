@@ -1,0 +1,20 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/faq_activity_tool_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        layout="@layout/toolbar_layout"
+        android:layout_alignParentTop="true"
+        />
+    <fragment
+        android:id="@+id/faq_activity_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/faq_activity_tool_bar"
+        tools:layout="@layout/user_profile_fragment" />
+
+
+</RelativeLayout>

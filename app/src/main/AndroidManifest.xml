@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.smartfoxitsolutions.lockup">
+
+    <uses-permission tools:ignore="ProtectedPermissions"
+        android:name="android.permission.PACKAGE_USAGE_STATS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        >
+        <meta-data android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <activity android:name=".AppLoaderActivity"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <service android:name=".AppLockingService" />
+        <activity android:name=".LockUpMainActivity"/>
+        <activity android:name=".SetPinPatternActivity"/>
+        <activity android:name=".AppLockActivity"/>
+        <activity android:name=".PinLockActivity"/>
+        <activity android:name=".PatternLockActivity"/>
+
+        <receiver android:name=".AppLockBroadcastReceiver">
+        <intent-filter>
+            <action android:name="android.intent.action.PACKAGE_ADDED"/>
+        </intent-filter>
+    </receiver>
+
+
+    </application>
+
+</manifest>

@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent" android:layout_width="match_parent" android:fillViewport="true">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <View
+            android:id="@+id/user_profile_line_seperator_main"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/fourDpDimension"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:background="@color/colorMainAccent"
+            />
+
+        <TextView
+            android:id="@+id/user_profile_fragment_user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/user_profile_line_seperator_main"
+            android:text="Jack Reacher"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:textSize="@dimen/twentyFourSpDimension"
+            android:textColor="@color/textDarkGrey"
+            />
+
+        <TextView
+            android:id="@+id/user_profile_fragment_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/user_profile_fragment_user_name"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/tenDpDimension"
+            android:text="jack.reacher@example.com"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/textDarkGrey"
+            />
+        <ImageView
+            android:id="@+id/user_profile_fragment_email_icon_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/user_profile_fragment_email_icon_description"
+            android:layout_below="@+id/user_profile_fragment_user_name"
+            android:layout_alignTop="@+id/user_profile_fragment_email"
+            android:layout_toLeftOf="@+id/user_profile_fragment_email"
+            android:layout_toStartOf="@id/user_profile_fragment_email"
+            android:src="@drawable/ic_user_screen_mail"
+            />
+
+        <View
+            android:id="@+id/user_profile_line_seperator_main_1"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/oneDpDimension"
+            android:layout_below="@+id/user_profile_fragment_email"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:background="@color/dividerColor"
+            />
+
+        <TextView
+            android:id="@+id/user_profile_fragment_points_earned_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/user_profile_line_seperator_main_1"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:text="@string/user_profile_fragment_points_earned_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/textDarkGrey"
+            />
+        <View
+            android:id="@+id/user_profile_horizontal_seperator_invisible"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/user_profile_fragment_points_earned_text"
+            android:layout_marginTop="@dimen/tenDpDimension"
+            />
+        <Button
+            android:id="@+id/user_profile_fragment_today_earning_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@+id/user_profile_horizontal_seperator_invisible"
+            android:layout_toStartOf="@+id/user_profile_horizontal_seperator_invisible"
+            android:layout_below="@+id/user_profile_fragment_points_earned_text"
+            android:layout_marginTop="@dimen/tenDpDimension"
+            android:background="@color/colorMainAccent"
+            android:text="@string/user_profile_fragment_points_earned_today_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/white"
+            />
+
+        <Button
+            android:id="@+id/user_profile_fragment_total_earning_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_toRightOf="@+id/user_profile_horizontal_seperator_invisible"
+            android:layout_toEndOf="@+id/user_profile_horizontal_seperator_invisible"
+            android:layout_below="@+id/user_profile_fragment_points_earned_text"
+            android:layout_marginTop="@dimen/tenDpDimension"
+            android:background="@color/colorMainAccent"
+            android:text="@string/user_profile_fragment_points_earned_total_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/white"
+            />
+
+<FrameLayout
+    android:id="@+id/user_profile_fragment_frame_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/user_profile_fragment_today_earning_button"
+    android:layout_centerInParent="true"
+    >
+    <TextView
+        android:id="@+id/user_profile_fragment_today_earning_text_circle_big"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/twentyDpDimension"
+        android:text="55553"
+        android:textSize="@dimen/fourtySpDimension"
+        android:textColor="@color/white"
+        android:background="@drawable/earned_points_circle_view_big"
+        android:gravity="center"
+        android:visibility="visible"
+        android:elevation="@dimen/sevenDpDimension"
+        />
+
+
+</FrameLayout>
+
+        <TextView
+            android:id="@+id/user_profile_fragment_points_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/user_profile_fragment_today_earning_button"
+            android:layout_centerHorizontal="true"
+            android:text="@string/user_profile_fragment_points_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/white"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/oneHunderedAndFiftyDpDimension"
+            />
+
+        <View
+            android:id="@+id/user_profile_line_seperator_main_2"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/oneDpDimension"
+            android:layout_below="@+id/user_profile_fragment_frame_layout"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:background="@color/dividerColor"
+            />
+
+        <TextView
+            android:id="@+id/user_profile_fragment_dob_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/user_profile_line_seperator_main_2"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="@dimen/tenDpDimension"
+            android:layout_marginStart="@dimen/tenDpDimension"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:text="@string/user_profile_fragment_dob_title_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/textDarkGrey"
+            />
+
+        <TextView
+            android:id="@+id/user_profile_fragment_dob_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/user_profile_line_seperator_main_2"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="@dimen/tenDpDimension"
+            android:layout_marginEnd="@dimen/tenDpDimension"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:text="23/06/1989"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/textDarkGrey"
+            />
+
+        <View
+            android:id="@+id/user_profile_line_seperator_main_3"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/oneDpDimension"
+            android:layout_below="@+id/user_profile_fragment_dob_text"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:background="@color/dividerColor"
+            />
+
+        <TextView
+            android:id="@+id/user_profile_fragment_gender_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/user_profile_line_seperator_main_3"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="@dimen/tenDpDimension"
+            android:layout_marginStart="@dimen/tenDpDimension"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:text="@string/user_profile_fragment_gender_title_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/textDarkGrey"
+            />
+
+        <TextView
+            android:id="@+id/user_profile_fragment_gender_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/user_profile_line_seperator_main_3"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="@dimen/tenDpDimension"
+            android:layout_marginEnd="@dimen/tenDpDimension"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:text="Male"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/textDarkGrey"
+            />
+
+        <View
+            android:id="@+id/user_profile_line_seperator_main_4"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/oneDpDimension"
+            android:layout_below="@+id/user_profile_fragment_gender_text"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:background="@color/dividerColor"
+            />
+
+        <TextView
+            android:id="@+id/user_profile_fragment_password_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/user_profile_line_seperator_main_4"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="@dimen/tenDpDimension"
+            android:layout_marginStart="@dimen/tenDpDimension"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:text="@string/user_profile_fragment_password_title_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/textDarkGrey"
+            />
+
+        <TextView
+            android:id="@+id/user_profile_fragment_password_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/user_profile_line_seperator_main_4"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="@dimen/tenDpDimension"
+            android:layout_marginEnd="@dimen/tenDpDimension"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:text="@string/user_profile_fragment_password_change_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/textDarkGrey"
+            android:textStyle="bold"
+            />
+        <View
+            android:id="@+id/user_profile_line_seperator_main_5"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/oneDpDimension"
+            android:layout_below="@+id/user_profile_fragment_password_text"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:background="@color/dividerColor"
+            />
+
+        <TextView
+            android:id="@+id/user_profile_fragment_redeem_info_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/user_profile_line_seperator_main_5"
+            android:layout_centerHorizontal="true"
+            android:textAlignment="center"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:padding="@dimen/tenDpDimension"
+            android:text="@string/user_profile_fragment_redeem_cash_info_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/textDarkGrey"
+            />
+
+        <Button
+            android:id="@+id/user_profile_fragment_redeem_cash_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/user_profile_fragment_redeem_info_title"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:background="@drawable/selector_main_button"
+            android:text="@string/user_profile_fragment_redeem_cash_text"
+            android:padding="@dimen/tenDpDimension"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/white"
+            />
+
+        <ProgressBar
+            android:id="@+id/user_profile_fragment_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/tenDpDimension"
+            android:layout_below="@id/user_profile_fragment_redeem_cash_button"
+            android:progressBackgroundTint="@color/colorMainPrimary"
+            android:layout_marginBottom="@dimen/twentyDpDimension"
+            android:visibility="invisible"
+            />
+
+    </RelativeLayout>
+
+    </ScrollView>
+

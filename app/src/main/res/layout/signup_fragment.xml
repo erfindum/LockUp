@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="@color/colorLightPrimary"
+    android:paddingRight="@dimen/tenDpDimension"
+    android:paddingLeft="@dimen/tenDpDimension">
+
+    <TextView
+        android:id="@+id/appName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:padding="@dimen/tenDpDimension"
+        android:text="@string/signUp_fragment_signup"
+        android:textSize="@dimen/thirtyFourSpDimension"
+        android:textColor="@color/colorMainPrimary"
+        />
+
+    <TextView
+        android:id="@+id/appInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/appName"
+        android:paddingBottom="@dimen/tenDpDimension"
+        android:paddingTop="@dimen/tenDpDimension"
+        android:text="@string/signUp_appInfo"
+        android:textSize="@dimen/fifteenSpDimension"
+        android:textColor="@color/colorMainPrimary"
+        android:paddingLeft="@dimen/tenDpDimension"
+        android:paddingStart="@dimen/tenDpDimension"
+        android:paddingEnd="@dimen/tenDpDimension"
+        android:paddingRight="@dimen/tenDpDimension"
+        android:lineSpacingMultiplier="1"
+        />
+
+    <View
+        android:id="@+id/signup_line_seperator_signup"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/oneDpDimension"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/appInfo"
+        android:background="@color/colorMainPrimary"
+        android:layout_marginTop="@dimen/tenDpDimension"
+        />
+
+<android.support.v4.widget.NestedScrollView
+    android:id="@+id/signUp_nestedScroll"
+    android:layout_below="@id/signup_line_seperator_signup"
+    android:layout_height="wrap_content" android:layout_width="match_parent"
+    android:layout_alignParentBottom="true"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <EditText
+            android:id="@+id/signUp_fragment_firstName_edit_text"
+            android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:hint="@string/signUp_fragment_firstName"
+            android:textColorHint="@color/textSecondaryColor"
+            android:textColor="@color/textPrimaryColor"
+            android:drawableLeft="@drawable/ic_login_edit_person"
+            android:drawableStart="@drawable/ic_login_edit_person"
+            android:layout_marginTop="@dimen/thirtyDpDimension"
+            android:paddingRight="@dimen/twentyDpDimension"
+            android:paddingEnd="@dimen/twentyDpDimension"
+            android:inputType="textPersonName"
+
+            />
+
+        <EditText
+            android:id="@+id/signUp_fragment_lastName_edit_text"
+            android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/signUp_fragment_firstName_edit_text"
+            android:inputType="textPersonName"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:hint="@string/signUp_fragment_lastName"
+            android:textColorHint="@color/textSecondaryColor"
+            android:textColor="@color/textPrimaryColor"
+            android:drawableLeft="@drawable/ic_login_edit_person"
+            android:drawableStart="@drawable/ic_login_edit_person"
+            android:paddingRight="@dimen/twentyDpDimension"
+            android:paddingEnd="@dimen/twentyDpDimension"
+
+
+             />
+
+        <EditText
+            android:id="@+id/signUp_fragment_email_edit_text"
+            android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/signUp_fragment_lastName_edit_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:hint="@string/login_activity_email_edit_hint"
+            android:textColorHint="@color/textSecondaryColor"
+            android:textColor="@color/textPrimaryColor"
+            android:drawableLeft="@drawable/ic_login_edit_email"
+            android:drawableStart="@drawable/ic_login_edit_email"
+            android:paddingRight="@dimen/twentyDpDimension"
+            android:paddingEnd="@dimen/twentyDpDimension"
+            android:inputType="textEmailAddress"
+            android:maxLines="1"
+
+            />
+
+        <EditText
+            android:id="@+id/signUp_fragment_password_edit_text"
+            android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/signUp_fragment_email_edit_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:hint="@string/login_activity_password_edit_hint"
+            android:textColorHint="@color/textSecondaryColor"
+            android:textColor="@color/textPrimaryColor"
+            android:drawableLeft="@drawable/ic_login_edit_password"
+            android:drawableStart="@drawable/ic_login_edit_password"
+            android:paddingRight="@dimen/twentyDpDimension"
+            android:paddingEnd="@dimen/twentyDpDimension"
+            android:inputType="textWebPassword"
+            android:maxLines="1"
+
+            />
+
+
+
+        <EditText
+            android:id="@+id/signUp_fragment_password_reEnter_edit_text"
+            android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/signUp_fragment_password_edit_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:hint="@string/signUp_fragment_confirm_Password"
+            android:textColorHint="@color/textSecondaryColor"
+            android:textColor="@color/textPrimaryColor"
+            android:drawableLeft="@drawable/ic_login_edit_password"
+            android:drawableStart="@drawable/ic_login_edit_password"
+            android:paddingRight="@dimen/twentyDpDimension"
+            android:paddingEnd="@dimen/twentyDpDimension"
+            android:inputType="textWebPassword"
+            android:maxLines="1"
+            />
+
+
+
+        <EditText
+            android:id="@+id/signUp_fragment_dob_edit_text"
+            android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/signUp_fragment_password_reEnter_edit_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:hint="@string/signUp_fragment_dob"
+            android:textColorHint="@color/textSecondaryColor"
+            android:textColor="@color/textPrimaryColor"
+            android:drawableLeft="@drawable/ic_login_edit_dob"
+            android:drawableStart="@drawable/ic_login_edit_dob"
+            android:paddingRight="@dimen/twentyDpDimension"
+            android:paddingEnd="@dimen/twentyDpDimension"
+            android:cursorVisible="false"
+            android:inputType="none"
+            />
+
+
+
+       <EditText
+            android:id="@+id/signUp_fragment_gender_edit_text"
+            android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/signUp_fragment_dob_edit_text"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:hint="@string/signUp_fragment_gender"
+            android:textColorHint="@color/textSecondaryColor"
+           android:textColor="@color/textPrimaryColor"
+            android:drawableLeft="@drawable/ic_login_edit_gender"
+            android:drawableStart="@drawable/ic_login_edit_gender"
+            android:paddingRight="@dimen/twentyDpDimension"
+            android:paddingEnd="@dimen/twentyDpDimension"
+            android:cursorVisible="false"
+           android:inputType="none"
+            />
+
+
+        <Button
+            android:id="@+id/signUp_fragment_signUp_button"
+            android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/signUp_fragment_gender_edit_text"
+            android:layout_alignLeft="@+id/signUp_fragment_gender_edit_text"
+            android:layout_alignStart="@+id/signUp_fragment_gender_edit_text"
+            android:text="@string/signUp_fragment_signup"
+            android:textAllCaps="true"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:background="@drawable/selector_main_button"
+            android:textColor="@color/white"
+            android:layout_marginTop="@dimen/tenDpDimension"
+            />
+        <ProgressBar
+            android:id="@+id/signUp_fragment_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/tenDpDimension"
+            android:layout_below="@id/signUp_fragment_signUp_button"
+            android:progressBackgroundTint="@color/colorMainPrimary"
+
+             />
+
+    </RelativeLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+</RelativeLayout>

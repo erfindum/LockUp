@@ -1,0 +1,45 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+<!-- Login Fragment-->
+
+    <dimen name="fourtySpDimension">40sp</dimen>
+    <dimen name="thirtyFourSpDimension">34sp</dimen>
+    <dimen name="fifteenSpDimension">15sp</dimen>
+    <dimen name="twentyFourSpDimension">24sp</dimen>
+    <dimen name="twelveSpDimension">12sp</dimen>
+    <dimen name="seventeenSpDimension">17sp</dimen>
+
+    <dimen name="loginLineSeperator">225dp</dimen>
+
+    <dimen name="fiveDpDimension">5dp</dimen>
+    <dimen name="fifteenDpDimension">15dp</dimen>
+    <dimen name="fiftyDpDimension">50dp</dimen>
+    <dimen name="fourDpDimension">4dp</dimen>
+    <dimen name="fourtyEightDpDimension">48dp</dimen>
+    <dimen name="oneDpDimension">1dp</dimen>
+    <dimen name="onePointFiveDpDimension">1.5dp</dimen>
+    <dimen name="oneHunderedDpDimension">100dp</dimen>
+    <dimen name="oneHunderedAndTwentyDpDimension">120dp</dimen>
+    <dimen name="oneHunderedAndFiftyDpDimension">150dp</dimen>
+    <dimen name="sevenDpDimension">7dp</dimen>
+    <dimen name="seventyDpDimension">60dp</dimen>
+    <dimen name="sixtyFiveDpDimension">65dp</dimen>
+    <dimen name="seventyFiveDpDimension">75dp</dimen>
+
+    <dimen name="tenDpDimension">10dp</dimen>
+    <dimen name="threeDpDimension">3dp</dimen>
+    <dimen name="thirtyDpDimension">30dp</dimen>
+    <dimen name="thirtyTwoDpDimension">32dp</dimen>
+    <dimen name="thirtyFiveDpDimension">35dp</dimen>
+    <dimen name="twentyEightDpDImension">28dp</dimen>
+    <dimen name="twentyDpDimension">20dp</dimen>
+    <dimen name="twoDpDimension">2dp</dimen>
+    <dimen name="twoHundredDpDimension">200dp</dimen>
+    <dimen name="twoHunderedAndFourtyDpDimension">240dp</dimen>
+
+
+
+
+</resources>

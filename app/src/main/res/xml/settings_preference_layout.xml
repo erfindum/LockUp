@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceCategory android:title="@string/preference_fragment_general_settings_title"
+    />
+    <CheckBoxPreference
+        android:id="@+id/preference_fragment_activate_locker"
+        android:title="@string/preference_fragment_activate_locker_title"
+        android:summary="@string/preference_fragment_activate_locker_summery"
+        android:widgetLayout="@layout/check_box_layout"
+        />
+    <CheckBoxPreference
+        android:id="@+id/preference_fragment_vibrate"
+        android:title="@string/preference_fragment_vibrate_title"
+        android:summary="@string/preference_fragment_vibrate_summery"
+        android:widgetLayout="@layout/check_box_layout"
+        />
+    <CheckBoxPreference
+        android:id="@+id/preference_fragment_uninstall_prevention"
+        android:title="@string/preference_fragment_uninstall_prevention_title"
+        android:summary="@string/preference_fragment_uninstall_prevention_summery"
+        android:widgetLayout="@layout/check_box_layout"
+        />
+    <CheckBoxPreference
+        android:id="@+id/preference_fragment_lock_settings"
+        android:title="@string/preference_fragment_lock_settings_title"
+        android:summary="@string/preference_fragment_lock_settings_summery"
+        android:widgetLayout="@layout/check_box_layout"
+        />
+    <PreferenceCategory android:title="@string/preference_fragment_change_password_title"/>
+
+    <Preference
+        android:id="@+id/preference_fragment_change_lock_pin"
+        android:title="@string/preference_fragment_change_user_pin_title"
+        android:summary="@string/preference_fragment_change_user_pin_summery"
+        />
+
+    <Preference
+        android:id="@+id/preference_fragment_change_user_password"
+        android:title="@string/preference_fragment_change_user_password_title"
+        android:summary="@string/preference_fragment_change_user_password_summery"
+        />
+    <PreferenceCategory android:title="@string/preference_fragment_vault_settings_title"/>
+    <Preference
+        android:id="@+id/preference_fragment_change_vault"
+        android:title="@string/preference_fragment_change_vault_title"
+        />
+
+    <PreferenceCategory android:title="@string/preference_fragment_user_settings_title"/>
+    <Preference
+        android:id="@+id/preference_fragment_change_security_question"
+        android:title="@string/preference_fragment_change_security_question_title"
+        />
+    <Preference
+        android:id="@+id/preference_fragment_logout"
+        android:title="@string/preference_fragment_logout_user_account_title"
+        />
+</PreferenceScreen>

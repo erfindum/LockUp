@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PatternLockView" >
+        <attr name="nodeCellSize" format="dimension"/>
+        <attr name="nodeCornerSize" format="dimension"/>
+        <attr name="nodeSelectedCornerSize" format="dimension"/>
+        <attr name="patternLineStroke" format="dimension"/>
+        <attr name="patternLineColor" format="color"/>
+        <attr name="nodeDefaultColor" format="color"/>
+        <attr name="nodeSelectedDefaultColor" format="color"/>
+        <attr name="nodeColor" format="reference"/>
+        <attr name="nodeSelectedColor" format="reference"/>
+    </declare-styleable>
+
+</resources>
