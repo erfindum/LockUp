@@ -43,7 +43,7 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
 
     private String selectedPin,pinSetFirstAttempt, pinConfirmed;
     private int pinDigitCount, pinSetCount=PIN_SET_FIRST_ATTEMPT;
-    private boolean isPinSetStarted,isPinSetCompleted,isResetPin; // Set to true when user starts pressing the Pin
+    private boolean isPinSetStarted,isPinSetCompleted,isResetPin,isPinError; // Set to true when user starts pressing the Pin
     ObjectAnimator pinErrorAnimator,pinCompleteAnimator;
 
     SetPinPatternActivity pinPatternActivity;
@@ -174,7 +174,6 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
-                pinLayout.setClickable(false);
                 pinInfo.setText(R.string.set_pin_fragment_not_equal_text);
                 pinInfo.setTextColor(Color.parseColor("#ef5350")); // For minimum API 15
                 Button button;
@@ -195,7 +194,7 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
                 pinInfo.setText(R.string.set_pin_fragment_info_text);
                 pinInfo.setTextColor(Color.WHITE);
                 resetPinView(RESET_PIN_VIEW_PARTIAL);
-                pinLayout.setClickable(true);
+                isPinError = false;
             }
         });
 
@@ -271,45 +270,48 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
      */
 
     void pinClicked(String digit){
-        if(!isPinSetStarted){
-            isPinSetStarted = true;
-            pinDigitCount+=1;
-            selectedPin+=digit;
-            getTrigger(pinDigitCount).setBackgroundResource(R.drawable.img_pin_selected);
-        }else if(pinDigitCount<3 ){
-            pinDigitCount+=1;
-            selectedPin+=digit;
-            getTrigger(pinDigitCount).setBackgroundResource(R.drawable.img_pin_selected);
-        }else if(pinDigitCount == 3){
-            selectedPin+=digit;
-            pinDigitCount+=1;
-            getTrigger(pinDigitCount).setBackgroundResource(R.drawable.img_pin_selected);
-            if(pinSetCount==PIN_SET_FIRST_ATTEMPT) {
-                pinSetCount=PIN_SET_CONFIRMED;
-                pinSetFirstAttempt = selectedPin;
-                pinHead.setText(R.string.set_pin_fragment_confirm_text);
-                changeLock.setText(R.string.set_pattern_fragment_reset_text);
-                isPinSetCompleted=false;
-                pinCompleteAnimator.start();
-            }else if(pinSetFirstAttempt.equals(selectedPin)){
-                pinConfirmed = selectedPin;
-                pinHead.setText(R.string.set_pin_fragment_title_text);
-                changeLock.setText(R.string.set_pin_fragment_change_lock_text);
-                isPinSetCompleted=true;
-                SharedPreferences prefs = pinPatternActivity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, Context.MODE_PRIVATE);
-                long userPassCode = Long.parseLong(pinConfirmed)*55439;
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putLong(AppLockModel.USER_SET_LOCK_PASS_CODE,userPassCode);
-                edit.putInt(AppLockModel.APP_LOCK_LOCKMODE,AppLockModel.APP_LOCK_MODE_PIN);
-                edit.putBoolean(AppLockModel.LOCK_UP_FIRST_LOAD_PREF_KEY,false);
-                edit.apply();
-                pinPatternActivity.startLockUpMainActivity();
-                pinCompleteAnimator.start();
+       if(!isPinError) {
+           if (!isPinSetStarted) {
+               isPinSetStarted = true;
+               pinDigitCount += 1;
+               selectedPin += digit;
+               getTrigger(pinDigitCount).setBackgroundResource(R.drawable.img_pin_selected);
+           } else if (pinDigitCount < 3) {
+               pinDigitCount += 1;
+               selectedPin += digit;
+               getTrigger(pinDigitCount).setBackgroundResource(R.drawable.img_pin_selected);
+           } else if (pinDigitCount == 3) {
+               selectedPin += digit;
+               pinDigitCount += 1;
+               getTrigger(pinDigitCount).setBackgroundResource(R.drawable.img_pin_selected);
+               if (pinSetCount == PIN_SET_FIRST_ATTEMPT) {
+                   pinSetCount = PIN_SET_CONFIRMED;
+                   pinSetFirstAttempt = selectedPin;
+                   pinHead.setText(R.string.set_pin_fragment_confirm_text);
+                   changeLock.setText(R.string.set_pattern_fragment_reset_text);
+                   isPinSetCompleted = false;
+                   pinCompleteAnimator.start();
+               } else if (pinSetFirstAttempt.equals(selectedPin)) {
+                   pinConfirmed = selectedPin;
+                   pinHead.setText(R.string.set_pin_fragment_title_text);
+                   changeLock.setText(R.string.set_pin_fragment_change_lock_text);
+                   isPinSetCompleted = true;
+                   SharedPreferences prefs = pinPatternActivity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, Context.MODE_PRIVATE);
+                   long userPassCode = Long.parseLong(pinConfirmed) * 55439;
+                   SharedPreferences.Editor edit = prefs.edit();
+                   edit.putLong(AppLockModel.USER_SET_LOCK_PASS_CODE, userPassCode);
+                   edit.putInt(AppLockModel.APP_LOCK_LOCKMODE, AppLockModel.APP_LOCK_MODE_PIN);
+                   edit.putBoolean(AppLockModel.LOCK_UP_FIRST_LOAD_PREF_KEY, false);
+                   edit.apply();
+                   pinPatternActivity.startLockUpMainActivity();
+                   pinCompleteAnimator.start();
 
-            }else if(!pinSetFirstAttempt.equals(selectedPin)) {
-                pinErrorAnimator.start();
-            }
-        }
+               } else if (!pinSetFirstAttempt.equals(selectedPin)) {
+                   isPinError = true;
+                   pinErrorAnimator.start();
+               }
+           }
+       }
     }
 
 

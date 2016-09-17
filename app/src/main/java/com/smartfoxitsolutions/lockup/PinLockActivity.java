@@ -71,9 +71,8 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
             getWindow().getDecorView().setAlpha(0.95f);
         }
         else{
-            Drawable appColor = new ColorDrawable(Color.parseColor("#2874F0"));
+            Drawable appColor = new ColorDrawable(Color.parseColor("#F52874F0"));
             getWindow().getDecorView().setBackground(appColor);
-            getWindow().getDecorView().setAlpha(0.95f);
         }
         pinLayout = (RelativeLayout) findViewById(R.id.pin_lock_activity_digit_group);
         triggerLayout = (RelativeLayout) findViewById(R.id.pin_lock_activity_trigger_group);

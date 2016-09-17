@@ -18,8 +18,8 @@
 
     <ImageView
         android:id="@+id/pin_lock_activity_app_icon_view"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_above="@+id/pin_lock_activity_trigger_group"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/tenDpDimension"

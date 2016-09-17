@@ -61,9 +61,12 @@ public class AppLockQueryTask implements Runnable {
                }
            }
            else {
-               List<ActivityManager.RunningTaskInfo> recentTasks = activityManager.getRunningTasks(10);
+              try{ List<ActivityManager.RunningTaskInfo> recentTasks = activityManager.getRunningTasks(10);
                appQuery.obj = recentTasks.get(0).topActivity.getPackageName();
                Log.d("AppLockTask", recentTasks.get(0).topActivity.getPackageName());
+              }catch (Exception e){
+                  e.printStackTrace();
+              }
            }
 
         if(appLockUIHandler != null){

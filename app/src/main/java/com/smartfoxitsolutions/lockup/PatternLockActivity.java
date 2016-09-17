@@ -46,12 +46,11 @@ public class PatternLockActivity extends AppCompatActivity implements PatternLoc
         if(packageColor!=0){
             Drawable appColor = new ColorDrawable(packageColor);
             getWindow().getDecorView().setBackground(appColor);
-            getWindow().getDecorView().setAlpha(0.95f);
+            getWindow().getDecorView().setAlpha(0.20f);
         }
         else{
-            Drawable appColor = new ColorDrawable(Color.parseColor("#2874F0"));
+            Drawable appColor = new ColorDrawable(Color.parseColor("#F52874F0"));
             getWindow().getDecorView().setBackground(appColor);
-            getWindow().getDecorView().setAlpha(0.45f);
         }
         patternView = (PatternLockView) findViewById(R.id.pattern_lock_activity_pattern_view);
         nativeExpressAdView = (NativeExpressAdView) findViewById(R.id.pattern_lock_activity_ad_view);
