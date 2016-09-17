@@ -14,15 +14,15 @@
 </string-array>
 
     <string-array name="nodeSelectedColors">
-        <item>#647B1FA2</item>
-        <item>#643F9F</item>
-        <item>#6400796B</item>
-        <item>#641976D2</item>
-        <item>#64AFB42B</item>
-        <item>#64689F38</item>
-        <item>#64d32f2f</item>
-        <item>#64FBC02D</item>
-        <item>#64F57C00</item>
+        <item>#7B1FA2</item>
+        <item>#303F9F</item>
+        <item>#00796B</item>
+        <item>#0288D1</item>
+        <item>#AFB42B</item>
+        <item>#388E3C</item>
+        <item>#d32f2f</item>
+        <item>#FBC02D</item>
+        <item>#F57C00</item>
     </string-array>
 
 </resources>

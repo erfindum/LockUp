@@ -7,7 +7,11 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -45,22 +49,39 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
 
     private String selectedPin;
     private int pinDigitCount;
-    private boolean isPinComplete, isVibratorEnabled, isErrorConfirmed;
+    private boolean isVibratorEnabled, isErrorConfirmed;
 
     ValueAnimator digitOneAnimator,digitTwoAnimator, digitThreeAnimator, digitFourAnimator,digitFiveAnimator, digitSixAnimator
                     ,digitSevenAnimator,digitEightAnimator,digitNineAnimator,digitZeroAnimator;
    ValueAnimator triggerAnimator;
 
+    private String packageName;
+    private int packageColor;
+    long pinPassCode;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pin_lock_activity);
+        packageName = getIntent().getStringExtra(AppLockingService.CHECKED_APP_LOCK_PACKAGE_NAME);
+        packageColor = getIntent().getIntExtra(AppLockingService.CHECKED_APP_LOCK_COLOR,0);
+        if(packageColor!=0){
+            Drawable appColor = new ColorDrawable(packageColor);
+            getWindow().getDecorView().setBackground(appColor);
+            getWindow().getDecorView().setAlpha(0.95f);
+        }
+        else{
+            Drawable appColor = new ColorDrawable(Color.parseColor("#2874F0"));
+            getWindow().getDecorView().setBackground(appColor);
+            getWindow().getDecorView().setAlpha(0.95f);
+        }
         pinLayout = (RelativeLayout) findViewById(R.id.pin_lock_activity_digit_group);
         triggerLayout = (RelativeLayout) findViewById(R.id.pin_lock_activity_trigger_group);
         pinDigitVibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         SharedPreferences prefs = getBaseContext().getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
         isVibratorEnabled = prefs.getBoolean(AppLockModel.VIBRATOR_ENABLED_PREF_KEY,true);
         selectedPin = "";
+        pinPassCode = prefs.getLong(AppLockModel.USER_SET_LOCK_PASS_CODE,0);
         String adAppId = getResources().getString(R.string.pin_lock_activity_ad_app_id);
         digitTypFace = Typeface.createFromAsset(getAssets(),"fonts/arquitectabook.ttf");
         MobileAds.initialize(getApplicationContext(),adAppId);
@@ -70,6 +91,15 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
         pinLockAdView.loadAd(pinLockAdRequest);
         inflatePinViews();
 
+    }
+
+    void setAppIcon(String packageName){
+        try{
+            Drawable appIcon =  getPackageManager().getApplicationIcon(packageName);
+            appIconView.setImageDrawable(appIcon);
+        }catch (PackageManager.NameNotFoundException e){
+            e.printStackTrace();
+        }
     }
 
     void inflatePinViews(){
@@ -103,6 +133,7 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
         button_digit_zero.setTypeface(digitTypFace);
 
         registerListeners();
+        setAppIcon(packageName);
         setPinAnimation();
     }
 
@@ -136,6 +167,7 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public void onClick(View v) {
+
         switch(v.getId()){
             case R.id.pin_lock_activity_digit_one:
                 pinClicked("1");
@@ -601,7 +633,7 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
 
     void pinClicked(String digit){
         Log.d("AppLock", "PinClicked .......");
-        String passcode= "4512";
+
         if(!isErrorConfirmed) {
             if (pinDigitCount < 3) {
                 pinDigitCount += 1;
@@ -613,11 +645,12 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
                 pinDigitCount += 1;
                 getTrigger(pinDigitCount).setBackgroundResource(R.drawable.img_pin_trigger_selected);
                 getDigitAnimators(digit).start();
-                if (!selectedPin.equals("") && passcode.equals(selectedPin)) {
-
-                    Log.d("AppLock", "Passcode is " + selectedPin + "  " + passcode);
+                long confirmedPin = Long.parseLong(selectedPin)*55439;
+                if (!selectedPin.equals("") && pinPassCode == confirmedPin) {
+                    Log.d("AppLock", "Passcode is " + selectedPin + "  " + pinPassCode);
+                    postPatternCompleted(packageName);
                     resetPinView();
-                } else if (!passcode.equals(selectedPin)) {
+                } else if (pinPassCode != confirmedPin) {
                     triggerAnimator.start();
                     if(isVibratorEnabled){
                         pinDigitVibrator.vibrate(30);
@@ -646,6 +679,12 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
             pinDigitCount-=1;
             Log.d("PatternLock","Cleared : " +selectedPin);
         }
+    }
+
+    private void postPatternCompleted(String packageUnlockedName){
+
+        AppLockingService.recentlyUnlockedApp = packageUnlockedName;
+        finish();
     }
 
     @Override

@@ -48,7 +48,7 @@ public class AppLockQueryTask implements Runnable {
         Message appQuery = appLockUIHandler.obtainMessage(AppLockingService.RECENT_APP_INFO);
            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                long currentTime = System.currentTimeMillis();
-               UsageEvents usageEvents = usageStatsManager.queryEvents(currentTime -1000, currentTime);
+               UsageEvents usageEvents = usageStatsManager.queryEvents(currentTime- 700, currentTime);
                UsageEvents.Event recentAppEvent = new UsageEvents.Event();
                while (usageEvents.hasNextEvent()) {
                    usageEvents.getNextEvent(recentAppEvent);

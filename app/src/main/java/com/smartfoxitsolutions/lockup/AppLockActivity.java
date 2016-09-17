@@ -139,7 +139,8 @@ public class AppLockActivity extends AppCompatActivity {
         else if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
             startService(new Intent(this,AppLockingService.class));
         }
-        sendBroadcast(new Intent("com.smartfoxitsolutions.lockup.APP_LOCK_BACKGROUND"));
+        startService(new Intent(this,GetPaletteColorService.class));
+
         Log.d(TAG,"Called onStop");
     }
 
@@ -152,7 +153,6 @@ public class AppLockActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG," " + String .valueOf(appLockRecyclerAdapter == null));
         Log.d(TAG,"Called onDestroy");
     }
 }

@@ -90,6 +90,7 @@
     <string name="main_screen_activity_settings_button_text">Settings</string>
     <string name="main_screen_activity_user_profile_button_text">My Profile</string>
     <string name="main_screen_activity_faq_button_text">FAQ</string>
+    <string name="main_screen_activity_ad_unit_id">ca-app-pub-4739007494599063/2472603036</string>
 
     <!-- Set Pattern Screen -->
     <string name="set_pattern_fragment_title_text">Set Pattern</string>

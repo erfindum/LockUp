@@ -121,7 +121,6 @@ public class SetPatternFragment extends Fragment implements PatternLockView.OnPa
 
     @Override
     public void onPatternCompleted(boolean patternCompleted) {
-        Log.d("PatternLock","Selected : Called inside PatternLockView");
         if(patternCompleted && patternDotSelectedCount>=4){
             if(patternSetCount == PATTERN_SET_FIRST_ATTEMPT){
                 patternSelectedFirstAttempt = selectedPatternDot;
@@ -133,9 +132,9 @@ public class SetPatternFragment extends Fragment implements PatternLockView.OnPa
                 patternLockView.resetPatternView();
             }else if (patternSetCount == PATTERN_CONFIRMED_SET && patternSelectedFirstAttempt.equals(selectedPatternDot)){
                 patternConfirmed = selectedPatternDot;
-                resetPatternView(COMPLETE_RESET_PATTERN_VIEW);
-                patternLockView.resetPatternView();
                 setPatternPassCode(patternConfirmed);
+                patternLockView.resetPatternView();
+                resetPatternView(COMPLETE_RESET_PATTERN_VIEW);
             }else if(!patternSelectedFirstAttempt.equals(selectedPatternDot)){
                 isPatternNotEqual=true;
                 patternAnimator.start();
@@ -170,10 +169,12 @@ public class SetPatternFragment extends Fragment implements PatternLockView.OnPa
 
     void setPatternPassCode(String passCode){
         if(passCode!=null && !passCode.equals("")){
+            Log.d("PatternLock",passCode + " ");
             SharedPreferences prefs = pinPatternActivity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, Context.MODE_PRIVATE);
             long userPassCode = Long.parseLong(patternConfirmed)*55439;
             SharedPreferences.Editor edit = prefs.edit();
-            edit.putLong(SetPinPatternActivity.USER_SET_LOCK_PASS_CODE,userPassCode);
+            edit.putLong(AppLockModel.USER_SET_LOCK_PASS_CODE,userPassCode);
+            edit.putInt(AppLockModel.APP_LOCK_LOCKMODE,AppLockModel.APP_LOCK_MODE_PATTERN);
             edit.putBoolean(AppLockModel.LOCK_UP_FIRST_LOAD_PREF_KEY,false);
             edit.apply();
             pinPatternActivity.startLockUpMainActivity();

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -38,6 +39,7 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
     Button button_digit_six,button_digit_seven,button_digit_eight,button_digit_nine,button_digit_zero,clear_pin_button;
     ImageView img_trigger_one,img_trigger_two,img_trigger_three,img_trigger_four;
     RelativeLayout pinLayout;
+    Typeface digitTypFace;
 
     private String selectedPin,pinSetFirstAttempt, pinConfirmed;
     private int pinDigitCount, pinSetCount=PIN_SET_FIRST_ATTEMPT;
@@ -66,6 +68,22 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         pinPatternActivity = (SetPinPatternActivity) getActivity();
+        setDigitTypeface();
+    }
+
+    void setDigitTypeface(){
+        digitTypFace = Typeface.createFromAsset(pinPatternActivity.getAssets(),"fonts/arquitectabook.ttf");
+        button_digit_one.setTypeface(digitTypFace);
+        button_digit_two.setTypeface(digitTypFace);
+        button_digit_three.setTypeface(digitTypFace);
+        button_digit_four.setTypeface(digitTypFace);
+        button_digit_five.setTypeface(digitTypFace);
+        button_digit_six.setTypeface(digitTypFace);
+        button_digit_seven.setTypeface(digitTypFace);
+        button_digit_eight.setTypeface(digitTypFace);
+        button_digit_nine.setTypeface(digitTypFace);
+        button_digit_zero.setTypeface(digitTypFace);
+
     }
 
     /**
@@ -84,6 +102,8 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
         button_digit_eight = (Button) parent.findViewById(R.id.set_pin_fragment_digit_eight);
         button_digit_nine = (Button) parent.findViewById(R.id.set_pin_fragment_digit_nine);
         button_digit_zero = (Button) parent.findViewById(R.id.set_pin_fragment_digit_zero);
+
+
 
         img_trigger_one = (ImageView) parent.findViewById(R.id.set_pin_fragment_trigger_one);
         img_trigger_two = (ImageView) parent.findViewById(R.id.set_pin_fragment_trigger_two);
@@ -279,7 +299,8 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
                 SharedPreferences prefs = pinPatternActivity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, Context.MODE_PRIVATE);
                 long userPassCode = Long.parseLong(pinConfirmed)*55439;
                 SharedPreferences.Editor edit = prefs.edit();
-                edit.putLong(SetPinPatternActivity.USER_SET_LOCK_PASS_CODE,userPassCode);
+                edit.putLong(AppLockModel.USER_SET_LOCK_PASS_CODE,userPassCode);
+                edit.putInt(AppLockModel.APP_LOCK_LOCKMODE,AppLockModel.APP_LOCK_MODE_PIN);
                 edit.putBoolean(AppLockModel.LOCK_UP_FIRST_LOAD_PREF_KEY,false);
                 edit.apply();
                 pinPatternActivity.startLockUpMainActivity();

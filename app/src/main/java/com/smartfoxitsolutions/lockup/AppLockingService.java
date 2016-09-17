@@ -1,9 +1,9 @@
 package com.smartfoxitsolutions.lockup;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Handler;
@@ -18,11 +18,10 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -34,14 +33,17 @@ public class AppLockingService extends Service implements Handler.Callback{
     public static final int RECENT_APP_INFO =2;
     public static String recentlyUnlockedApp = "NIL";
     public static final String NIL_APPS_LOCKED = "NIL";
+    public static final String CHECKED_APP_LOCK_PACKAGE_NAME = "checkedAppPackageName";
+    public static final String CHECKED_APP_LOCK_COLOR = "checkedAppColor";
 
     private ScheduledExecutorService appLockService;
     private AppLockQueryTask appLockQueryTask;
     private Gson gson;
-    private Type checkedAppsMapToken;
+    private Type checkedAppsMapToken, checkedAppsColorMapToken;
     private ArrayList<String> checkedAppsList, launcherAppsList;
-    private String systemUIApp = "com.android.systemui";
-    private AppLockBroadcastReceiver appLockBroadcastReceiver;
+    private AppLockReceiver appLockReceiver;
+    private int appLockMode;
+    private TreeMap<String,Integer> checkedAppColorMap;
 
     @Nullable
     @Override
@@ -56,28 +58,42 @@ public class AppLockingService extends Service implements Handler.Callback{
         checkedAppsList = new ArrayList<>();
         launcherAppsList = new ArrayList<>();
         checkedAppsMapToken = new TypeToken<TreeMap<String,String>>(){}.getType();
-        List<ResolveInfo> launcherInfo= getBaseContext().getPackageManager().queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER),PackageManager.GET_META_DATA);
+        checkedAppsColorMapToken = new TypeToken<TreeMap<String,Integer>>(){}.getType();
+        checkedAppColorMap = new TreeMap<>();
+        appLockMode = getBaseContext().getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE)
+                            .getInt(AppLockModel.APP_LOCK_LOCKMODE,54);
+                List<ResolveInfo> launcherInfo= getBaseContext().getPackageManager().queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME),PackageManager.GET_META_DATA);
         for (ResolveInfo info : launcherInfo ){
             launcherAppsList.add(info.activityInfo.packageName);
         }
+
         appLockQueryTask = new AppLockQueryTask(getApplicationContext(),this);
-        appLockService = Executors.newScheduledThreadPool(3);
+        appLockService = Executors.newScheduledThreadPool(4);
         appLockService.scheduleAtFixedRate(appLockQueryTask,0,500, TimeUnit.MILLISECONDS);
-        appLockBroadcastReceiver = new AppLockBroadcastReceiver();
-        registerReceiver(appLockBroadcastReceiver,new IntentFilter(Intent.ACTION_SCREEN_OFF));
-        unregisterReceiver(appLockBroadcastReceiver);
-        registerReceiver(appLockBroadcastReceiver,new IntentFilter(Intent.ACTION_PACKAGE_ADDED));
+        appLockReceiver = new AppLockReceiver();
+        IntentFilter appLockFilter = new IntentFilter();
+        appLockFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        registerReceiver(appLockReceiver,appLockFilter);
 }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         Log.d(TAG,"Service Started");
-        String checkedAppsJSONString = getBaseContext().getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE)
-                                    .getString(AppLockModel.CHECKED_APPS_SHARED_PREF_KEY,null);
+        SharedPreferences prefs = getBaseContext().getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
+        String checkedAppsColorJSONString = prefs.getString(AppLockModel.CHECKED_APPS_COLOR_SHARED_PREF_KEY,null);
+        String checkedAppsJSONString = prefs.getString(AppLockModel.CHECKED_APPS_SHARED_PREF_KEY,null);
+        TreeMap<String,Integer> checkedAppsColor = gson.fromJson(checkedAppsColorJSONString,checkedAppsColorMapToken);
         TreeMap<String,String> checkedAppsMap = gson.fromJson(checkedAppsJSONString,checkedAppsMapToken);
         if(checkedAppsMap!=null){
             checkedAppsList = new ArrayList<>(checkedAppsMap.keySet());
+        }
+        if(checkedAppsColor!=null){
+            checkedAppColorMap = checkedAppsColor;
+        }
+
+        for(Map.Entry<String,Integer> color : checkedAppColorMap.entrySet() ){
+            Log.d("App Lock",color.getValue() + " ");
         }
 
         return START_STICKY;
@@ -86,19 +102,33 @@ public class AppLockingService extends Service implements Handler.Callback{
     @Override
     public boolean handleMessage(Message msg) {
         if(msg.what == RECENT_APP_INFO){
-            String foregroundApp = (String) msg.obj;
-            if(checkedAppsList.contains(foregroundApp)){
-                if(!foregroundApp.equals(recentlyUnlockedApp)){
+            String systemUIApp = "com.android.systemui";
+            String checkedAppPackage = (String) msg.obj;
+            if(checkedAppsList.contains(checkedAppPackage)){
+                if(!checkedAppPackage.equals(recentlyUnlockedApp)){
                     recentlyUnlockedApp = NIL_APPS_LOCKED;
-                    //Start Lock Screen
+                    if(appLockMode == AppLockModel.APP_LOCK_MODE_PATTERN){
+                        startActivity(new Intent(getBaseContext(),PatternLockActivity.class)
+                                .putExtra(CHECKED_APP_LOCK_PACKAGE_NAME,checkedAppPackage)
+                                .putExtra(CHECKED_APP_LOCK_COLOR,checkedAppColorMap.get(checkedAppPackage))
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
+                    }else{
+                        startActivity(new Intent(getBaseContext(),PinLockActivity.class)
+                                .putExtra(CHECKED_APP_LOCK_PACKAGE_NAME,checkedAppPackage)
+                                .putExtra(CHECKED_APP_LOCK_COLOR,checkedAppColorMap.get(checkedAppPackage))
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
+                    }
                 }
-                else if(launcherAppsList.contains(foregroundApp) || foregroundApp.equals(systemUIApp)){
-                    recentlyUnlockedApp = NIL_APPS_LOCKED;
-                }
+            }
+            else if(launcherAppsList.contains(checkedAppPackage) || systemUIApp.equals(checkedAppPackage)){
+                recentlyUnlockedApp = NIL_APPS_LOCKED;
             }
             return true;
         }
-
         return false;
     }
 
@@ -107,10 +137,10 @@ public class AppLockingService extends Service implements Handler.Callback{
         super.onDestroy();
         if(!appLockService.isShutdown()){
             appLockService.shutdown();
+            appLockQueryTask= null;
         }
-        unregisterReceiver(appLockBroadcastReceiver);
-        registerReceiver(appLockBroadcastReceiver,new IntentFilter(Intent.ACTION_SCREEN_ON));
-        unregisterReceiver(appLockBroadcastReceiver);
+        unregisterReceiver(appLockReceiver);
+        Log.d("AppLock","Service Destroyed");
     }
 
 

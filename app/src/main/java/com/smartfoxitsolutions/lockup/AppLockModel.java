@@ -22,14 +22,20 @@ public class AppLockModel {
     public static final String INSTALLED_APPS_SHARED_PREF_KEY = "installedAppsMap";
     public static final String CHECKED_APPS_SHARED_PREF_KEY = "checkedAppsMap";
     public static final String RECOMMENDED_APPS_SHARED_PREF_KEY = "recommendedInstallerLock";
+    public static final String CHECKED_APPS_COLOR_SHARED_PREF_KEY = "checkedAppsColorMap";
+    static final String USER_SET_LOCK_PASS_CODE = "userLockPasscode";
+
     public static final String LOCK_UP_FIRST_LOAD_PREF_KEY = "lockUp_is_first_load";
     public static final String VIBRATOR_ENABLED_PREF_KEY = "app_lock_vibrator_enabled";
+    public static final String APP_LOCK_LOCKMODE = "app_lock_lockmode";
 
     public static final int INSTALLED_APPS_PACKAGE =1;
     public  static final int CHECKED_APPS_PACKAGE=2;
     public static final int RECOMMENDED_APPS_PACKAGE=5;
     public static final String APP_LOCK_PREFERENCE_NAME="lockUp_general_preferences";
     public static final int APP_LIST_UPDATED =3;
+    public static final int APP_LOCK_MODE_PATTERN = 54;
+    public static final int APP_LOCK_MODE_PIN = 55;
 
     private SharedPreferences sharedPreferences;
     private TreeMap<String,String> installedAppsMap,checkedAppsMap;

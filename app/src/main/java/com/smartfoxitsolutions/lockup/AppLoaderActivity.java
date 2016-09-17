@@ -30,7 +30,6 @@ public class AppLoaderActivity extends AppCompatActivity {
     private TreeMap<String,String> installedAppMap,checkedAppMap;
     private TreeMap<String,Boolean> recommendedAppMap;
     private AppLockModel appLockModel;
-    private Runnable appListLoadRunnable;
     private ExecutorService appListLoadExecutor;
 
     static boolean isLockUpFirstLoad(){
@@ -102,8 +101,7 @@ public class AppLoaderActivity extends AppCompatActivity {
 
     void startMainActivity(){
         if (isFirstLoad){
-            //startActivityForResult(new Intent(this,SetPinPatternActivity.class),REQUEST_START_ACTIVITY_FIRST_LOAD);
-            startActivity(new Intent(this,PatternLockActivity.class));
+            startActivityForResult(new Intent(this,SetPinPatternActivity.class),REQUEST_START_ACTIVITY_FIRST_LOAD);
         }else{
             startActivityForResult(new Intent(this,LockUpMainActivity.class),REQUEST_START_LOCKUP_ACTIVITY);
         }

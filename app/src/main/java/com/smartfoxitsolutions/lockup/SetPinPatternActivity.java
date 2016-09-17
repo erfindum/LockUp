@@ -17,7 +17,7 @@ public class SetPinPatternActivity extends AppCompatActivity {
 
     static final String SET_PATTERN_FRAGMENT_TAG = "setPatternFragment";
     static final String SET_PIN_FRAGMENT_TAG ="setPinFragment";
-    static final String USER_SET_LOCK_PASS_CODE = "userLockPasscode";
+    static final int LOCKUP_MAIN_ACTIVITY = 3;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,7 +60,15 @@ public class SetPinPatternActivity extends AppCompatActivity {
 }
 
     void startLockUpMainActivity(){
-        startActivity(new Intent(this,LockUpMainActivity.class));
+        startActivityForResult(new Intent(this,LockUpMainActivity.class),LOCKUP_MAIN_ACTIVITY);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == LOCKUP_MAIN_ACTIVITY){
+            finish();
+        }
     }
 
     @Override

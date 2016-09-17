@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:background="@color/colorMainPrimary"
     android:paddingLeft="@dimen/tenDpDimension"
     android:paddingRight="@dimen/tenDpDimension"
     >
@@ -24,7 +23,6 @@
         android:layout_above="@+id/pin_lock_activity_trigger_group"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/tenDpDimension"
-        android:background="@drawable/pattern_lock_activity_app_icon_back"
         />
 
     <RelativeLayout

@@ -13,4 +13,9 @@
         <item name="colorAccent">@color/colorMainAccent</item>
     </style>
 
+    <style name="LockActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
 </resources>

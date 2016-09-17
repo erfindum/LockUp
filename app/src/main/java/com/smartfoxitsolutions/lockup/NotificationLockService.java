@@ -8,6 +8,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class NotificationLockService extends NotificationListenerService {
         super.onCreate();
         gson = new Gson();
         checkedAppsList = new ArrayList<>();
+        checkedAppsMapToken = new TypeToken<TreeMap<String,String>>(){}.getType();
     }
 
     @Override

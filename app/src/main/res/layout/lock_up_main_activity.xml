@@ -11,6 +11,16 @@
         layout="@layout/toolbar_layout"
         android:layout_alignParentTop="true"
         />
+    <com.google.android.gms.ads.NativeExpressAdView
+        android:id="@+id/main_screen_activity_adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:adSize = "320x250"
+        app:adUnitId="@string/main_screen_activity_ad_unit_id"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/main_screen_activity_tool_bar"
+        android:layout_marginTop="@dimen/twentyDpDimension"
+        />
 
 <RelativeLayout
     android:layout_alignParentBottom="true"
