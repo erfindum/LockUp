@@ -133,5 +133,8 @@
 
     <!-- Pin Lock Activity -->
     <string name="pin_lock_activity_ad_unit_id">ca-app-pub-4739007494599063/2472603036</string>
+    
+    <!-- ImagePicker Bucket Fragments -->
+    <string name="media_vault_image_bucket_ext_load_text">Loading Images</string>
 
 </resources>

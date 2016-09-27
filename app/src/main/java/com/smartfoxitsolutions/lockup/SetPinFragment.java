@@ -290,6 +290,7 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
                    pinHead.setText(R.string.set_pin_fragment_confirm_text);
                    changeLock.setText(R.string.set_pattern_fragment_reset_text);
                    isPinSetCompleted = false;
+
                    pinCompleteAnimator.start();
                } else if (pinSetFirstAttempt.equals(selectedPin)) {
                    pinConfirmed = selectedPin;

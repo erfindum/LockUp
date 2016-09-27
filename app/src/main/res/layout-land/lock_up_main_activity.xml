@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/white"
+    >
     <include
         android:id="@+id/main_screen_activity_tool_bar"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         layout="@layout/toolbar_layout"
         android:layout_alignParentTop="true"
+        />
+    <com.google.android.gms.ads.NativeExpressAdView
+        android:id="@+id/main_screen_activity_adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:adSize = "320x250"
+        app:adUnitId="@string/main_screen_activity_ad_unit_id"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/main_screen_activity_tool_bar"
+        android:layout_marginTop="@dimen/twentyDpDimension"
         />
 
 <RelativeLayout
@@ -14,15 +27,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/main_screen_activity_app_lock_image"
         android:layout_width="@dimen/seventyDpDimension"
         android:layout_height="@dimen/seventyDpDimension"
         android:layout_centerHorizontal="true"
         android:layout_margin="@dimen/tenDpDimension"
-        android:src="@drawable/selector_main_screen_lock_button"
         android:contentDescription="@string/main_screen_activity_lock_button_text"
-        android:clickable="true"
+        android:background="@android:color/transparent"
+        app:srcCompat="@drawable/selector_main_screen_lock_button"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
         />
     <View
         android:id="@+id/main_screen_activity_lock_left_seperator"
@@ -35,6 +50,7 @@
         android:layout_marginRight="@dimen/twentyDpDimension"
         android:layout_marginEnd="@dimen/twentyDpDimension"
         android:background="@color/dividerColor"
+        android:visibility="invisible"
         />
 
     <View
@@ -48,33 +64,34 @@
         android:layout_marginLeft="@dimen/twentyDpDimension"
         android:layout_marginStart="@dimen/twentyDpDimension"
         android:background="@color/dividerColor"
+        android:visibility="invisible"
         />
-    <ImageView
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/main_screen_activity_settings_image"
         android:layout_width="@dimen/seventyDpDimension"
         android:layout_height="@dimen/seventyDpDimension"
         android:layout_toRightOf="@+id/main_screen_activity_lock_right_seperator"
         android:layout_toEndOf="@+id/main_screen_activity_lock_right_seperator"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/tenDpDimension"
-        android:src="@drawable/selector_main_screen_settings_button"
         android:contentDescription="@string/main_screen_activity_settings_button_text"
-        android:clickable="true"
+        android:background="@android:color/transparent"
+        app:srcCompat="@drawable/selector_main_screen_settings_button"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
         />
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/main_screen_activity_vault_image"
         android:layout_width="@dimen/seventyDpDimension"
         android:layout_height="@dimen/seventyDpDimension"
         android:layout_toLeftOf="@+id/main_screen_activity_lock_left_seperator"
         android:layout_toStartOf="@+id/main_screen_activity_lock_left_seperator"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_margin="@dimen/tenDpDimension"
-        android:src="@drawable/selector_main_screen_vault_button"
         android:contentDescription="@string/main_screen_activity_vault_button_text"
-        android:clickable="true"
+        android:background="@android:color/transparent"
+        app:srcCompat="@drawable/selector_main_screen_vault_button"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
         />
 
     <TextView
@@ -85,7 +102,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/tenDpDimension"
         android:text="@string/main_screen_activity_lock_button_text"
-        android:textSize="@dimen/fifteenSpDimension"
+        android:textSize="@dimen/twelveSpDimension"
         android:gravity="center"
 
         />
@@ -96,11 +113,11 @@
         android:layout_below="@+id/main_screen_activity_vault_image"
         android:layout_toLeftOf="@+id/main_screen_activity_lock_left_seperator"
         android:layout_toStartOf="@+id/main_screen_activity_lock_left_seperator"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
         android:layout_marginBottom="@dimen/tenDpDimension"
+        android:layout_marginRight="@dimen/twentyFiveDpDimension"
+        android:layout_marginEnd="@dimen/twentyFiveDpDimension"
         android:text="@string/main_screen_activity_vault_button_text"
-        android:textSize="@dimen/fifteenSpDimension"
+        android:textSize="@dimen/twelveSpDimension"
         android:gravity="center"
         />
 
@@ -108,19 +125,19 @@
         android:id="@+id/main_screen_activity_app_settings_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/main_screen_activity_vault_image"
+        android:layout_below="@+id/main_screen_activity_settings_image"
         android:layout_toRightOf="@+id/main_screen_activity_lock_right_seperator"
         android:layout_toEndOf="@+id/main_screen_activity_lock_right_seperator"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:layout_marginBottom="@dimen/tenDpDimension"
+        android:layout_marginLeft="@dimen/twentyDpDimension"
+        android:layout_marginStart="@dimen/twentyDpDimension"
         android:text="@string/main_screen_activity_settings_button_text"
-        android:textSize="@dimen/fifteenSpDimension"
+        android:textSize="@dimen/twelveSpDimension"
         android:gravity="center"
         />
 
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/main_screen_activity_user_profile_image"
         android:layout_width="@dimen/seventyDpDimension"
         android:layout_height="@dimen/seventyDpDimension"
@@ -128,9 +145,11 @@
         android:layout_toLeftOf="@+id/main_screen_activity_lock_bottom_seperator"
         android:layout_toStartOf="@+id/main_screen_activity_lock_bottom_seperator"
         android:layout_margin="@dimen/tenDpDimension"
-        android:src="@drawable/selector_main_screen_user_profile_button"
         android:contentDescription="@string/main_screen_activity_user_profile_button_text"
-        android:clickable="true"
+        android:background="@android:color/transparent"
+        app:srcCompat="@drawable/selector_main_screen_user_profile_button"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
         />
     <View
         android:id="@+id/main_screen_activity_lock_bottom_seperator"
@@ -145,8 +164,9 @@
         android:layout_marginLeft="@dimen/twentyDpDimension"
         android:layout_marginStart="@dimen/twentyDpDimension"
         android:background="@color/dividerColor"
+        android:visibility="invisible"
         />
-    <ImageView
+    <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/main_screen_activity_faq_image"
         android:layout_width="@dimen/seventyDpDimension"
         android:layout_height="@dimen/seventyDpDimension"
@@ -154,9 +174,11 @@
         android:layout_toRightOf="@+id/main_screen_activity_lock_bottom_seperator"
         android:layout_toEndOf="@+id/main_screen_activity_lock_bottom_seperator"
         android:layout_margin="@dimen/tenDpDimension"
-        android:src="@drawable/selector_main_screen_faq_button"
         android:contentDescription="@string/main_screen_activity_faq_button_text"
-        android:clickable="true"
+        android:background="@android:color/transparent"
+        app:srcCompat="@drawable/selector_main_screen_faq_button"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
         />
 
     <TextView
@@ -165,12 +187,12 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/main_screen_activity_user_profile_image"
         android:layout_marginBottom="@dimen/tenDpDimension"
-        android:layout_marginRight="@dimen/twentyEightDpDImension"
-        android:layout_marginEnd="@dimen/twentyEightDpDImension"
+        android:layout_marginRight="@dimen/thirtyFiveDpDimension"
+        android:layout_marginEnd="@dimen/thirtyFiveDpDimension"
         android:layout_alignRight="@id/main_screen_activity_lock_bottom_seperator"
         android:layout_alignEnd="@+id/main_screen_activity_lock_bottom_seperator"
         android:text="@string/main_screen_activity_user_profile_button_text"
-        android:textSize="@dimen/fifteenSpDimension"
+        android:textSize="@dimen/twelveSpDimension"
         android:gravity="center"
         />
 
@@ -180,12 +202,12 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/main_screen_activity_user_profile_image"
         android:layout_marginBottom="@dimen/tenDpDimension"
-        android:layout_marginLeft="@dimen/fifteenDpDimension"
-        android:layout_marginStart="@dimen/fifteenDpDimension"
+        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
         android:layout_alignLeft="@id/main_screen_activity_faq_image"
         android:layout_alignStart="@+id/main_screen_activity_faq_image"
         android:text="@string/main_screen_activity_faq_button_text"
-        android:textSize="@dimen/fifteenSpDimension"
+        android:textSize="@dimen/twelveSpDimension"
         android:gravity="center"
         />
 

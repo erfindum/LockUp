@@ -98,10 +98,10 @@
 
         <RelativeLayout
             android:id="@+id/user_profile_redeem_fragment_secondary_layout"
+            android:layout_below="@+id/user_profile_redeem_fragment_points_earned_text2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/user_profile_redeem_fragment_points_earned_text2"
-            android:layout_alignParentBottom="true"
+            android:layout_marginTop="@dimen/seventyDpDimension"
             >
             <TextView
                 android:id="@+id/user_profile_redeem_fragment_enter_details_text"
@@ -186,7 +186,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="@dimen/tenDpDimension"
                 android:layout_below="@id/user_profile_redeem_fragment_redeem_button"
-                android:progressBackgroundTint="@color/colorMainAccent"
+                android:progressBackgroundTint="@color/colorMainPrimary"
                 android:layout_marginBottom="@dimen/twentyDpDimension"
                 android:visibility="invisible"
                 />

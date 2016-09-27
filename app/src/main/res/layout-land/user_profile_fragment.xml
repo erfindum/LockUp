@@ -23,7 +23,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/twentyDpDimension"
             android:textSize="@dimen/twentyFourSpDimension"
-            android:textColor="@color/textPrimaryColor"
+            android:textColor="@color/textDarkGrey"
             />
 
         <TextView
@@ -35,7 +35,7 @@
             android:layout_marginTop="@dimen/tenDpDimension"
             android:text="jack.reacher@example.com"
             android:textSize="@dimen/fifteenSpDimension"
-            android:textColor="@color/textPrimaryColor"
+            android:textColor="@color/textDarkGrey"
             />
         <ImageView
             android:id="@+id/user_profile_fragment_email_icon_view"
@@ -68,7 +68,7 @@
             android:layout_marginTop="@dimen/twentyDpDimension"
             android:text="@string/user_profile_fragment_points_earned_text"
             android:textSize="@dimen/fifteenSpDimension"
-            android:textColor="@color/textPrimaryColor"
+            android:textColor="@color/textDarkGrey"
             />
         <View
             android:id="@+id/user_profile_horizontal_seperator_invisible"
@@ -110,31 +110,30 @@
             android:textColor="@color/white"
             />
 
+<FrameLayout
+    android:id="@+id/user_profile_fragment_frame_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/user_profile_fragment_today_earning_button"
+    android:layout_centerInParent="true"
+    >
+    <TextView
+        android:id="@+id/user_profile_fragment_today_earning_text_circle_big"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/twentyDpDimension"
+        android:text="55553"
+        android:textSize="@dimen/fourtySpDimension"
+        android:textColor="@color/white"
+        android:background="@drawable/earned_points_circle_view_big"
+        android:gravity="center"
+        android:visibility="visible"
+        android:elevation="@dimen/sevenDpDimension"
+        />
 
-        <FrameLayout
-            android:id="@+id/user_profile_fragment_frame_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/user_profile_fragment_today_earning_button"
-            android:layout_centerInParent="true"
-            >
-            <TextView
-                android:id="@+id/user_profile_fragment_today_earning_text_circle_big"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/twentyDpDimension"
-                android:text="55553"
-                android:textSize="@dimen/fourtySpDimension"
-                android:textColor="@color/white"
-                android:background="@drawable/earned_points_circle_view_big"
-                android:gravity="center"
-                android:visibility="visible"
-                android:elevation="@dimen/sevenDpDimension"
-                />
 
-
-        </FrameLayout>
+</FrameLayout>
 
         <TextView
             android:id="@+id/user_profile_fragment_points_text"
@@ -171,7 +170,7 @@
             android:layout_marginTop="@dimen/twentyDpDimension"
             android:text="@string/user_profile_fragment_dob_title_text"
             android:textSize="@dimen/fifteenSpDimension"
-            android:textColor="@color/textPrimaryColor"
+            android:textColor="@color/textDarkGrey"
             />
 
         <TextView
@@ -186,7 +185,7 @@
             android:layout_marginTop="@dimen/twentyDpDimension"
             android:text="23/06/1989"
             android:textSize="@dimen/fifteenSpDimension"
-            android:textColor="@color/textPrimaryColor"
+            android:textColor="@color/textDarkGrey"
             />
 
         <View
@@ -211,7 +210,7 @@
             android:layout_marginTop="@dimen/twentyDpDimension"
             android:text="@string/user_profile_fragment_gender_title_text"
             android:textSize="@dimen/fifteenSpDimension"
-            android:textColor="@color/textPrimaryColor"
+            android:textColor="@color/textDarkGrey"
             />
 
         <TextView
@@ -226,7 +225,7 @@
             android:layout_marginTop="@dimen/twentyDpDimension"
             android:text="Male"
             android:textSize="@dimen/fifteenSpDimension"
-            android:textColor="@color/textPrimaryColor"
+            android:textColor="@color/textDarkGrey"
             />
 
         <View
@@ -251,7 +250,7 @@
             android:layout_marginTop="@dimen/twentyDpDimension"
             android:text="@string/user_profile_fragment_password_title_text"
             android:textSize="@dimen/fifteenSpDimension"
-            android:textColor="@color/textPrimaryColor"
+            android:textColor="@color/textDarkGrey"
             />
 
         <TextView
@@ -266,7 +265,7 @@
             android:layout_marginTop="@dimen/twentyDpDimension"
             android:text="@string/user_profile_fragment_password_change_text"
             android:textSize="@dimen/fifteenSpDimension"
-            android:textColor="@color/textPrimaryColor"
+            android:textColor="@color/textDarkGrey"
             android:textStyle="bold"
             />
         <View
@@ -290,7 +289,7 @@
             android:padding="@dimen/tenDpDimension"
             android:text="@string/user_profile_fragment_redeem_cash_info_text"
             android:textSize="@dimen/fifteenSpDimension"
-            android:textColor="@color/textPrimaryColor"
+            android:textColor="@color/textDarkGrey"
             />
 
         <Button

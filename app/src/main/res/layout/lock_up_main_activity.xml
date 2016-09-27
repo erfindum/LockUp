@@ -36,7 +36,7 @@
         android:contentDescription="@string/main_screen_activity_lock_button_text"
         android:background="@android:color/transparent"
         app:srcCompat="@drawable/selector_main_screen_lock_button"
-        android:scaleType="fitCenter"
+        android:scaleType="fitXY"
         android:adjustViewBounds="true"
         />
     <View
@@ -72,13 +72,11 @@
         android:layout_height="@dimen/seventyDpDimension"
         android:layout_toRightOf="@+id/main_screen_activity_lock_right_seperator"
         android:layout_toEndOf="@+id/main_screen_activity_lock_right_seperator"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/tenDpDimension"
         android:contentDescription="@string/main_screen_activity_settings_button_text"
         android:background="@android:color/transparent"
         app:srcCompat="@drawable/selector_main_screen_settings_button"
-        android:scaleType="fitCenter"
+        android:scaleType="fitXY"
         android:adjustViewBounds="true"
         />
 
@@ -88,13 +86,11 @@
         android:layout_height="@dimen/seventyDpDimension"
         android:layout_toLeftOf="@+id/main_screen_activity_lock_left_seperator"
         android:layout_toStartOf="@+id/main_screen_activity_lock_left_seperator"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_margin="@dimen/tenDpDimension"
         android:contentDescription="@string/main_screen_activity_vault_button_text"
         android:background="@android:color/transparent"
         app:srcCompat="@drawable/selector_main_screen_vault_button"
-        android:scaleType="fitCenter"
+        android:scaleType="fitXY"
         android:adjustViewBounds="true"
         />
 
@@ -117,9 +113,9 @@
         android:layout_below="@+id/main_screen_activity_vault_image"
         android:layout_toLeftOf="@+id/main_screen_activity_lock_left_seperator"
         android:layout_toStartOf="@+id/main_screen_activity_lock_left_seperator"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
         android:layout_marginBottom="@dimen/tenDpDimension"
+        android:layout_marginRight="@dimen/twentyFiveDpDimension"
+        android:layout_marginEnd="@dimen/twentyFiveDpDimension"
         android:text="@string/main_screen_activity_vault_button_text"
         android:textSize="@dimen/twelveSpDimension"
         android:gravity="center"
@@ -129,12 +125,12 @@
         android:id="@+id/main_screen_activity_app_settings_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/main_screen_activity_vault_image"
+        android:layout_below="@+id/main_screen_activity_settings_image"
         android:layout_toRightOf="@+id/main_screen_activity_lock_right_seperator"
         android:layout_toEndOf="@+id/main_screen_activity_lock_right_seperator"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:layout_marginBottom="@dimen/tenDpDimension"
+        android:layout_marginLeft="@dimen/twentyDpDimension"
+        android:layout_marginStart="@dimen/twentyDpDimension"
         android:text="@string/main_screen_activity_settings_button_text"
         android:textSize="@dimen/twelveSpDimension"
         android:gravity="center"
@@ -152,7 +148,7 @@
         android:contentDescription="@string/main_screen_activity_user_profile_button_text"
         android:background="@android:color/transparent"
         app:srcCompat="@drawable/selector_main_screen_user_profile_button"
-        android:scaleType="fitCenter"
+        android:scaleType="fitXY"
         android:adjustViewBounds="true"
         />
     <View
@@ -181,7 +177,7 @@
         android:contentDescription="@string/main_screen_activity_faq_button_text"
         android:background="@android:color/transparent"
         app:srcCompat="@drawable/selector_main_screen_faq_button"
-        android:scaleType="fitCenter"
+        android:scaleType="fitXY"
         android:adjustViewBounds="true"
         />
 

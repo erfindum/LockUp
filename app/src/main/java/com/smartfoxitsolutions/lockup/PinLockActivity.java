@@ -2,7 +2,6 @@ package com.smartfoxitsolutions.lockup;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
@@ -14,14 +13,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.AnticipateInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -30,14 +26,12 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.NativeExpressAdView;
 
-import java.util.Date;
 
 /**
  * Created by RAAJA on 13-09-2016.
  */
 public class PinLockActivity extends AppCompatActivity implements View.OnClickListener{
-
-   NativeExpressAdView pinLockAdView;
+    NativeExpressAdView pinLockAdView;
     ImageView appIconView;
     AdRequest pinLockAdRequest;
     AppCompatButton button_digit_one,button_digit_two,button_digit_three,button_digit_four,button_digit_five;
@@ -52,8 +46,8 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
     private boolean isVibratorEnabled, isErrorConfirmed;
 
     ValueAnimator digitOneAnimator,digitTwoAnimator, digitThreeAnimator, digitFourAnimator,digitFiveAnimator, digitSixAnimator
-                    ,digitSevenAnimator,digitEightAnimator,digitNineAnimator,digitZeroAnimator;
-   ValueAnimator triggerAnimator;
+            ,digitSevenAnimator,digitEightAnimator,digitNineAnimator,digitZeroAnimator;
+    ValueAnimator triggerAnimator;
 
     private String packageName;
     private int packageColor;
@@ -83,11 +77,9 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
         pinPassCode = prefs.getLong(AppLockModel.USER_SET_LOCK_PASS_CODE,0);
         String adAppId = getResources().getString(R.string.pin_lock_activity_ad_app_id);
         digitTypFace = Typeface.createFromAsset(getAssets(),"fonts/arquitectabook.ttf");
-        MobileAds.initialize(getApplicationContext(),adAppId);
-        pinLockAdView = (NativeExpressAdView) findViewById(R.id.pin_lock_activity_ad_view);
         appIconView = (ImageView) findViewById(R.id.pin_lock_activity_app_icon_view);
-        pinLockAdRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).addTestDevice("A219F9DA86E122F8F4AE0F7EF7FA95E5").build();
-        pinLockAdView.loadAd(pinLockAdRequest);
+       MobileAds.initialize(getApplicationContext(),adAppId);
+        pinLockAdView = (NativeExpressAdView) findViewById(R.id.pin_lock_activity_ad_view);
         inflatePinViews();
 
     }
@@ -120,7 +112,7 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
 
         clear_pin_button = (AppCompatButton) findViewById(R.id.pin_lock_activity_digit_clear);
 
-        button_digit_one.setTypeface(digitTypFace);
+       button_digit_one.setTypeface(digitTypFace);
         button_digit_two.setTypeface(digitTypFace);
         button_digit_three.setTypeface(digitTypFace);
         button_digit_four.setTypeface(digitTypFace);
@@ -133,7 +125,6 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
 
         registerListeners();
         setAppIcon(packageName);
-        setPinAnimation();
     }
 
     void registerListeners(){
@@ -241,7 +232,7 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
-               button_digit_one.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_one_selected);
+                button_digit_one.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_one_selected);
                 Log.d("AppLock","Animation End");
             }
         });
@@ -531,7 +522,7 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 resetPinView();
-               isErrorConfirmed = false;
+                isErrorConfirmed = false;
             }
         });
 
@@ -584,32 +575,32 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     ValueAnimator getDigitAnimators(String digit){
-            if(Integer.parseInt(digit)>9 || Integer.parseInt(digit)<0){
-                throw new IllegalArgumentException("Digit cannot be less than 0 or more than 9");
-            }
-            switch(digit){
-                case "1":
-                    return digitOneAnimator;
-                case "2":
-                    return digitTwoAnimator;
-                case "3":
-                    return digitThreeAnimator;
-                case "4":
-                    return digitFourAnimator;
-                case "5":
-                    return digitFiveAnimator;
-                case "6":
-                    return digitSixAnimator;
-                case "7":
-                    return digitSevenAnimator;
-                case "8":
-                    return digitEightAnimator;
-                case "9":
-                    return digitNineAnimator;
-                case "0":
-                    return digitZeroAnimator;
-            }
-            return null;
+        if(Integer.parseInt(digit)>9 || Integer.parseInt(digit)<0){
+            throw new IllegalArgumentException("Digit cannot be less than 0 or more than 9");
+        }
+        switch(digit){
+            case "1":
+                return digitOneAnimator;
+            case "2":
+                return digitTwoAnimator;
+            case "3":
+                return digitThreeAnimator;
+            case "4":
+                return digitFourAnimator;
+            case "5":
+                return digitFiveAnimator;
+            case "6":
+                return digitSixAnimator;
+            case "7":
+                return digitSevenAnimator;
+            case "8":
+                return digitEightAnimator;
+            case "9":
+                return digitNineAnimator;
+            case "0":
+                return digitZeroAnimator;
+        }
+        return null;
 
     }
 
@@ -662,9 +653,9 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     void resetPinView(){
-            for(int i =1;i<=4;i++){
-                getTrigger(i).setBackgroundResource(R.drawable.img_pin_trigger_normal);
-            }
+        for(int i =1;i<=4;i++){
+            getTrigger(i).setBackgroundResource(R.drawable.img_pin_trigger_normal);
+        }
         pinDigitCount=0;
         selectedPin="";
 
@@ -687,9 +678,36 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        pinLockAdRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).addTestDevice("A219F9DA86E122F8F4AE0F7EF7FA95E5").build();
+        pinLockAdView.loadAd(pinLockAdRequest);
+
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        setPinAnimation();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterListeners();
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME));
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
-        unregisterListeners();
+        Log.d("AppLock","Called OnDestroy");
     }
 
 }
