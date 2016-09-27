@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorMainPrimary"
+    >
+<TextView
+    android:id="@+id/set_pattern_fragment_title_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerHorizontal="true"
+    android:layout_marginTop="@dimen/tenDpDimension"
+    android:text="@string/set_pattern_fragment_title_text"
+    android:textColor="@color/white"
+    android:textSize="@dimen/thirtyFourSpDimension"
+    />
+
+    <TextView
+        android:id="@+id/set_pattern_fragment_info_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/set_pattern_fragment_title_text"
+        android:layout_marginTop="@dimen/twentyDpDimension"
+        android:text="@string/set_pattern_fragment_info_text"
+        android:textColor="@color/white"
+        android:textSize="@dimen/fifteenSpDimension"
+        />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/set_pattern_fragment_info_text"
+        android:background="@color/white"
+        android:layout_marginTop="@dimen/twentyDpDimension"
+        android:layout_marginLeft="@dimen/tenDpDimension"
+        android:layout_marginRight="@dimen/tenDpDimension"
+        />
+
+    <com.smartfoxitsolutions.lockup.PatternLockView
+        android:id="@+id/set_pattern_fragment_pattern_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/set_pattern_fragment_change_lock_text"
+        android:layout_marginBottom="@dimen/twentyDpDimension"
+        android:paddingLeft="@dimen/fiftyDpDimension"
+        android:paddingRight="@dimen/fiftyDpDimension"
+        android:paddingTop="@dimen/thirtyDpDimension"
+        android:paddingBottom="@dimen/thirtyDpDimension"
+        app:nodeCellSize="@dimen/fiftyDpDimension"
+        app:nodeCornerSize="3dp"
+        app:nodeSelectedCornerSize="5dp"
+        app:nodeDefaultColor="@color/white"
+        app:nodeSelectedDefaultColor="@color/colorMainAccent"
+        app:patternLineStroke="@dimen/sevenDpDimension"
+        app:patternLineColor="@color/white"
+        />
+
+    <TextView
+        android:id="@+id/set_pattern_fragment_change_lock_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/twentyDpDimension"
+        android:text="@string/set_pattern_fragment_change_lock_text"
+        android:textColor="@color/white"
+        android:textSize="@dimen/fifteenSpDimension"
+        android:clickable="true"
+        />
+</RelativeLayout>
