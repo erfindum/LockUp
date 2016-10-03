@@ -10,10 +10,11 @@
         android:layout_alignParentTop="true"
         />
 
-    <android.support.v4.view.ViewPager
+  <!--  <android.support.v4.view.ViewPager
         android:id="@+id/media_vault_activity_viewPager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/media_vault_activity_tool_bar"
-        />
+        /> -->
+
 </RelativeLayout>

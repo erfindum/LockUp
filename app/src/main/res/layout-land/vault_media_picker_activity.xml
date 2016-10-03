@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/backgroundGrey"
+    >
+
+    <include
+        android:id="@+id/vault_media_picker_activity_tool_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/toolbar_layout"
+        android:layout_alignParentTop="true"
+        />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/vault_media_picker_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/vault_media_picker_activity_tool_bar"
+        android:layout_marginLeft="@dimen/fiveDpDimension"
+        android:layout_marginStart="@dimen/fiveDpDimension"
+        android:paddingBottom="46dp"
+        />
+
+    <RelativeLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/vault_media_picker_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:layout_alignParentBottom="true"
+        >
+        <View
+            android:id="@+id/vault_media_picker_divider"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/oneDpDimension"
+            android:background="@color/dividerColor"
+            android:layout_alignParentTop="true"
+            />
+        <View
+            android:id="@+id/vault_media_picker_icon_separator"
+            android:layout_width="1dp"
+            android:layout_height="1dp"
+            android:layout_centerHorizontal="true"
+            />
+
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/vault_media_picker_lock"
+            android:layout_width="@dimen/twentyFiveDpDimension"
+            android:layout_height="@dimen/twentyFiveDpDimension"
+            android:layout_toRightOf="@+id/vault_media_picker_icon_separator"
+            android:layout_toEndOf="@+id/vault_media_picker_icon_separator"
+            android:layout_marginLeft="@dimen/twentyDpDimension"
+            android:layout_marginStart="@dimen/twentyDpDimension"
+            android:layout_marginTop="@dimen/tenDpDimension"
+            android:layout_marginBottom="@dimen/tenDpDimension"
+            android:background="@color/white"
+            app:srcCompat="@drawable/ic_vault_lock_blue"
+            android:scaleType="fitCenter"
+            />
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/vault_media_picker_select_all"
+            android:layout_width="@dimen/twentyFiveDpDimension"
+            android:layout_height="@dimen/twentyFiveDpDimension"
+            android:layout_toLeftOf="@+id/vault_media_picker_icon_separator"
+            android:layout_toStartOf="@+id/vault_media_picker_icon_separator"
+            android:layout_marginRight="@dimen/twentyDpDimension"
+            android:layout_marginEnd="@dimen/twentyDpDimension"
+            android:layout_marginTop="@dimen/tenDpDimension"
+            android:layout_marginBottom="@dimen/tenDpDimension"
+            android:background="@color/white"
+            app:srcCompat="@drawable/ic_vault_selected_all"
+            android:scaleType="fitCenter"
+            />
+    </RelativeLayout>
+</RelativeLayout>

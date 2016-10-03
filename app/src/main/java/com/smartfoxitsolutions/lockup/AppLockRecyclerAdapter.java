@@ -40,10 +40,10 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private ArrayList<String> installedAppsName,installedAppsPackage,checkedAppsName,checkedAppsPackage,
                         recommendedAppList;
     private ArrayList<Boolean> recommendedAppLocked;
+    private ArrayList<AppLockRecyclerViewItem> itemHolder;
     private TreeMap<String,String> installedAppsMap,checkedAppsMap;
     private TreeMap<String,Boolean> recommendedAppsMap;
     PackageManager packageManager;
-    AppLockRecyclerViewItem item;
     SharedPreferences prefs;
     private AppLockModel appLockModel;
     private AppLockActivity activity;
@@ -59,6 +59,7 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         this.checkedAppsMap = appModel.getCheckedAppsMap();
         this.recommendedAppsMap= appModel.getRecommendedAppsMap();
         this.recommendedAppLocked = appModel.getRecommendedAppLocked();
+        this.itemHolder = new ArrayList<>();
         this.activity = activity;
         this.packageManager = activity.getPackageManager();
         this.prefs = activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
@@ -135,8 +136,9 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         LayoutInflater inflater = LayoutInflater.from(context);
         if(viewType==LIST_VIEW_TYPE_ITEM){
             View itemView = inflater.inflate(R.layout.app_lock_recycler_item_view,parent,false);
-            item =  new AppLockRecyclerViewItem(itemView);
+            AppLockRecyclerViewItem item =  new AppLockRecyclerViewItem(itemView);
             item.setOnAppListItemClickListener(this);
+            itemHolder.add(item);
             return item;
         }
         if(viewType==LIST_VIEW_TYPE_HEADER){
@@ -350,18 +352,12 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
     }
 
-    void updateAppLockRecyclerAdapter(){
-        if(item!=null){
-            item.setOnAppListItemClickListener(this);
-        }
-    }
-
     void closeAppLockRecyclerAdapter(){
         appLockModel.updateAppPackages(installedAppsMap,AppLockModel.INSTALLED_APPS_PACKAGE);
         appLockModel.updateAppPackages(checkedAppsMap,AppLockModel.CHECKED_APPS_PACKAGE);
         appLockModel.updateRecommendedAppPackages(recommendedAppsMap);
-        if(item!=null) {
-            item.setOnAppListItemClickListener(null);
+        for(AppLockRecyclerViewItem holder : itemHolder){
+            holder.setOnAppListItemClickListener(null);
         }
         appLockModel.loadAppPackages(AppLockModel.INSTALLED_APPS_PACKAGE);
         appLockModel.loadAppPackages(AppLockModel.CHECKED_APPS_PACKAGE);

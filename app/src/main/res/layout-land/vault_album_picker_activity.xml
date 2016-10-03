@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <include
+        android:id="@+id/vault_album_picker_activity_tool_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/toolbar_layout"
+        android:layout_alignParentTop="true"
+        />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/vault_album_picker_activity_tool_bar"
+        android:background="@color/backgroundGrey"
+        >
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/vault_album_picker_activity_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/tenDpDimension"
+            android:layout_marginStart="@dimen/tenDpDimension"
+            />
+        <ProgressBar
+            android:id="@+id/vault_album_picker_activity_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            />
+        <TextView
+            android:id="@+id/vault_album_picker_activity_load_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/vault_album_picker_activity_progress"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:textColor="@color/colorMainPrimary"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:text="@string/vault_album_picker_load_text"
+            />
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/vault_album_picker_activity_placeholder"
+            android:layout_width="60dp"
+            android:layout_height="60dp" />
+    </RelativeLayout>
+</RelativeLayout>

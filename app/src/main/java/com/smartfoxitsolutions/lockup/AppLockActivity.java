@@ -120,26 +120,23 @@ public class AppLockActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         Log.d(TAG,"Called onStart");
-        if(appLockRecyclerAdapter!=null){
-            appLockRecyclerAdapter.updateAppLockRecyclerAdapter();
-        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         if (appLockRecyclerAdapter!=null) {
-            appLockRecyclerAdapter.closeAppLockRecyclerAdapter();
             appLockRecyclerAdapter.notifyDataSetChanged();
             Log.d(TAG,"");
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && getUsageAccessPermissionGranted()){
             startService(new Intent(this,AppLockingService.class));
+            startService(new Intent(this,GetPaletteColorService.class));
         }
         else if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
             startService(new Intent(this,AppLockingService.class));
+            startService(new Intent(this,GetPaletteColorService.class));
         }
-        startService(new Intent(this,GetPaletteColorService.class));
 
         Log.d(TAG,"Called onStop");
     }
@@ -153,6 +150,9 @@ public class AppLockActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (appLockRecyclerAdapter!=null){
+            appLockRecyclerAdapter.closeAppLockRecyclerAdapter();
+        }
         Log.d(TAG,"Called onDestroy");
     }
 }

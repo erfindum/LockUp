@@ -34,6 +34,7 @@
             android:layout_marginLeft="@dimen/fifteenDpDimension"
             android:layout_marginStart="@dimen/fifteenDpDimension"
             android:textSize="@dimen/fifteenSpDimension"
+            android:maxLength="40"
             android:textColor="@color/textDarkGrey"
             />
 

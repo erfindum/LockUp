@@ -134,7 +134,17 @@
     <!-- Pin Lock Activity -->
     <string name="pin_lock_activity_ad_unit_id">ca-app-pub-4739007494599063/2472603036</string>
     
-    <!-- ImagePicker Bucket Fragments -->
-    <string name="media_vault_image_bucket_ext_load_text">Loading Images</string>
+    <!-- Album Picker Fragments -->
+    <string name="vault_album_picker_load_text">Loading Images</string>
+    <string name="vault_album_picker_select_album_toolbar">Select An Album</string>
+
+    <!-- Media Vault General -->
+    <string name="media_vault_internal_storage_title">PHONE STORAGE</string>
+    <string name="media_vault_external_storage_title">SD CARD</string>
+    <string name="media_vault_permission_request_message">
+        LockUp vault requires user permission to read or write media files from External Storage (SD Card). Without this permission vault will stop working.
+    </string>
+    <string name="media_vault_permission_grant">PERMIT</string>
+    <string name="media_vault_permission_deny">CANCEL</string>
 
 </resources>

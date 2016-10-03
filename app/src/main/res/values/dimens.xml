@@ -37,6 +37,7 @@
     <dimen name="twentyFiveDpDimension">25dp</dimen>
     <dimen name="twentyDpDimension">20dp</dimen>
     <dimen name="twoDpDimension">2dp</dimen>
+    <dimen name="twoFiveDpDimension">2.5dp</dimen>
     <dimen name="twoHundredDpDimension">200dp</dimen>
     <dimen name="twoHunderedAndFourtyDpDimension">240dp</dimen>
 
