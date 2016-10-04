@@ -39,7 +39,6 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
     private TextView loadingText;
     private ProgressBar loadingProgress;
     int viewWidth, viewHeight,noOfColumns;
-    private int storageKind;
     private String mediaType;
     private Toolbar toolbar;
 

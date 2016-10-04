@@ -20,9 +20,11 @@
         >
         <meta-data android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-        <activity android:name=".mediavault.MediaVaultActivity"
-            android:excludeFromRecents="true"
-            android:theme="@style/DarkActivityTheme"
+
+        <meta-data android:name="com.smartfoxitsolutions.lockup.mediavault.AlbumArtModule"
+            android:value="GlideModule"
+            />
+        <activity android:name=".AppLoaderActivity"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -47,6 +49,10 @@
             android:theme="@style/LockActivityTheme"
             android:excludeFromRecents="true"
             />
+        <activity android:name=".mediavault.MediaVaultActivity"
+            android:excludeFromRecents="true"
+            android:theme="@style/DarkActivityTheme"
+            />
         <activity android:name=".mediavault.MediaAlbumPickerActivity"
             android:excludeFromRecents="true"
             android:theme="@style/DarkActivityTheme"
@@ -55,8 +61,6 @@
             android:excludeFromRecents="true"
             android:theme="@style/DarkActivityTheme"
             />
-
-        <activity android:name=".mediavault.SampleVaultActivity"/>
 
         <service android:name=".AppLockingService" />
         <service android:name=".GetPaletteColorService"/>

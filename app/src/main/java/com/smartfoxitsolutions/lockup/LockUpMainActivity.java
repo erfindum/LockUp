@@ -8,6 +8,7 @@ import android.support.v7.widget.AppCompatImageButton;
 import android.view.View;
 
 import com.google.android.gms.ads.NativeExpressAdView;
+import com.smartfoxitsolutions.lockup.mediavault.MediaVaultActivity;
 
 /**
  * Created by RAAJA on 16-09-2016.
@@ -38,6 +39,13 @@ public class LockUpMainActivity extends AppCompatActivity {
             public void onClick(View v) {
                startActivity(new Intent(getBaseContext(),AppLockActivity.class));
 
+            }
+        });
+
+        vaultActivityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getBaseContext(), MediaVaultActivity.class));
             }
         });
     }

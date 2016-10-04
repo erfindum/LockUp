@@ -680,7 +680,9 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     protected void onResume() {
         super.onResume();
-        pinLockAdRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).addTestDevice("A219F9DA86E122F8F4AE0F7EF7FA95E5").build();
+        pinLockAdRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .addTestDevice("A04B6DE7DDFED7231620C0AA9BCF67EC")
+                .addTestDevice("A219F9DA86E122F8F4AE0F7EF7FA95E5").build();
         pinLockAdView.loadAd(pinLockAdRequest);
 
     }

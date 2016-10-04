@@ -26,6 +26,7 @@
     <dimen name="sevenDpDimension">7dp</dimen>
     <dimen name="seventyDpDimension">60dp</dimen>
     <dimen name="sixtyFiveDpDimension">65dp</dimen>
+    <dimen name="sixteenDpDimension">16dp</dimen>
     <dimen name="seventyFiveDpDimension">75dp</dimen>
 
     <dimen name="tenDpDimension">10dp</dimen>

@@ -125,7 +125,6 @@ public class AppLockingService extends Service implements Handler.Callback{
                                 .putExtra(CHECKED_APP_LOCK_PACKAGE_NAME,checkedAppPackage)
                                 .putExtra(CHECKED_APP_LOCK_COLOR,checkedAppColorMap.get(checkedAppPackage))
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
                                 .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                                 );
@@ -134,7 +133,6 @@ public class AppLockingService extends Service implements Handler.Callback{
                                 .putExtra(CHECKED_APP_LOCK_PACKAGE_NAME,checkedAppPackage)
                                 .putExtra(CHECKED_APP_LOCK_COLOR,checkedAppColorMap.get(checkedAppPackage))
                                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
                                 .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                                 );

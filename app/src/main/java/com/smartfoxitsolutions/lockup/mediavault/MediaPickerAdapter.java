@@ -173,22 +173,19 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 break;
 
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                Glide.with(activity).load(uri).placeholder(getPlaceHolderImages())
+                Glide.with(activity).load(new AlbumArtModel(uri,activity)).placeholder(getPlaceHolderImages())
                         .error(getPlaceHolderImages()).override(getItemSize(), getItemSize())
                         .centerCrop().diskCacheStrategy(DiskCacheStrategy.RESULT).crossFade()
                         .into(mediaHolder.getThumbnailView());
         }
         if(!selectedAll) {
-            switch (activity.getMediaType()) {
-                case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
-                case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
                     if (!selectedMediaIds.contains(mediaIdString.toString())) {
                         mediaHolder.setItemDeselected();
                     } else if (selectedMediaIds.contains(mediaIdString.toString())) {
                         mediaHolder.setItemSelected();
                     }
-                    break;
-            }
+        }else{
+            mediaHolder.setItemSelected();
         }
     }
 

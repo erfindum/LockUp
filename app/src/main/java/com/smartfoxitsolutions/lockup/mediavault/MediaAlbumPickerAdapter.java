@@ -68,9 +68,6 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
             Log.d("Vault",resultCursor.getCount() + "");
             loadAlbumData(resultCursor);
         }
-        else{
-            Log.d("Vault",String.valueOf(resultCursor == null) + "");
-        }
         mediaAlbumActivity.loadingComplete();
         notifyDataSetChanged();
     }
@@ -151,7 +148,7 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
                 return MediaStore.Video.Media._ID;
 
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                return MediaStore.Audio.Media.ALBUM;
+                return MediaStore.Audio.Media._ID;
         }
         return null;
     }
@@ -233,7 +230,8 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
                     break;
 
                 case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                    Glide.with(mediaAlbumActivity).load(uri).placeholder(getPlaceHolderImages())
+                    Glide.with(mediaAlbumActivity).load(new AlbumArtModel(uri,mediaAlbumActivity.getBaseContext()))
+                            .placeholder(getPlaceHolderImages())
                             .error(getPlaceHolderImages()).override(viewWidth, viewHeight)
                             .centerCrop().diskCacheStrategy(DiskCacheStrategy.RESULT).crossFade()
                             .into(imageHolder.getThumbnailView());

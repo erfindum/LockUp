@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/fiveDpDimension"
-        app:adSize ="300x190"
+        app:adSize ="280x132"
         app:adUnitId="@string/pin_lock_activity_ad_unit_id"
         />
 

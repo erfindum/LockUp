@@ -23,3 +23,5 @@
 -keep class * implements com.google.gson.TypeAdapterFactory
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
+
+-keep public class * implements com.bumptech.glide.module.GlideModule
