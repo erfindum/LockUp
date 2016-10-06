@@ -11,14 +11,14 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.os.Vibrator;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -26,11 +26,13 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.NativeExpressAdView;
 
-
 /**
- * Created by RAAJA on 13-09-2016.
+ * Created by RAAJA on 06-10-2016.
  */
-public class PinLockActivity extends AppCompatActivity implements View.OnClickListener{
+
+public class LockPinView extends FrameLayout implements View.OnClickListener{
+    Context context;
+
     NativeExpressAdView pinLockAdView;
     ImageView appIconView;
     AdRequest pinLockAdRequest;
@@ -53,43 +55,60 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
     private int packageColor;
     long pinPassCode;
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.pin_lock_activity);
-        packageName = getIntent().getStringExtra(AppLockingService.CHECKED_APP_LOCK_PACKAGE_NAME);
-        packageColor = getIntent().getIntExtra(AppLockingService.CHECKED_APP_LOCK_COLOR,0);
-        if(packageColor!=0){
-            Drawable appColor = new ColorDrawable(packageColor);
-            getWindow().getDecorView().setBackground(appColor);
-            getWindow().getDecorView().setAlpha(0.95f);
-        }
-        else{
-            Drawable appColor = new ColorDrawable(Color.parseColor("#F52874F0"));
-            getWindow().getDecorView().setBackground(appColor);
-        }
+    private OnPinLockUnlockListener pinLockListener;
+
+    public LockPinView(Context context, OnPinLockUnlockListener pinLockListener) {
+        super(context);
+        this.context = context;
+        setPinLockUnlockListener(pinLockListener);
+        pinLockListener.onPinLocked();
+        LayoutInflater.from(context).inflate(R.layout.pin_lock_activity,this,true);
+        pinDigitVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        initializeLockView();
+    }
+
+    void setPinLockUnlockListener(OnPinLockUnlockListener pinLockListener){
+        this.pinLockListener = pinLockListener;
+    }
+
+
+    void setPackageName(String packageName){
+        Log.e(AppLockingService.TAG,packageName + " Set Package");
+        this.packageName = packageName;
+        setAppIcon(packageName);
+    }
+
+    void setWindowBackground(){
+        Drawable appColor = new ColorDrawable(Color.parseColor("#F52874F0"));
+        setBackground(appColor);
+    }
+
+    void initializeLockView(){
         pinLayout = (RelativeLayout) findViewById(R.id.pin_lock_activity_digit_group);
         triggerLayout = (RelativeLayout) findViewById(R.id.pin_lock_activity_trigger_group);
-        pinDigitVibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-        SharedPreferences prefs = getBaseContext().getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
         isVibratorEnabled = prefs.getBoolean(AppLockModel.VIBRATOR_ENABLED_PREF_KEY,true);
         selectedPin = "";
         pinPassCode = prefs.getLong(AppLockModel.USER_SET_LOCK_PASS_CODE,0);
         String adAppId = getResources().getString(R.string.pin_lock_activity_ad_app_id);
-        digitTypFace = Typeface.createFromAsset(getAssets(),"fonts/arquitectabook.ttf");
+        digitTypFace = Typeface.createFromAsset(context.getAssets(),"fonts/arquitectabook.ttf");
         appIconView = (ImageView) findViewById(R.id.pin_lock_activity_app_icon_view);
-       MobileAds.initialize(getApplicationContext(),adAppId);
+        MobileAds.initialize(context.getApplicationContext(),adAppId);
         pinLockAdView = (NativeExpressAdView) findViewById(R.id.pin_lock_activity_ad_view);
+        pinLockAdRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .addTestDevice("A04B6DE7DDFED7231620C0AA9BCF67EC")
+                .addTestDevice("A219F9DA86E122F8F4AE0F7EF7FA95E5").build();
+        pinLockAdView.loadAd(pinLockAdRequest);
         inflatePinViews();
-
     }
 
     void setAppIcon(String packageName){
         try{
-            Drawable appIcon =  getPackageManager().getApplicationIcon(packageName);
+            Drawable appIcon =  context.getPackageManager().getApplicationIcon(packageName);
             appIconView.setImageDrawable(appIcon);
         }catch (PackageManager.NameNotFoundException e){
             e.printStackTrace();
+            Log.e(AppLockingService.TAG,packageName + " Not Found");
         }
     }
 
@@ -112,7 +131,7 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
 
         clear_pin_button = (AppCompatButton) findViewById(R.id.pin_lock_activity_digit_clear);
 
-       button_digit_one.setTypeface(digitTypFace);
+        button_digit_one.setTypeface(digitTypFace);
         button_digit_two.setTypeface(digitTypFace);
         button_digit_three.setTypeface(digitTypFace);
         button_digit_four.setTypeface(digitTypFace);
@@ -124,7 +143,7 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
         button_digit_zero.setTypeface(digitTypFace);
 
         registerListeners();
-        setAppIcon(packageName);
+        setPinAnimation();
     }
 
     void registerListeners(){
@@ -155,9 +174,9 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
         clear_pin_button.setOnClickListener(null);
     }
 
+
     @Override
     public void onClick(View v) {
-
         switch(v.getId()){
             case R.id.pin_lock_activity_digit_one:
                 pinClicked("1");
@@ -213,7 +232,6 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
             pinDigitVibrator.vibrate(30);
         }
     }
-
 
     void setPinAnimation(){
 
@@ -538,7 +556,6 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
         });
     }
 
-
     /**
      * Returns a Button reference from the digit passed
      * @param digit Digit for which the button reference is to be returned
@@ -638,8 +655,8 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
                 long confirmedPin = Long.parseLong(selectedPin)*55439;
                 if (!selectedPin.equals("") && pinPassCode == confirmedPin) {
                     Log.d("AppLock", "Passcode is " + selectedPin + "  " + pinPassCode);
-                    postPatternCompleted(packageName);
                     resetPinView();
+                    postPinCompleted(packageName);
                 } else if (pinPassCode != confirmedPin) {
                     triggerAnimator.start();
                     if(isVibratorEnabled){
@@ -664,52 +681,48 @@ public class PinLockActivity extends AppCompatActivity implements View.OnClickLi
 
     void clearPin(){
         if(!selectedPin.isEmpty() && selectedPin.length()>=0){
-            getTrigger(selectedPin.length()).setBackgroundResource(R.drawable.img_pin_normal);
+            getTrigger(selectedPin.length()).setBackgroundResource(R.drawable.img_pin_trigger_normal);
             selectedPin = selectedPin.substring(0,selectedPin.length()-1);
             pinDigitCount-=1;
             Log.d("PatternLock","Cleared : " +selectedPin);
         }
     }
 
-    private void postPatternCompleted(String packageUnlockedName){
+    private void postPinCompleted(String packageUnlockedName){
+        pinLockListener.onPinUnlocked(packageUnlockedName);
+    }
 
-        AppLockingService.recentlyUnlockedApp = packageUnlockedName;
-        finish();
+    void startHome(){
+        context.startActivity(new Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_HOME)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        );
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        pinLockAdRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                .addTestDevice("A04B6DE7DDFED7231620C0AA9BCF67EC")
-                .addTestDevice("A219F9DA86E122F8F4AE0F7EF7FA95E5").build();
-        pinLockAdView.loadAd(pinLockAdRequest);
-
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        Log.d(AppLockingService.TAG,"OnMeasure Called");
     }
 
     @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        setPinAnimation();
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        Log.d(AppLockingService.TAG,"OnLayout Called");
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if(event.getAction()!=KeyEvent.ACTION_UP || event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
+            return super.dispatchKeyEvent(event);
+        }
+        startHome();
+        return true;
+    }
+
+    void removeView(){
         unregisterListeners();
-        finish();
+        setPinLockUnlockListener(null);
+        context = null;
     }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME));
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d("AppLock","Called OnDestroy");
-    }
-
 }

@@ -25,6 +25,8 @@ public class AppLockModel {
     public static final String CHECKED_APPS_COLOR_SHARED_PREF_KEY = "checkedAppsColorMap";
     static final String USER_SET_LOCK_PASS_CODE = "userLockPasscode";
 
+    static final int QUERY_TASK_TIME = 6000;
+
     public static final String LOCK_UP_FIRST_LOAD_PREF_KEY = "lockUp_is_first_load";
     public static final String VIBRATOR_ENABLED_PREF_KEY = "app_lock_vibrator_enabled";
     public static final String APP_LOCK_LOCKMODE = "app_lock_lockmode";
