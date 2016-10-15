@@ -11,6 +11,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -43,8 +44,6 @@ public class MediaMoveActivity extends AppCompatActivity {
 
     public static final String MEDIA_MOVE_MESSENGER_KEY = "media_move_messenger";
 
-    public static final String MEDIA_MOVE_ACTION  = "media_move_action";
-
 
     TextView countText;
     Button doneButton;
@@ -53,7 +52,6 @@ public class MediaMoveActivity extends AppCompatActivity {
     String albumBucketId, mediaType;
     String[] selectedMediaId,fileNames;
     AtomicLong timestamp;
-    MoveReceiver receiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -67,7 +65,6 @@ public class MediaMoveActivity extends AppCompatActivity {
         serviceStartType = intent.getIntExtra(SERVICE_START_TYPE_KEY,0);
         disableDoneButton();
         setMoveText();
-        receiver = new MoveReceiver(getWeakReference());
         if(serviceStartType==SERVICE_START_TYPE_NEW){
             moveType = intent.getIntExtra(VAULT_TYPE_KEY,2);
             mediaSelectionType = intent.getIntExtra(MEDIA_SELECTION_TYPE,2);
@@ -137,6 +134,7 @@ public class MediaMoveActivity extends AppCompatActivity {
     }
 
     void startMoveService(){
+        Messenger messenger = new Messenger(new MoveHandler(getWeakReference()));
         Intent serviceIntent;
         if(moveType==MOVE_TYPE_INTO_VAULT) {
             if(mediaSelectionType == MEDIA_SELECTION_TYPE_ALL) {
@@ -146,7 +144,8 @@ public class MediaMoveActivity extends AppCompatActivity {
                         .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY, albumBucketId)
                         .putExtra(MEDIA_FILE_NAMES_KEY,fileNames)
                         .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY, mediaType)
-                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY, MediaMoveActivity.MOVE_TYPE_INTO_VAULT);
+                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY, MediaMoveActivity.MOVE_TYPE_INTO_VAULT)
+                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
                 startService(serviceIntent);
             }
             if(mediaSelectionType == MEDIA_SELECTION_TYPE_UNIQUE){
@@ -157,7 +156,8 @@ public class MediaMoveActivity extends AppCompatActivity {
                         .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,mediaType)
                         .putExtra(MEDIA_FILE_NAMES_KEY,fileNames)
                         .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,selectedMediaId)
-                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT);
+                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT)
+                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);;
                 startService(serviceIntent);
             }
         }
@@ -170,26 +170,23 @@ public class MediaMoveActivity extends AppCompatActivity {
         return new WeakReference<>(this);
     }
 
-
-    static  class MoveReceiver extends BroadcastReceiver{
+    static class MoveHandler extends Handler{
         WeakReference<MediaMoveActivity> activity;
-        MoveReceiver(WeakReference<MediaMoveActivity> activity){
+        MoveHandler(WeakReference<MediaMoveActivity> activity){
             this.activity = activity;
         }
         @Override
-        public void onReceive(Context context, Intent intent) {
-            if(intent.getAction().equals(MEDIA_MOVE_ACTION)){
-                int moveType = intent.getIntExtra(MediaMoveService.MEDIA_MOVE_SUCCESS_TYPE_KEY,0);
-                if(moveType == MediaMoveService.MEDIA_SUCCESSFULLY_MOVED){
-                    int arg1 = intent.getIntExtra(MediaMoveService.MEDIA_MOVE_COUNT_KEY,0);
-                    int arg2 = intent.getIntExtra(MediaMoveService.MEDIA_MOVE_TOTAL_COUNT_KEY,0);
-                    String moveText = "Files " + arg1 + " of " + arg2;
-                    activity.get().countText.setText(moveText);
-                }
-                if(moveType == MediaMoveService.MEDIA_MOVE_COMPLETED){
-                    activity.get().countText.setText(R.string.vault_move_activity_move_complete);
-                    activity.get().enableDoneButton();
-                }
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if(msg.what == MediaMoveService.MEDIA_SUCCESSFULLY_MOVED){
+                int arg1 = msg.arg1;
+                int arg2 = msg.arg2;
+                String moveText = "Files " + arg1 + " of " + arg2;
+                activity.get().countText.setText(moveText);
+            }
+            if(msg.what == MediaMoveService.MEDIA_MOVE_COMPLETED){
+                activity.get().countText.setText(R.string.vault_move_activity_move_complete);
+                activity.get().enableDoneButton();
             }
         }
     }
@@ -197,8 +194,10 @@ public class MediaMoveActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        IntentFilter filter = new IntentFilter(MEDIA_MOVE_ACTION);
-        registerReceiver(receiver,filter);
+        if(MediaMoveService.SERVICE_STARTED){
+            Messenger messenger = new Messenger(new MoveHandler(getWeakReference()));
+            MediaMoveService.updateMessenger(messenger);
+        }
     }
 
     @Override
@@ -210,12 +209,13 @@ public class MediaMoveActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        unregisterReceiver(receiver);
+        if(MediaMoveService.SERVICE_STARTED){
+            MediaMoveService.updateMessenger(null);
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        receiver = null;
     }
 }

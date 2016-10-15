@@ -62,7 +62,8 @@
         <service android:name=".AppLockingService" android:persistent="true" android:priority="1000">
         </service>
         <service android:name=".GetPaletteColorService"/>
-        <service android:name=".mediavault.MediaMoveService" android:persistent="true"/>
+        <service android:name=".mediavault.MediaMoveService" android:persistent="true"
+            android:process=":com.smartfoxitsolutions.lockup.mediaProcess"/>
         <service android:name=".NotificationLockService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>

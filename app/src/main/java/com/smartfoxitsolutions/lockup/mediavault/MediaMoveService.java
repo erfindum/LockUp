@@ -3,6 +3,7 @@ package com.smartfoxitsolutions.lockup.mediavault;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
@@ -12,6 +13,8 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.smartfoxitsolutions.lockup.LockUpMainActivity;
 import com.smartfoxitsolutions.lockup.R;
@@ -27,11 +30,8 @@ public class MediaMoveService extends Service implements Handler.Callback{
 
     public static boolean SERVICE_STARTED = false;
 
-    public static final String MEDIA_MOVE_SUCCESS_TYPE_KEY = "media_move_success_type";
     public static final int MEDIA_SUCCESSFULLY_MOVED = 4;
     public static final int MEDIA_MOVE_COMPLETED = 5;
-    public static final String MEDIA_MOVE_COUNT_KEY = "move_count_key";
-    public static final String MEDIA_MOVE_TOTAL_COUNT_KEY = "move_completed_key";
 
 
     int moveType, mediaSelectionType, serviceStartType;
@@ -41,6 +41,7 @@ public class MediaMoveService extends Service implements Handler.Callback{
     MediaMoveInTask moveTask;
     NotificationCompat.Builder notifBuilder;
     NotificationManager notifManager;
+    static Messenger activityMessenger;
 
     @Nullable
     @Override
@@ -64,6 +65,8 @@ public class MediaMoveService extends Service implements Handler.Callback{
             mediaSelectionType = intent.getIntExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE,2);
             albumBucketId = intent.getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY);
             mediaType = intent.getStringExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY);
+            Messenger messenger = intent.getParcelableExtra(MediaMoveActivity.MEDIA_MOVE_MESSENGER_KEY);
+            updateMessenger(messenger);
             if(mediaSelectionType==MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE) {
                 selectedMediaId = intent.getStringArrayExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY);
             }
@@ -71,6 +74,10 @@ public class MediaMoveService extends Service implements Handler.Callback{
             startMediaMoveTask();
         SERVICE_STARTED = true;
         return START_REDELIVER_INTENT;
+    }
+
+    static void updateMessenger(Messenger messenger){
+        activityMessenger = messenger;
     }
 
     void startMediaMoveTask(){
@@ -113,15 +120,31 @@ public class MediaMoveService extends Service implements Handler.Callback{
             notifBuilder.setContentText(notifString);
             notifBuilder.setProgress(fileNames.length,moveCount,false);
             notifManager.notify(3542124,notifBuilder.build());
-            sendBroadcast(new Intent(MediaMoveActivity.MEDIA_MOVE_ACTION)
-                        .putExtra(MEDIA_MOVE_SUCCESS_TYPE_KEY,MEDIA_SUCCESSFULLY_MOVED)
-                        .putExtra(MEDIA_MOVE_COUNT_KEY,moveCount)
-                        .putExtra(MEDIA_MOVE_TOTAL_COUNT_KEY,totalCount));
+            if(activityMessenger!=null && activityMessenger.getBinder().isBinderAlive()){
+                Message mssg = Message.obtain();
+                mssg.what = msg.what;
+                mssg.arg1 = moveCount;
+                mssg.arg2 = totalCount;
+                try {
+                    activityMessenger.send(mssg);
+                }
+                catch (RemoteException e){
+                    e.printStackTrace();
+                }
+            }
             return true;
         }
         if(msg.what == MEDIA_MOVE_COMPLETED){
-            sendBroadcast(new Intent(MediaMoveActivity.MEDIA_MOVE_ACTION)
-                    .putExtra(MEDIA_MOVE_SUCCESS_TYPE_KEY,MEDIA_MOVE_COMPLETED));
+            if(activityMessenger!=null && activityMessenger.getBinder().isBinderAlive()){
+                Message mssg = Message.obtain();
+                mssg.what = msg.what;
+                try {
+                    activityMessenger.send(mssg);
+                }
+                catch (RemoteException e){
+                    e.printStackTrace();
+                }
+            }
             closeService();
             return true;
         }
@@ -141,6 +164,7 @@ public class MediaMoveService extends Service implements Handler.Callback{
             mediaMoveService.shutdown();
             moveTask.closeTask();
         }
+        activityMessenger = null;
         SERVICE_STARTED = false;
     }
 }
