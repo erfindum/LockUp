@@ -221,7 +221,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         }
         unregisterReceiver(appLockReceiver);
         appLockReceiver = null;
-        sendBroadcast(new Intent(AppLockServiceRestartReceiver.ACTION_LOCK_SERVICE_RESTART));
+       sendBroadcast(new Intent(AppLockServiceRestartReceiver.ACTION_LOCK_SERVICE_RESTART));
         Log.d(TAG,"Service Destroyed");
     }
 

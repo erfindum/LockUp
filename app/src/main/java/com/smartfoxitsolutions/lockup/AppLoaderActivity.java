@@ -100,7 +100,7 @@ public class AppLoaderActivity extends AppCompatActivity {
     }
 
     void startMainActivity(){
-        if (isFirstLoad){
+        if (isLockUpFirstLoad()){
             startActivityForResult(new Intent(this,SetPinPatternActivity.class),REQUEST_START_ACTIVITY_FIRST_LOAD);
         }else{
             startActivityForResult(new Intent(this,LockUpMainActivity.class),REQUEST_START_LOCKUP_ACTIVITY);

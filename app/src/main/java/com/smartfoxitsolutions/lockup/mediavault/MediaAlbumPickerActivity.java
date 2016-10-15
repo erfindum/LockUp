@@ -2,6 +2,7 @@ package com.smartfoxitsolutions.lockup.mediavault;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -19,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
+import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.DimensionConverter;
 import com.smartfoxitsolutions.lockup.R;
 
@@ -33,6 +35,10 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
     public static final String TYPE_AUDIO_MEDIA = "type_audio_media";
     public static final String ALBUM_NAME_KEY = "album_name_key";
     public static final String ALBUM_BUCKET_ID_KEY = "album_bucket_id";
+    public static final String SELECTED_MEDIA_FILES_KEY = "selected_media_files";
+    public static final String SELECTED_FILE_COUNT_KEY = "selected_file_count";
+    public static final String THUMBNAIL_WIDTH_KEY = "thumbnail_width_key";
+    public static final String THUMBNAIL_HEIGHT_KEY = "thumbnail_height_key";
 
     private RecyclerView mediaPickerBuckRecycler;
     private MediaAlbumPickerAdapter mediaAdapter;
@@ -74,7 +80,13 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
         DisplayMetrics metrics = ctxt.getResources().getDisplayMetrics();
         int displayWidth = metrics.widthPixels;
         noOfColumns = displayWidth/itemWidth;
+        SharedPreferences.Editor edit = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE).edit();
+        edit.putInt(THUMBNAIL_WIDTH_KEY,viewWidth);
+        edit.putInt(THUMBNAIL_HEIGHT_KEY,viewHeight);
+        edit.apply();
     }
+
+
 
 
     @Override

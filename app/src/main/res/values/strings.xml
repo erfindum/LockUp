@@ -129,10 +129,10 @@
     </string-array>
 
     <!-- adMob App ID -->
-    <string name="pin_lock_activity_ad_app_id">ca-app-pub-4739007494599063~8446914634</string>
+    <string name="pin_lock_activity_ad_app_id">ca-app-pub-7146089791969598~5483242665</string>
 
     <!-- Pin Lock Activity -->
-    <string name="pin_lock_activity_ad_unit_id">ca-app-pub-4739007494599063/6896019039</string>
+    <string name="pin_lock_activity_ad_unit_id">ca-app-pub-7146089791969598/5556647862</string>
     
     <!-- Album Picker Fragments -->
     <string name="vault_album_picker_load_text">Loading Images</string>
@@ -141,7 +141,7 @@
     <!-- Media Vault General -->
     <string name="media_vault_toolbar_title">Vault</string>
     <string name="media_vault_permission_request_message">
-        LockUp vault requires user permission to read or write media files from External Storage (SD Card). Without this permission vault will stop working.
+        LockUp vault requires user permission to read or write media files from Storage. Without this permission vault will stop working.
     </string>
     <string name="media_vault_permission_grant">PERMIT</string>
     <string name="media_vault_permission_deny">CANCEL</string>
@@ -150,5 +150,13 @@
         <item name="media_vault_audio_text">IMAGES</item>
         <item name="media_vault_video_text">VIDEO</item>
     </string-array>
+
+    <!-- Vault Move Activity -->
+    <string name="vault_move_activity_move_in_text">Moving Into Vault</string>
+    <string name="vault_move_activity_move_out_text">Moving Out Of Vault</string>
+    <string name="vault_move_activity_move_info_text">Please wait. This may take a while depending on the file size and number of files.</string>
+    <string name="vault_move_activity_move_button">Done</string>
+    <string name="vault_move_activity_cancel_notif">CANCEL</string>
+    <string name="vault_move_activity_move_complete">Files successfully moved</string>
 
 </resources>

@@ -50,6 +50,9 @@ public class AppLockActivity extends AppCompatActivity {
         appLockActivityToolbar.setTitleTextColor(Color.WHITE);
         getSupportActionBar().setTitle("AppLock");
         checkAndSetUsagePermissions();
+        if(Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
+            overlayPermissionGranted = true;
+        }
         calculateMarginHeader();
         displayRecyclerView();
 
@@ -106,7 +109,9 @@ public class AppLockActivity extends AppCompatActivity {
             AppOpsManager opsManager = (AppOpsManager) getApplicationContext().getSystemService(APP_OPS_SERVICE);
             if (opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), getPackageName()) == AppOpsManager.MODE_ALLOWED) {
                 setUsageAccessPermissionGranted(true);
-                checkAndSetOverlayPermission();
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
+                    checkAndSetOverlayPermission();
+                }
                 Log.d(AppLockingService.TAG,String.valueOf(opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), getPackageName())
                         == AppOpsManager.MODE_ALLOWED));
             } else {

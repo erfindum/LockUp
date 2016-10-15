@@ -1,14 +1,11 @@
 package com.smartfoxitsolutions.lockup.mediavault;
 
-import android.content.Context;
 import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 /**

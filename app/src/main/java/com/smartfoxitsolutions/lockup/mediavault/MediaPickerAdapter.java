@@ -27,7 +27,7 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private ArrayList<MediaPickerHolder> holder;
     private ArrayList<String> selectedMediaIds;
     private MediaPickerActivity activity;
-    private Cursor mediaCursor;
+     Cursor mediaCursor;
     private boolean selectedAll,isSelectionStarted;
     private StringBuilder mediaIdString;
     private int itemSize;
