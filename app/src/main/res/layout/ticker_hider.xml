@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/tickerHiderColor"
+    >
+    <ImageView
+        android:id="@+id/ticker_hider_app_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="@dimen/tenDpDimension"
+        android:layout_marginBottom="@dimen/tenDpDimension"
+        android:layout_marginRight="@dimen/tenDpDimension"
+        android:layout_marginEnd="@dimen/tenDpDimension"
+        android:layout_marginStart="@dimen/twentyDpDimension"
+        android:layout_marginLeft="@dimen/twentyDpDimension"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:scaleType="fitXY"
+        />
+
+    <TextView
+        android:id="@+id/ticker_hider_app_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_toRightOf="@+id/ticker_hider_app_icon"
+        android:layout_toEndOf="@+id/ticker_hider_app_icon"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="@dimen/twentyDpDimension"
+        android:layout_marginEnd="@dimen/twentyDpDimension"
+        android:layout_marginTop="@dimen/fiveDpDimension"
+        android:textColor="@color/white"
+        android:textSize="@dimen/seventeenSpDimension"
+        android:textStyle="bold"
+        />
+    <TextView
+        android:id="@+id/ticker_hider_app_sub_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ticker_hider_app_text"
+        android:layout_toRightOf="@+id/ticker_hider_app_icon"
+        android:layout_toEndOf="@+id/ticker_hider_app_icon"
+        android:layout_centerHorizontal="true"
+        android:layout_marginRight="@dimen/twentyDpDimension"
+        android:layout_marginEnd="@dimen/twentyDpDimension"
+        android:layout_marginTop="@dimen/fiveDpDimension"
+        android:textColor="@color/tickerHiderMessageColor"
+        android:textSize="@dimen/fifteenSpDimension"
+        android:textStyle="bold"
+
+        />
+
+</RelativeLayout>
