@@ -48,7 +48,9 @@ public class AppLockActivity extends AppCompatActivity {
         appLockActivityToolbar = (Toolbar) findViewById(R.id.app_lock_activity_tool_bar);
         setSupportActionBar(appLockActivityToolbar);
         appLockActivityToolbar.setTitleTextColor(Color.WHITE);
-        getSupportActionBar().setTitle("AppLock");
+        if(getSupportActionBar()!=null) {
+            getSupportActionBar().setTitle(R.string.appLock_activity_title);
+        }
         checkAndSetUsagePermissions();
         if(Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
             overlayPermissionGranted = true;
@@ -87,6 +89,7 @@ public class AppLockActivity extends AppCompatActivity {
        DisplayMetrics metrices =  getResources().getDisplayMetrics();
         AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_TEN = 10 * (metrices.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
         AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_FIFTEEN = 15 * (metrices.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
+
     }
 
     void startUsagePermissionDialog(){
@@ -170,6 +173,7 @@ public class AppLockActivity extends AppCompatActivity {
         super.onStop();
         if (appLockRecyclerAdapter!=null) {
             appLockRecyclerAdapter.notifyDataSetChanged();
+            appLockRecyclerAdapter.updateAppModel();
             Log.d(TAG,"");
         }
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && getUsageAccessPermissionGranted()

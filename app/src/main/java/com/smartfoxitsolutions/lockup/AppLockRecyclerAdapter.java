@@ -1,6 +1,7 @@
 package com.smartfoxitsolutions.lockup;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -13,9 +14,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeMap;
 
 /**
@@ -30,6 +31,7 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public static int HEADER_MARGIN_SIZE_TEN;
     public static int HEADER_MARGIN_SIZE_FIFTEEN;
 
+
     private static final int ITEM_POSITION_RANGE_HEADER_ONE = 3;
     private static final int ITEM_POSITION_RANGE_RECOMMENDED_APPS = 4;
     private static final int ITEM_POSITION_RANGE_HEADER_TWO = 5;
@@ -42,9 +44,8 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private ArrayList<Boolean> recommendedAppLocked;
     private ArrayList<AppLockRecyclerViewItem> itemHolder;
     private TreeMap<String,String> installedAppsMap,checkedAppsMap;
-    private TreeMap<String,Boolean> recommendedAppsMap;
-    PackageManager packageManager;
-    SharedPreferences prefs;
+    private HashMap<String,Boolean> recommendedAppsMap;
+    private PackageManager packageManager;
     private AppLockModel appLockModel;
     private AppLockActivity activity;
 
@@ -62,7 +63,6 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         this.itemHolder = new ArrayList<>();
         this.activity = activity;
         this.packageManager = activity.getPackageManager();
-        this.prefs = activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
         this.appLockModel = appModel;
     }
 
@@ -107,7 +107,7 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
      * @return int value of the range.
      */
 
-    int getItemPositionRange(int position){
+    private int getItemPositionRange(int position){
         if(position==(getHeaderOneSize() -1)){
             return ITEM_POSITION_RANGE_HEADER_ONE;
         }
@@ -155,28 +155,48 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             headerView.getHeaderText().setText(R.string.appLock_activity_additional_settings_header);
         }
         else if(getItemPositionRange(position)==ITEM_POSITION_RANGE_RECOMMENDED_APPS){
-
-            AppLockRecyclerViewItem itemView = (AppLockRecyclerViewItem) holder;
-               int listPosition = position-getHeaderOneSize();
-            if(listPosition == 0){
-                itemView.getAppImage().setImageDrawable(null);
-                itemView.getAppImage().setBackgroundResource(R.drawable.ic_app_lock_activity_hide_notif);
-                itemView.getAppName().setText(recommendedAppList.get(listPosition));
-            }
-            else if(listPosition == 1){
-                itemView.getAppImage().setImageDrawable(null);
-                itemView.getAppName().setText(recommendedAppList.get(listPosition));
-                itemView.getAppImage().setBackgroundResource(R.drawable.img_pin_normal);
-            }else if(listPosition ==2){
-                itemView.getAppImage().setImageDrawable(null);
-                itemView.getAppName().setText(recommendedAppList.get(listPosition));
-                itemView.getAppImage().setBackgroundResource(R.drawable.img_pin_normal);
-            }
-            if(recommendedAppsMap.get(recommendedAppList.get(listPosition))){
-                changeLockButtonImage(itemView.getLockButton(),true);
-            }
-            else{
-                changeLockButtonImage(itemView.getLockButton(),false);
+            if(Build.VERSION.SDK_INT<Build.VERSION_CODES.JELLY_BEAN_MR2){
+                AppLockRecyclerViewItem itemView = (AppLockRecyclerViewItem) holder;
+                int listPosition = position - getHeaderOneSize();
+                if (listPosition == 0) {
+                    itemView.getAppImage().setImageDrawable(null);
+                    itemView.getAppName().setText(recommendedAppList.get(listPosition));
+                    itemView.getAppImage().setBackgroundResource(R.drawable.img_pin_normal);
+                } else if (listPosition == 1) {
+                    itemView.getAppImage().setImageDrawable(null);
+                    itemView.getAppName().setText(recommendedAppList.get(listPosition));
+                    itemView.getAppImage().setBackgroundResource(R.drawable.img_pin_normal);
+                }
+                if (recommendedAppsMap.get(recommendedAppList.get(listPosition))) {
+                    changeLockButtonImage(itemView.getLockButton(), true);
+                } else {
+                    changeLockButtonImage(itemView.getLockButton(), false);
+                }
+            }else {
+                AppLockRecyclerViewItem itemView = (AppLockRecyclerViewItem) holder;
+                int listPosition = position - getHeaderOneSize();
+                if (listPosition == 0) {
+                    itemView.getAppImage().setImageDrawable(null);
+                    itemView.getAppImage().setBackgroundResource(R.drawable.ic_app_lock_activity_hide_notif);
+                    itemView.getAppName().setText(recommendedAppList.get(listPosition));
+                } else if (listPosition == 1) {
+                    itemView.getAppImage().setImageDrawable(null);
+                    itemView.getAppName().setText(recommendedAppList.get(listPosition));
+                    itemView.getAppImage().setBackgroundResource(R.drawable.img_pin_normal);
+                } else if (listPosition == 2) {
+                    itemView.getAppImage().setImageDrawable(null);
+                    itemView.getAppName().setText(recommendedAppList.get(listPosition));
+                    itemView.getAppImage().setBackgroundResource(R.drawable.img_pin_normal);
+                }
+                if(listPosition == 0){
+                    itemView.getLockButton().setImageResource(0);
+                    itemView.getLockButton().setImageResource(R.drawable.ic_app_lock_activity_notif_navigation);
+                }else
+                if (recommendedAppsMap.get(recommendedAppList.get(listPosition))) {
+                    changeLockButtonImage(itemView.getLockButton(), true);
+                } else {
+                    changeLockButtonImage(itemView.getLockButton(), false);
+                }
             }
         }
         else if(getItemPositionRange(position)==ITEM_POSITION_RANGE_HEADER_TWO){
@@ -190,17 +210,18 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         HEADER_MARGIN_SIZE_TEN, HEADER_MARGIN_SIZE_FIFTEEN);
                 headerView.getHeaderView().setLayoutParams(layoutParams);
             }else{
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) {
+                    CardView.LayoutParams layoutParams = new FrameLayout.LayoutParams(headerView.getHeaderView().getLayoutParams());
+
+                    layoutParams.setMargins(HEADER_MARGIN_SIZE_TEN,
+                            HEADER_MARGIN_SIZE_FIFTEEN,
+                            HEADER_MARGIN_SIZE_TEN, 0);
+                    headerView.getHeaderView().setLayoutParams(layoutParams);
+                }
                 headerView.getHeaderText().setText(R.string.appLock_activity_checked_apps_header);
-                CardView.LayoutParams layoutParams = new FrameLayout.LayoutParams(headerView.getHeaderView().getLayoutParams());
-
-                layoutParams.setMargins(HEADER_MARGIN_SIZE_TEN,
-                        HEADER_MARGIN_SIZE_FIFTEEN,
-                        HEADER_MARGIN_SIZE_TEN,0);
-                headerView.getHeaderView().setLayoutParams(layoutParams);
             }
-
-
         }
+
         else if(!checkedAppsPackage.isEmpty() && getItemPositionRange(position)==ITEM_POSITION_RANGE_CHECKED_APPS){
            AppLockRecyclerViewItem itemView = (AppLockRecyclerViewItem) holder;
             int listPosition = position-getHeaderTwoSize();
@@ -230,13 +251,16 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         HEADER_MARGIN_SIZE_TEN, HEADER_MARGIN_SIZE_FIFTEEN);
                 headerView.getHeaderView().setLayoutParams(layoutParams);
             }else{
-                headerView.getHeaderText().setText(R.string.appLock_activity_installed_apps_header);
-                CardView.LayoutParams layoutParams = new FrameLayout.LayoutParams(headerView.getHeaderView().getLayoutParams());
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) {
+                    headerView.getHeaderText().setText(R.string.appLock_activity_installed_apps_header);
+                    CardView.LayoutParams layoutParams = new FrameLayout.LayoutParams(headerView.getHeaderView().getLayoutParams());
 
-                layoutParams.setMargins(HEADER_MARGIN_SIZE_TEN,
-                        HEADER_MARGIN_SIZE_FIFTEEN,
-                        HEADER_MARGIN_SIZE_TEN,0);
-                headerView.getHeaderView().setLayoutParams(layoutParams);
+                    layoutParams.setMargins(HEADER_MARGIN_SIZE_TEN,
+                            HEADER_MARGIN_SIZE_FIFTEEN,
+                            HEADER_MARGIN_SIZE_TEN, 0);
+                    headerView.getHeaderView().setLayoutParams(layoutParams);
+                }
+                headerView.getHeaderText().setText(R.string.appLock_activity_installed_apps_header);
             }
         }
         else if(!installedAppsPackage.isEmpty() && getItemPositionRange(position)==ITEM_POSITION_RANGE_INSTALLED_APPS){
@@ -289,18 +313,36 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
         if(getItemPositionRange(listItemPosition)==ITEM_POSITION_RANGE_RECOMMENDED_APPS){
             int listPosition = listItemPosition-getHeaderOneSize();
-            AppCompatImageButton lockButton = itemView.getLockButton();
+            if(Build.VERSION.SDK_INT<Build.VERSION_CODES.JELLY_BEAN_MR2){
+                AppCompatImageButton lockButton = itemView.getLockButton();
+                boolean val = recommendedAppsMap.get(recommendedAppList.get(listPosition));
+                if (val) {
+                    itemView.getLockButtonAnimator().start();
+                    changeLockButtonImage(lockButton, false);
+                    recommendedAppsMap.put(recommendedAppList.get(listPosition), false);
+                } else {
+                    itemView.getLockButtonAnimator().start();
+                    changeLockButtonImage(lockButton, true);
+                    recommendedAppsMap.put(recommendedAppList.get(listPosition), true);
+                }
+            }else {
+                if(listPosition == 0){
+                    activity.startActivity(new Intent(activity.getBaseContext(),NotificationLockActivity.class));
+                }
+                else {
+                    AppCompatImageButton lockButton = itemView.getLockButton();
                     boolean val = recommendedAppsMap.get(recommendedAppList.get(listPosition));
-                if(val) {
-                    itemView.getLockButoonAnimator().start();
-                    changeLockButtonImage(lockButton,false);
-                    recommendedAppsMap.put(recommendedAppList.get(listPosition),false);
+                    if (val) {
+                        itemView.getLockButtonAnimator().start();
+                        changeLockButtonImage(lockButton, false);
+                        recommendedAppsMap.put(recommendedAppList.get(listPosition), false);
+                    } else {
+                        itemView.getLockButtonAnimator().start();
+                        changeLockButtonImage(lockButton, true);
+                        recommendedAppsMap.put(recommendedAppList.get(listPosition), true);
+                    }
                 }
-                else{
-                    itemView.getLockButoonAnimator().start();
-                    changeLockButtonImage(lockButton,true);
-                    recommendedAppsMap.put(recommendedAppList.get(listPosition),true);
-                }
+            }
         }
         else if(!checkedAppsPackage.isEmpty() && getItemPositionRange(listItemPosition)==ITEM_POSITION_RANGE_CHECKED_APPS){
             int listPosition = listItemPosition-getHeaderTwoSize();
@@ -311,12 +353,12 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             }
             if(checkedAppsMap.containsKey(checkedAppsPackage.get(listPosition))) {
                 changeLockButtonImage(lockButton,false);
-                itemView.getLockButoonAnimator().start();
+                itemView.getLockButtonAnimator().start();
                 installedAppsMap.put(checkedAppsPackage.get(listPosition),checkedAppsName.get(listPosition));
                 checkedAppsMap.remove(checkedAppsPackage.get(listPosition));
             }else{
                 changeLockButtonImage(lockButton,true);
-                itemView.getLockButoonAnimator().start();
+                itemView.getLockButtonAnimator().start();
                 checkedAppsMap.put(checkedAppsPackage.get(listPosition),checkedAppsName.get(listPosition));
                 installedAppsMap.remove(checkedAppsPackage.get(listPosition));
             }
@@ -330,12 +372,12 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             }
             if(installedAppsMap.containsKey(installedAppsPackage.get(listPosition))) {
                 changeLockButtonImage(lockButton,true);
-                itemView.getLockButoonAnimator().start();
+                itemView.getLockButtonAnimator().start();
                 checkedAppsMap.put(installedAppsPackage.get(listPosition),installedAppsName.get(listPosition));
                 installedAppsMap.remove(installedAppsPackage.get(listPosition));
             }else{
                 changeLockButtonImage(lockButton,false);
-                itemView.getLockButoonAnimator().start();
+                itemView.getLockButtonAnimator().start();
                 installedAppsMap.put(installedAppsPackage.get(listPosition),installedAppsName.get(listPosition));
                 checkedAppsMap.remove(installedAppsPackage.get(listPosition));
             }
@@ -345,23 +387,29 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     private void changeLockButtonImage(AppCompatImageButton button,boolean checked){
         if(checked){
+            button.setImageResource(0);
             button.setImageResource(R.drawable.ic_app_lock_activity_lock_selected);
         }
         else {
+            button.setImageResource(0);
             button.setImageResource(R.drawable.ic_app_lock_activity_lock_unselected);
         }
     }
 
     void closeAppLockRecyclerAdapter(){
-        appLockModel.updateAppPackages(installedAppsMap,AppLockModel.INSTALLED_APPS_PACKAGE);
-        appLockModel.updateAppPackages(checkedAppsMap,AppLockModel.CHECKED_APPS_PACKAGE);
-        appLockModel.updateRecommendedAppPackages(recommendedAppsMap);
         for(AppLockRecyclerViewItem holder : itemHolder){
             holder.setOnAppListItemClickListener(null);
         }
+        activity = null;
+    }
+
+    void updateAppModel(){
+        appLockModel.updateAppPackages(installedAppsMap,AppLockModel.INSTALLED_APPS_PACKAGE);
+        appLockModel.updateAppPackages(checkedAppsMap,AppLockModel.CHECKED_APPS_PACKAGE);
+        appLockModel.updateRecommendedAppPackages(recommendedAppsMap);
+
         appLockModel.loadAppPackages(AppLockModel.INSTALLED_APPS_PACKAGE);
         appLockModel.loadAppPackages(AppLockModel.CHECKED_APPS_PACKAGE);
         appLockModel.loadAppPackages(AppLockModel.RECOMMENDED_APPS_PACKAGE);
-
     }
 }

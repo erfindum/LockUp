@@ -37,14 +37,16 @@
             android:layout_below="@id/vault_album_picker_activity_progress"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/twentyDpDimension"
-            android:textColor="@color/colorMainPrimary"
+            android:textColor="@android:color/black"
             android:textSize="@dimen/fifteenSpDimension"
             android:text="@string/vault_album_picker_load_text"
             />
 
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/vault_album_picker_activity_placeholder"
-            android:layout_width="60dp"
-            android:layout_height="60dp" />
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_centerInParent="true"
+            />
     </RelativeLayout>
 </RelativeLayout>

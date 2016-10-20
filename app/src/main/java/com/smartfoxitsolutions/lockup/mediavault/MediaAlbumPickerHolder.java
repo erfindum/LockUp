@@ -19,10 +19,6 @@ public class MediaAlbumPickerHolder extends RecyclerView.ViewHolder {
     private TextView countText;
     private OnGridItemSelectedListener listener;
 
-    public interface OnGridItemSelectedListener{
-         void onGridItemSelected(int gridPosition);
-    }
-
     public void setOnGridItemSelectedListener(OnGridItemSelectedListener listener){
         this.listener = listener;
     }

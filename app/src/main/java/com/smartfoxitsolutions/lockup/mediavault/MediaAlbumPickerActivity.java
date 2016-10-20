@@ -14,7 +14,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.transition.Transition;
 import android.util.DisplayMetrics;
+import android.view.Menu;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -170,11 +172,25 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
         if(mediaAdapter !=null){
             mediaAdapter.closeResources();
+            mediaAdapter = null;
         }
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(getBaseContext(),MediaVaultActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+        overridePendingTransition(0,0);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
 }

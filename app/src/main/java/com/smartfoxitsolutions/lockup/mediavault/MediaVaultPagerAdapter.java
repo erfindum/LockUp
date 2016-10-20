@@ -24,12 +24,15 @@ public class MediaVaultPagerAdapter extends FragmentPagerAdapter {
         switch (position){
             case 0:
                 frag = new MediaVaultFragment();
+                frag.setMediaType(MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA);
                 return frag;
             case 1:
                 frag = new MediaVaultFragment();
+                frag.setMediaType(MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA);
                 return frag;
             case 2:
                 frag = new MediaVaultFragment();
+                frag.setMediaType(MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA);
                 return frag;
         }
 

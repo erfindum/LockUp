@@ -121,12 +121,8 @@
     <string name="appLock_activity_usage_dialog_permit_text">PERMIT</string>
     <string name="appLock_activity_usage_dialog_cancel_text">CANCEL</string>
 
-
-    <string-array name="recommended_app_list">
-        <item>Lock Notifications</item>
-        <item>Lock App Installer</item>
-        <item>Prevent LockUp Uninstall</item>
-    </string-array>
+    <!-- Notification Lock Activity -->
+    <string name="notification_lock_activity_title">NotificationLock</string>
 
     <!-- adMob App ID -->
     <string name="pin_lock_activity_ad_app_id">ca-app-pub-7146089791969598~5483242665</string>
@@ -140,6 +136,7 @@
 
     <!-- Media Vault General -->
     <string name="media_vault_toolbar_title">Vault</string>
+    <string name="media_vault_ads_text">Ads</string>
     <string name="media_vault_permission_request_message">
         LockUp vault requires user permission to read or write media files from Storage. Without this permission vault will stop working.
     </string>
@@ -158,5 +155,6 @@
     <string name="vault_move_activity_move_button">Done</string>
     <string name="vault_move_activity_cancel_notif">CANCEL</string>
     <string name="vault_move_activity_move_complete">Files successfully moved</string>
+
 
 </resources>

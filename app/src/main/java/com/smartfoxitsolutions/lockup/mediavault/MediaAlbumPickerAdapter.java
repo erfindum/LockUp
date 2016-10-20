@@ -29,7 +29,7 @@ import java.util.LinkedList;
  */
 
 public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
-        implements MediaAlbumPickerHolder.OnGridItemSelectedListener{
+        implements OnGridItemSelectedListener{
 
 
     private Cursor resultCursor;
@@ -43,7 +43,7 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
     private MediaAlbumPickerActivity mediaAlbumActivity;
     private String mediaType;
 
-    public MediaAlbumPickerAdapter(Cursor cursor,MediaAlbumPickerActivity frag, int viewWidth, int viewHeight) {
+    public MediaAlbumPickerAdapter(Cursor cursor,MediaAlbumPickerActivity activity, int viewWidth, int viewHeight) {
         bucketIdList = new LinkedList<>();
         bucketCountList = new LinkedList<>();
         bucketThumbnailId = new LinkedList<>();
@@ -52,7 +52,7 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
         this.viewHeight = viewHeight;
         this.resultCursor = cursor;
         holders = new ArrayList<>();
-        this.mediaAlbumActivity = frag;
+        this.mediaAlbumActivity = activity;
         setMediaType(mediaAlbumActivity.getMediaType());
         loadPlaceHolderImages();
         setupAlbumBuckets();
@@ -212,6 +212,7 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
         MediaAlbumPickerHolder imageHolder = (MediaAlbumPickerHolder) holder;
             Uri uri;
             uri = Uri.parse(getExternalMediaUri()+"/"+bucketThumbnailId.get(position));
+            Log.d("VaultMedia",uri.getPath() + " " + uri.getAuthority() + " " +uri.getScheme());
             switch (getMediaType()){
                 case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
                     Glide.with(mediaAlbumActivity).load(uri).placeholder(getPlaceHolderImages())

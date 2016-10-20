@@ -204,13 +204,20 @@ public class MediaVaultActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
         if(vaultExecutor!=null && !vaultExecutor.isShutdown()){
             vaultExecutor.shutdown();;
         }
         if(vaultTask!=null){
             vaultTask = null;
         }
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
     }
 }

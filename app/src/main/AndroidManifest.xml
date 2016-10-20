@@ -38,9 +38,11 @@
             />
         <activity android:name=".SetPinPatternActivity"
             android:excludeFromRecents="true"
-            android:noHistory="true"
             />
         <activity android:name=".AppLockActivity"
+            android:excludeFromRecents="true"
+            />
+        <activity android:name=".NotificationLockActivity"
             android:excludeFromRecents="true"
             />
         <activity android:name=".mediavault.MediaVaultActivity"
@@ -50,6 +52,7 @@
         <activity android:name=".mediavault.MediaAlbumPickerActivity"
             android:excludeFromRecents="true"
             android:theme="@style/DarkActivityTheme"
+            android:parentActivityName=".LockUpMainActivity"
             />
         <activity android:name=".mediavault.MediaPickerActivity"
             android:excludeFromRecents="true"

@@ -1,17 +1,21 @@
 package com.smartfoxitsolutions.lockup;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
@@ -28,7 +32,7 @@ public class AppLoaderActivity extends AppCompatActivity {
     private static boolean isFirstLoad;
     private ArrayList<String> recommendedAppList;
     private TreeMap<String,String> installedAppMap,checkedAppMap;
-    private TreeMap<String,Boolean> recommendedAppMap;
+    private HashMap<String,Boolean> recommendedAppMap;
     private AppLockModel appLockModel;
     private ExecutorService appListLoadExecutor;
 
@@ -43,7 +47,14 @@ public class AppLoaderActivity extends AppCompatActivity {
         appLockModel = new AppLockModel(getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE));
         prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
         isFirstLoad = prefs.getBoolean(AppLockModel.LOCK_UP_FIRST_LOAD_PREF_KEY,true);
-        List<String> array1Resource = Arrays.asList(this.getResources().getStringArray(R.array.recommended_app_list));
+        List<String> array1Resource;
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2){
+            String[] array1 = {"Lock App Installer","Prevent LockUp Uninstall"};
+            array1Resource = Arrays.asList(array1);
+        }else{
+            String[] array1 = {"Lock Notifications","Lock App Installer","Prevent LockUp Uninstall"};
+            array1Resource = Arrays.asList(array1);
+        }
         recommendedAppList = new ArrayList<>(array1Resource);
 
     }
