@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/colorMainPrimary"
+    >
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/media_move_activity_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/media_move_activity_move_text"
+        android:layout_marginBottom="@dimen/thirtyDpDimension"
+        />
+    <TextView
+        android:id="@+id/media_move_activity_move_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textSize="@dimen/twentySpDimension"
+        android:textColor="@color/white"
+        android:text="@string/vault_move_activity_move_in_text"
+        />
+    <TextView
+        android:id="@+id/media_move_activity_move_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/media_move_activity_move_text"
+        android:layout_centerHorizontal="true"
+        android:padding="@dimen/tenDpDimension"
+        android:textSize="@dimen/fifteenSpDimension"
+        android:textColor="@color/white"
+        android:textAlignment="center"
+        />
+
+    <TextView
+        android:id="@+id/media_move_activity_move_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/media_move_activity_move_count"
+        android:layout_centerHorizontal="true"
+        android:padding="@dimen/twentyDpDimension"
+        android:textSize="@dimen/twelveSpDimension"
+        android:textColor="@color/white"
+        android:text="@string/vault_move_activity_move_info_text"
+        android:textAlignment="center"
+        />
+
+    <Button
+        android:id="@+id/media_move_activity_button_done"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/media_move_activity_move_info"
+        android:background="@drawable/selector_main_button"
+        android:textColor="@color/colorMainPrimary"
+        android:textSize="@dimen/fifteenSpDimension"
+        android:text="@string/vault_move_activity_move_button"
+        />
+
+</RelativeLayout>

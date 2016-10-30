@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="248dp" android:layout_height="wrap_content"
+    android:background="@drawable/img_permission_dialog_back" android:layout_gravity="center"
+
+    >
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/notification_permission_image"
+        android:layout_width="@dimen/oneHunderedAndFiftyDpDimension"
+        android:layout_height="@dimen/oneHunderedAndFiftyDpDimension"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:padding="24dp"
+        app:srcCompat="@drawable/ic_lock_notif_permission_icon"
+        />
+
+    <TextView
+        android:id="@+id/notification_permission_info_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/notification_permission_image"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/white"
+        android:textSize="@dimen/twelveSpDimension"
+        android:text="@string/appLock_activity_notif_dialog_message"
+        android:maxWidth="200dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+       android:paddingBottom="12dp"
+        />
+    <TextView
+        android:id="@+id/notification_permission_info_text_sub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/notification_permission_info_text"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/white"
+        android:textSize="@dimen/twelveSpDimension"
+        android:text="@string/appLock_activity_notif_dialog_message_two"
+        android:maxWidth="200dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:paddingBottom="24dp"
+        />
+
+    <TextView
+        android:id="@+id/notification_permission_positive_button"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_below="@+id/notification_permission_info_text_sub"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:padding="10dp"
+        android:layout_marginBottom="@dimen/tenDpDimension"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@color/colorMainPrimary"
+        android:textColor="@color/colorMainAccent"
+        android:text="@string/appLock_activity_usage_dialog_permit_text"
+        android:textSize="@dimen/twelveSpDimension"
+        />
+
+    <TextView
+        android:id="@+id/notification_permission_negative_button"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_below="@+id/notification_permission_info_text_sub"
+        android:layout_toLeftOf="@+id/notification_permission_positive_button"
+        android:layout_toStartOf="@+id/notification_permission_positive_button"
+        android:padding="10dp"
+        android:layout_marginBottom="@dimen/tenDpDimension"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@color/colorMainPrimary"
+        android:textColor="@color/colorMainAccent"
+        android:text="@string/appLock_activity_usage_dialog_cancel_text"
+        android:textSize="@dimen/twelveSpDimension"
+        />
+
+
+</RelativeLayout>
