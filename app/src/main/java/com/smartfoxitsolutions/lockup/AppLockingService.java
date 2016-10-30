@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by RAAJA on 11-09-2016.
  */
-public class AppLockingService extends Service implements Handler.Callback,OnPinLockUnlockListener{
+public class AppLockingService extends Service implements Handler.Callback,OnPinLockUnlockListener {
     public static final String TAG = "AppLockingService";
 
     public static final String STOP_APP_LOCK_SERVICE = "stopAppLockService";
@@ -352,5 +352,9 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         }
         Log.d(TAG,"Service Destroyed");
     }
+
+    /**
+     * Created by RAAJA on 15-09-2016.
+     */
 
 }
