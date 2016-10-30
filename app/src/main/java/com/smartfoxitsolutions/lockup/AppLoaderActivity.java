@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -16,6 +17,7 @@ import android.widget.FrameLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
@@ -32,9 +34,8 @@ public class AppLoaderActivity extends AppCompatActivity {
     private static boolean isFirstLoad;
     private ArrayList<String> recommendedAppList;
     private TreeMap<String,String> installedAppMap,checkedAppMap;
-    private HashMap<String,Boolean> recommendedAppMap;
+    private LinkedHashMap<String,HashMap<String,Boolean>> recommendedAppMap;
     private AppLockModel appLockModel;
-    private ExecutorService appListLoadExecutor;
 
     static boolean isLockUpFirstLoad(){
         return isFirstLoad;
@@ -49,70 +50,108 @@ public class AppLoaderActivity extends AppCompatActivity {
         isFirstLoad = prefs.getBoolean(AppLockModel.LOCK_UP_FIRST_LOAD_PREF_KEY,true);
         List<String> array1Resource;
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2){
-            String[] array1 = {"Lock App Installer","Prevent LockUp Uninstall"};
+            String[] array1 = {getResources().getString(R.string.recommended_text_sixteen_down_one)};
             array1Resource = Arrays.asList(array1);
         }else{
-            String[] array1 = {"Lock Notifications","Lock App Installer","Prevent LockUp Uninstall"};
+            String[] array1 = {getResources().getString(R.string.recommended_text_sixteen_up_one)
+                    ,getResources().getString(R.string.recommended_text_sixteen_up_two)};
             array1Resource = Arrays.asList(array1);
         }
         recommendedAppList = new ArrayList<>(array1Resource);
+        queryInstalledApps();
 
     }
 
     void queryInstalledApps(){
+        installedAppMap = appLockModel.getInstalledAppsMap();
+        checkedAppMap = appLockModel.getCheckedAppsMap();
+        recommendedAppMap = appLockModel.getRecommendedAppsMap();
+        for(int i=0;i<recommendedAppList.size();i++){
+            if(recommendedAppMap.containsKey(recommendedAppList.get(i))){
+                continue;
+            }
+            HashMap<String,Boolean> stringMap = new HashMap<>();
 
-        appListLoadExecutor = Executors.newSingleThreadExecutor();
-        appListLoadExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                installedAppMap = appLockModel.getInstalledAppsMap();
-                checkedAppMap = appLockModel.getCheckedAppsMap();
-                recommendedAppMap = appLockModel.getRecommendedAppsMap();
-                for(String entries: recommendedAppList){
-                    if(!recommendedAppMap.containsKey(entries)){
-                        recommendedAppMap.put(entries,false);
-                    }
+            if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2){
+                if(i==0) {
+                    stringMap.put("Prevent Force Stop",false);
+                    recommendedAppMap.put(recommendedAppList.get(i),stringMap);
                 }
-                PackageManager pkgManager = getPackageManager();
-                List<ResolveInfo> mainPackages = pkgManager.queryIntentActivities(new Intent(Intent.ACTION_MAIN)
-                        .addCategory(Intent.CATEGORY_LAUNCHER),PackageManager.GET_META_DATA);
-                StringBuilder packageName = new StringBuilder();
-                StringBuilder appName = new StringBuilder();
-                ApplicationInfo appNameInfo = new ApplicationInfo();
-                for (ResolveInfo appInfo : mainPackages){
-                    packageName.delete(0,packageName.length());
-                    packageName.append(appInfo.activityInfo.packageName);
-                    if(!installedAppMap.containsKey(packageName.toString()) &&
-                            !checkedAppMap.containsKey(packageName.toString())){
-                        appName.delete(0,packageName.length());
+            }
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
+                if(i==0 ) {
+                    stringMap.put("Lock Notifications",false);
+                    recommendedAppMap.put(recommendedAppList.get(i), stringMap);
+                }
+                if(i==1){
+                    stringMap.put("Prevent Force Stop",false);
+                    recommendedAppMap.put(recommendedAppList.get(i),stringMap);
+                }
+            }
+        }
+        if(!recommendedAppMap.containsKey("com.android.packageinstaller")){
+            HashMap<String,Boolean> stringMap = new HashMap<>();
+                stringMap.put("Install/Uninstall Apps",true);
+                recommendedAppMap.put("com.android.packageinstaller",stringMap);
+        }
+        PackageManager pkgManager = getPackageManager();
+        List<ResolveInfo> mainPackages = pkgManager.queryIntentActivities(new Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_LAUNCHER),PackageManager.GET_META_DATA);
+        for (ResolveInfo appInfo : mainPackages){
+            String packageName = appInfo.activityInfo.packageName;
+            if(!installedAppMap.containsKey(packageName) &&
+                    !checkedAppMap.containsKey(packageName)){
+
+                    if(packageName.equalsIgnoreCase("com.android.settings") && !recommendedAppMap.containsKey(packageName)){
                         try {
-                            appNameInfo = pkgManager.getApplicationInfo(packageName.toString(), PackageManager.GET_META_DATA);
+                        ApplicationInfo appNameInfo = pkgManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+                        String appName = (String) pkgManager.getApplicationLabel(appNameInfo);
+                        HashMap<String,Boolean> recommendTemp = new HashMap<>();
+                        recommendTemp.put(appName,true);
+                        recommendedAppMap.put(packageName,recommendTemp);
                         }catch (PackageManager.NameNotFoundException e){
                             e.printStackTrace();
                         }
-                        appName.append(pkgManager.getApplicationLabel(appNameInfo));
-                        installedAppMap.put(packageName.toString(),appName.toString());
+                        continue;
                     }
-                }
-                if(installedAppMap.containsKey(getPackageName())){
-                    installedAppMap.remove(getPackageName());
-                }
-                appLockModel.updateRecommendedAppPackages(recommendedAppMap);
-                appLockModel.updateAppPackages(installedAppMap,AppLockModel.INSTALLED_APPS_PACKAGE);
-                appLockModel.loadAppPackages(AppLockModel.RECOMMENDED_APPS_PACKAGE);
-                int loadComplete = appLockModel.loadAppPackages(AppLockModel.INSTALLED_APPS_PACKAGE);
-                Log.d("AppLoclLoader","Task complete " + loadComplete);
-                if(loadComplete == AppLockModel.APP_LIST_UPDATED) {
-                    startMainActivity();
-                }
-            }
-        });
+                    if(packageName.equalsIgnoreCase("com.android.vending") && !recommendedAppMap.containsKey(packageName)){
+                        try {
+                        ApplicationInfo appNameInfo = pkgManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+                        String appName = (String) pkgManager.getApplicationLabel(appNameInfo);
+                        HashMap<String,Boolean> recomendTemp = new HashMap<>();
+                        recomendTemp.put(appName,false);
+                        recommendedAppMap.put(packageName,recomendTemp);
+                        }catch (PackageManager.NameNotFoundException e){
+                            e.printStackTrace();
+                        }
+                        continue;
+                    }
+                    if(packageName.equalsIgnoreCase("com.android.vending") || packageName.equalsIgnoreCase("com.android.settings") ){
+                        continue;
+                    }
+                        try {
+                    ApplicationInfo appNameInfo = pkgManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+                    String appName = (String) pkgManager.getApplicationLabel(appNameInfo);
+                    installedAppMap.put(packageName,appName);
+                        }catch (PackageManager.NameNotFoundException e){
+                            e.printStackTrace();
+                        }
 
+            }
+        }
+        if(installedAppMap.containsKey(getPackageName())){
+            installedAppMap.remove(getPackageName());
+        }
+        appLockModel.updateRecommendedAppPackages(recommendedAppMap);
+        appLockModel.updateAppPackages(installedAppMap,AppLockModel.INSTALLED_APPS_PACKAGE);
+        startMainActivity();
     }
 
     void startMainActivity(){
         if (isLockUpFirstLoad()){
-            startActivityForResult(new Intent(this,SetPinPatternActivity.class),REQUEST_START_ACTIVITY_FIRST_LOAD);
+            startActivityForResult(new Intent(this,SetPinPatternActivity.class)
+                    .putExtra(SetPinPatternActivity.INTENT_PIN_PATTERN_START_TYPE_KEY,SetPinPatternActivity.INTENT_APP_LOADER)
+                    ,REQUEST_START_ACTIVITY_FIRST_LOAD);
         }else{
             startActivityForResult(new Intent(this,LockUpMainActivity.class),REQUEST_START_LOCKUP_ACTIVITY);
         }
@@ -120,8 +159,12 @@ public class AppLoaderActivity extends AppCompatActivity {
     }
     @Override
     protected void onResume() {
-       queryInstalledApps();
         super.onResume();
+        if(isLockUpFirstLoad()){
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,true);
+            edit.apply();
+        }
     }
 
 

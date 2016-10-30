@@ -17,12 +17,17 @@ public class SetPinPatternActivity extends AppCompatActivity {
 
     static final String SET_PATTERN_FRAGMENT_TAG = "setPatternFragment";
     static final String SET_PIN_FRAGMENT_TAG ="setPinFragment";
-    static final int LOCKUP_MAIN_ACTIVITY = 3;
+    static final String INTENT_PIN_PATTERN_START_TYPE_KEY ="intentAppLoader";
 
+    static final int LOCKUP_MAIN_ACTIVITY = 3;
+    static final int INTENT_APP_LOADER =5;
+    static final int INTENT_SETTINGS =6;
+    private int startType;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.set_pin_pattern_activity);
+        startType = getIntent().getIntExtra(INTENT_PIN_PATTERN_START_TYPE_KEY,0);
     }
 
     @Override
@@ -60,7 +65,13 @@ public class SetPinPatternActivity extends AppCompatActivity {
 }
 
     void startLockUpMainActivity(){
-        startActivityForResult(new Intent(this,LockUpMainActivity.class),LOCKUP_MAIN_ACTIVITY);
+        if(startType == INTENT_APP_LOADER) {
+            startActivityForResult(new Intent(this, LockUpMainActivity.class), LOCKUP_MAIN_ACTIVITY);
+        }
+        if(startType == INTENT_SETTINGS){
+            startService(new Intent(getBaseContext(),AppLockingService.class));
+            finish();
+        }
     }
 
     @Override

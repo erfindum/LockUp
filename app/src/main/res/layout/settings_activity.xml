@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent" android:padding="@dimen/fifteenDpDimension">
 
-    <TextView
+ <!--   <TextView
         android:id="@+id/settings_fragment_general_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -10,10 +10,40 @@
         android:text="@string/preference_fragment_general_settings_title"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        />
+        /> -->
 
+<TextView
+    android:id="@+id/settings_change_pin_pattern"
+    android:layout_width="match_parent"
+    android:layout_height="36dp"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:textColor="@color/colorMainPrimary"
+    android:textSize="15sp"
+    android:text="Change Pin/Pattern"
+    android:gravity="left|center"
+    android:layout_marginBottom="@dimen/tenDpDimension"
+    />
+<TextView
+    android:id="@+id/settings_switch_fingerprint_text"
+    android:layout_width="wrap_content"
+    android:layout_height="36dp"
+    android:layout_below="@+id/settings_change_pin_pattern"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:textColor="@color/colorMainPrimary"
+    android:textSize="15sp"
+    android:text="Fingerprint Lock"
+    android:gravity="left|center"
+    android:layout_marginBottom="@dimen/tenDpDimension"
+    />
+ <android.support.v7.widget.SwitchCompat
+     android:id="@+id/settings_switch_fingerprint_switch"
+     android:layout_width="wrap_content"
+     android:layout_height="36dp"
+     android:layout_below="@+id/settings_change_pin_pattern"
+     android:layout_alignParentRight="true"
+     android:layout_alignParentEnd="true"
 
-
-
-
+     />
 </RelativeLayout>

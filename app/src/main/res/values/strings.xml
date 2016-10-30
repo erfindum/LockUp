@@ -116,13 +116,62 @@
     <string name="appLock_activity_installed_apps_empty">NO NEW APPS INSTALLED</string>
     <string name="appLock_activity_checked_apps_empty">NO NEW APPS LOCKED</string>
     <string name="appLock_activity_usage_dialog_message">
-        In Android Lollipop(5.0) and above you must permit usage access for LockUp to use the app lock function
+        In Android Lollipop(5.0) and above Usage Access permission is needed for LockUp to lock installed apps
     </string>
-    <string name="appLock_activity_usage_dialog_permit_text">PERMIT</string>
-    <string name="appLock_activity_usage_dialog_cancel_text">CANCEL</string>
+     <string name="appLock_activity_overlay_dialog_message">
+        LockUp requires permission to draw over apps for the AppLock to lock installed apps
+    </string>
+     <string name="appLock_activity_notif_dialog_message">
+        LockUp requires permission to hide and lock incoming notifications
+    </string>
+    <string name="appLock_activity_notif_dialog_message_two">
+        Note: If you have permitted LockUp to hide notifications before, kindly disable and enable the permission
+    </string>
+    <string name="appLock_activity_usage_dialog_permit_text">YES PERMIT</string>
+    <string name="appLock_activity_usage_dialog_cancel_text">NOT NOW</string>
+    <string name="appLock_activity_usage_dialog_overlay_permission_request">
+        LockUp - Enable Permission for AppLock to lock apps
+    </string>
+
+    <string name="appLock_activity_should_start_dialog_info">
+        App Lock is disabled would you like to start again ?
+    </string>
+    <string name="appLock_activity_should_start_dialog_permit">START</string>
+    <string name="appLock_activity_should_start_dialog_cancel">NOT NOW</string>
+
+    <string name="recommended_text_sixteen_down_one">Prevent Force Stop</string>
+
+    <string name="recommended_text_sixteen_up_one">Lock Notifications</string>
+    <string name="recommended_text_sixteen_up_two">Prevent Force Stop</string>
+    <string name="recommended_unlock_alert_text">
+        Unlocking the app will allow unauthorized users to stop app lock or uninstall LockUp completely. Are you sure you want to unlock?
+    </string>
+    <string name="recommended_unlock_alert_dialog_positive_text">UNLOCK</string>
+    <string name="recommended_unlock_alert_dialog_negative_text">CANCEL</string>
+
+    <!-- FingerPrint Lock Info Text -->
+    <string name="finger_print_lock_main_info">Use fingerprint to unlock</string>
+    <string name="finger_print_lock_main_failed_general">Failed to recognize finger print. Try again</string>
+    <string name="finger_print_lock_main_failed_attempt_two">Failed to recognize finger print. Try another finger instead</string>
+    <string name="finger_print_lock_main_failed_locked_pin">Fingerprint reader locked. Try to unlock using PIN</string>
+    <string name="finger_print_lock_main_error_hardware_unavailable_pin">Unable to detect Fingerprint reader. Try to unlock using PIN</string>
+    <string name="finger_print_lock_main_error_unable_process">Unable to process fingerprint. Try Again</string>
+    <string name="finger_print_lock_main_error_timeout">Fingerprint recognition timeout. Try another finger instead</string>
+    <string name="finger_print_lock_main_error_cancelled_pin">Fingerprint operation cancelled. Try to unlock using PIN</string>
+
+    <string name="finger_print_lock_main_failed_locked_pattern">Fingerprint reader locked. Try to unlock using Pattern</string>
+    <string name="finger_print_lock_main_error_hardware_unavailable_pattern">Unable to detect Fingerprint reader. Try to unlock using Pattern</string>
+    <string name="finger_print_lock_main_error_cancelled_pattern">Fingerprint operation cancelled. Try to unlock using Pattern</string>
+
+    <string name="finger_print_lock_main_help_noisy_general">Fingerprint too noisy. Try Again</string>
+    <string name="finger_print_lock_main_help_dirty">Clean the fingerprint reader and try again</string>
+    <string name="finger_print_lock_main_help_partial">Unable to recognize finger print. Press firmly and try again</string>
+    <string name="finger_print_lock_main_help_fast">Too Fast to recognize finger print. Hold for a while.</string>
+
 
     <!-- Notification Lock Activity -->
     <string name="notification_lock_activity_title">NotificationLock</string>
+    <string name="notification_lock_activity_empty_info">Lock apps to hide notifications </string>
 
     <!-- adMob App ID -->
     <string name="pin_lock_activity_ad_app_id">ca-app-pub-7146089791969598~5483242665</string>

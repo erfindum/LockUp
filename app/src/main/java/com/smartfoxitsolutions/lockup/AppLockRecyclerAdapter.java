@@ -2,10 +2,10 @@ package com.smartfoxitsolutions.lockup;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +17,7 @@ import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.TreeMap;
 
 /**
@@ -40,11 +41,12 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private static final int ITEM_POSITION_RANGE_INSTALLED_APPS = 8;
 
     private ArrayList<String> installedAppsName,installedAppsPackage,checkedAppsName,checkedAppsPackage,
-                        recommendedAppList;
+                        recommendedAppPackageList;
+    private ArrayList<String> recommendedAppLockedName;
     private ArrayList<Boolean> recommendedAppLocked;
     private ArrayList<AppLockRecyclerViewItem> itemHolder;
-    private TreeMap<String,String> installedAppsMap,checkedAppsMap;
-    private HashMap<String,Boolean> recommendedAppsMap;
+    private TreeMap<String,String> installedAppsMap,checkedAppsMap, notificationAppsMap;
+    private LinkedHashMap<String,HashMap<String,Boolean>> recommendedAppsMap;
     private PackageManager packageManager;
     private AppLockModel appLockModel;
     private AppLockActivity activity;
@@ -55,11 +57,14 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         this.installedAppsName = appModel.getInstalledAppsName();
         this.checkedAppsPackage = appModel.getCheckedAppsPackage();
         this.checkedAppsName= appModel.getCheckedAppsName();
-        this.recommendedAppList = appModel.getRecommendedAppList();
+        this.recommendedAppPackageList = appModel.getRecommendedAppPackageList();
         this.installedAppsMap = appModel.getInstalledAppsMap();
         this.checkedAppsMap = appModel.getCheckedAppsMap();
+        this.notificationAppsMap = appModel.getNotificationCheckedAppMap();
         this.recommendedAppsMap= appModel.getRecommendedAppsMap();
-        this.recommendedAppLocked = appModel.getRecommendedAppLocked();
+        HashMap<String,Boolean> recommendedAppLockedMap = appModel.getRecommendedAppLocked();
+        this.recommendedAppLockedName = new ArrayList<>(recommendedAppLockedMap.keySet());
+        this.recommendedAppLocked = new ArrayList<>(recommendedAppLockedMap.values());
         this.itemHolder = new ArrayList<>();
         this.activity = activity;
         this.packageManager = activity.getPackageManager();
@@ -71,7 +76,7 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     private int getRecommendedListSize(){
-        return getHeaderOneSize() +recommendedAppList.size();
+        return getHeaderOneSize() + recommendedAppPackageList.size();
     }
 
     private int getHeaderTwoSize(){
@@ -160,14 +165,19 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 int listPosition = position - getHeaderOneSize();
                 if (listPosition == 0) {
                     itemView.getAppImage().setImageDrawable(null);
-                    itemView.getAppName().setText(recommendedAppList.get(listPosition));
+                    itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
                     itemView.getAppImage().setBackgroundResource(R.drawable.img_pin_normal);
-                } else if (listPosition == 1) {
-                    itemView.getAppImage().setImageDrawable(null);
-                    itemView.getAppName().setText(recommendedAppList.get(listPosition));
-                    itemView.getAppImage().setBackgroundResource(R.drawable.img_pin_normal);
+                } else {
+                    try {
+                        itemView.getAppImage().setBackgroundResource(0);
+                        Drawable appIcon = packageManager.getApplicationIcon(recommendedAppPackageList.get(listPosition));
+                        itemView.getAppImage().setImageDrawable(appIcon);
+                    } catch (PackageManager.NameNotFoundException e){
+                        e.printStackTrace();
+                    }
+                    itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
                 }
-                if (recommendedAppsMap.get(recommendedAppList.get(listPosition))) {
+                if (recommendedAppLocked.get(listPosition)) {
                     changeLockButtonImage(itemView.getLockButton(), true);
                 } else {
                     changeLockButtonImage(itemView.getLockButton(), false);
@@ -178,21 +188,26 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 if (listPosition == 0) {
                     itemView.getAppImage().setImageDrawable(null);
                     itemView.getAppImage().setBackgroundResource(R.drawable.ic_app_lock_activity_hide_notif);
-                    itemView.getAppName().setText(recommendedAppList.get(listPosition));
+                    itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
                 } else if (listPosition == 1) {
                     itemView.getAppImage().setImageDrawable(null);
-                    itemView.getAppName().setText(recommendedAppList.get(listPosition));
+                    itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
                     itemView.getAppImage().setBackgroundResource(R.drawable.img_pin_normal);
-                } else if (listPosition == 2) {
-                    itemView.getAppImage().setImageDrawable(null);
-                    itemView.getAppName().setText(recommendedAppList.get(listPosition));
-                    itemView.getAppImage().setBackgroundResource(R.drawable.img_pin_normal);
+                } else {
+                    try {
+                        itemView.getAppImage().setBackgroundResource(0);
+                        Drawable appIcon = packageManager.getApplicationIcon(recommendedAppPackageList.get(listPosition));
+                        itemView.getAppImage().setImageDrawable(appIcon);
+                    } catch (PackageManager.NameNotFoundException e){
+                        e.printStackTrace();
+                    }
+                    itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
                 }
                 if(listPosition == 0){
                     itemView.getLockButton().setImageResource(0);
                     itemView.getLockButton().setImageResource(R.drawable.ic_app_lock_activity_notif_navigation);
                 }else
-                if (recommendedAppsMap.get(recommendedAppList.get(listPosition))) {
+                if (recommendedAppLocked.get(listPosition)) {
                     changeLockButtonImage(itemView.getLockButton(), true);
                 } else {
                     changeLockButtonImage(itemView.getLockButton(), false);
@@ -285,7 +300,7 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public int getItemCount() {
-        return 3+recommendedAppList.size()+installedAppsPackage.size()+checkedAppsPackage.size();
+        return 3+ recommendedAppPackageList.size()+installedAppsPackage.size()+checkedAppsPackage.size();
     }
 
     @Override
@@ -307,53 +322,120 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         return 0;
     }
 
+    private String[] getCheckedAppsPackages(){
+            String[] packageArray = new String[0];
+            String[] packages; packages = checkedAppsMap.keySet().toArray(packageArray);
+        return packages;
+    }
+
+    private String[] getCheckedAppsNames(){
+
+            String[] appNameArray = new String[0];
+            String[] appNames = checkedAppsMap.values().toArray(appNameArray);
+        return appNames;
+    }
+
 
     @Override
     public void onAppListItemClicked(AppLockRecyclerViewItem itemView, int listItemPosition) {
 
         if(getItemPositionRange(listItemPosition)==ITEM_POSITION_RANGE_RECOMMENDED_APPS){
             int listPosition = listItemPosition-getHeaderOneSize();
+            if(!AppLockActivity.shouldStartAppLock){
+                activity.startAppLockSwitchOnDialog();
+                return;
+            }
             if(Build.VERSION.SDK_INT<Build.VERSION_CODES.JELLY_BEAN_MR2){
                 AppCompatImageButton lockButton = itemView.getLockButton();
-                boolean val = recommendedAppsMap.get(recommendedAppList.get(listPosition));
-                if (val) {
-                    itemView.getLockButtonAnimator().start();
-                    changeLockButtonImage(lockButton, false);
-                    recommendedAppsMap.put(recommendedAppList.get(listPosition), false);
-                } else {
-                    itemView.getLockButtonAnimator().start();
-                    changeLockButtonImage(lockButton, true);
-                    recommendedAppsMap.put(recommendedAppList.get(listPosition), true);
-                }
-            }else {
-                if(listPosition == 0){
-                    activity.startActivity(new Intent(activity.getBaseContext(),NotificationLockActivity.class));
-                }
-                else {
-                    AppCompatImageButton lockButton = itemView.getLockButton();
-                    boolean val = recommendedAppsMap.get(recommendedAppList.get(listPosition));
+                boolean val = recommendedAppLocked.get(listPosition);
+                if(listPosition == 0) {
                     if (val) {
                         itemView.getLockButtonAnimator().start();
                         changeLockButtonImage(lockButton, false);
-                        recommendedAppsMap.put(recommendedAppList.get(listPosition), false);
+                        recommendedAppLocked.add(listPosition,false);
                     } else {
                         itemView.getLockButtonAnimator().start();
                         changeLockButtonImage(lockButton, true);
-                        recommendedAppsMap.put(recommendedAppList.get(listPosition), true);
+                        recommendedAppLocked.add(listPosition,true);
+                    }
+                }
+                else{
+                    if(val){
+                        activity.startRecommendedAlertDialog(itemView,listPosition);
+                        return;
+                    }
+                    else{
+                        itemView.getLockButtonAnimator().start();
+                        changeLockButtonImage(lockButton, true);
+                        HashMap<String,Boolean> recommendTempMap = new HashMap<>();
+                        recommendTempMap.put(recommendedAppLockedName.get(listPosition),true);
+                        recommendedAppsMap.put(recommendedAppPackageList.get(listPosition), recommendTempMap);
+                        recommendedAppLocked.set(listPosition,true);
+                    }
+                }
+            }else {
+                if(listPosition == 0){
+                    if(NotificationLockService.isNotificationServiceConnected) {
+                            activity.startActivity(new Intent(activity.getBaseContext(), NotificationLockActivity.class)
+                                    .putExtra(AppLockModel.NOTIFICATION_ACTIVITY_CHECKED_APPS_NAME_KEY, getCheckedAppsNames())
+                                    .putExtra(AppLockModel.NOTIFICATION_ACTIVITY_CHECKED_APPS_PACKAGE_KEY, getCheckedAppsPackages()));
+                        return;
+                    }else{
+                        activity.startNotificationPermissionDialog();
+                        return;
+                    }
+                }
+                boolean val = recommendedAppLocked.get(listPosition);
+                AppCompatImageButton lockButton = itemView.getLockButton();
+                if(listPosition == 1) {
+                    if (val) {
+                        itemView.getLockButtonAnimator().start();
+                        changeLockButtonImage(lockButton, false);
+                        recommendedAppLocked.add(listPosition,false);
+                    } else {
+                        itemView.getLockButtonAnimator().start();
+                        changeLockButtonImage(lockButton, true);
+                        recommendedAppLocked.add(listPosition,true);
+                    }
+                }
+                else {
+                    if(val){
+                            activity.startRecommendedAlertDialog(itemView,listPosition);
+                        return;
+                    }
+                    else{
+                        itemView.getLockButtonAnimator().start();
+                        changeLockButtonImage(lockButton, true);
+                        HashMap<String,Boolean> recommendTempMap = new HashMap<>();
+                        recommendTempMap.put(recommendedAppLockedName.get(listPosition),true);
+                        recommendedAppsMap.put(recommendedAppPackageList.get(listPosition), recommendTempMap);
+                        recommendedAppLocked.set(listPosition,true);
                     }
                 }
             }
         }
         else if(!checkedAppsPackage.isEmpty() && getItemPositionRange(listItemPosition)==ITEM_POSITION_RANGE_CHECKED_APPS){
+            if(!AppLockActivity.shouldStartAppLock){
+                activity.startAppLockSwitchOnDialog();
+                return;
+            }
             int listPosition = listItemPosition-getHeaderTwoSize();
             AppCompatImageButton lockButton = itemView.getLockButton();
-            if((Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) && !activity.getUsageAccessPermissionGranted()){
+            if((Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) && !AppLockActivity.getUsageAccessPermissionGranted()){
                 activity.startUsagePermissionDialog();
+                return;
+            }
+            if((Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) && !AppLockActivity.getOverlayPermissionGranted()){
+                activity.startOverlayPermissionDialog();
                 return;
             }
             if(checkedAppsMap.containsKey(checkedAppsPackage.get(listPosition))) {
                 changeLockButtonImage(lockButton,false);
                 itemView.getLockButtonAnimator().start();
+                if(notificationAppsMap.containsKey(checkedAppsPackage.get(listPosition))){
+                    notificationAppsMap.remove(checkedAppsPackage.get(listPosition));
+                    updateNotificationAppsMap();
+                }
                 installedAppsMap.put(checkedAppsPackage.get(listPosition),checkedAppsName.get(listPosition));
                 checkedAppsMap.remove(checkedAppsPackage.get(listPosition));
             }else{
@@ -364,10 +446,18 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             }
         }
         else if (!installedAppsPackage.isEmpty() && getItemPositionRange(listItemPosition)==ITEM_POSITION_RANGE_INSTALLED_APPS){
+            if(!AppLockActivity.shouldStartAppLock){
+                activity.startAppLockSwitchOnDialog();
+                return;
+            }
             int listPosition = listItemPosition-getHeaderThreeSize();
             AppCompatImageButton lockButton = itemView.getLockButton();
-            if((Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) && !activity.getUsageAccessPermissionGranted()){
+            if((Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) && !AppLockActivity.getUsageAccessPermissionGranted()){
                 activity.startUsagePermissionDialog();
+                return;
+            }
+            if((Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) && !AppLockActivity.getOverlayPermissionGranted()){
+                activity.startOverlayPermissionDialog();
                 return;
             }
             if(installedAppsMap.containsKey(installedAppsPackage.get(listPosition))) {
@@ -396,20 +486,42 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
     }
 
+    void removeRecommendedApp(AppLockRecyclerViewItem itemView,int position){
+        AppCompatImageButton lockButton = itemView.getLockButton();
+        itemView.getLockButtonAnimator().start();
+        changeLockButtonImage(lockButton, false);
+        HashMap<String,Boolean> recommendTempMap = new HashMap<>();
+        recommendTempMap.put(recommendedAppLockedName.get(position),false);
+        recommendedAppsMap.put(recommendedAppPackageList.get(position), recommendTempMap);
+        recommendedAppLocked.set(position,false);
+    }
+
     void closeAppLockRecyclerAdapter(){
         for(AppLockRecyclerViewItem holder : itemHolder){
             holder.setOnAppListItemClickListener(null);
         }
+        LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(NotificationLockService.UPDATE_LOCK_PACKAGES));
         activity = null;
+    }
+
+    void loadNotificationAppsMap(){
+        appLockModel.loadAppPackages(AppLockModel.NOTIFICATION_CHECKED_APPS_PACKAGE);
+        notificationAppsMap = appLockModel.getNotificationCheckedAppMap();
+    }
+
+    void updateNotificationAppsMap(){
+        appLockModel.updateAppPackages(notificationAppsMap,AppLockModel.NOTIFICATION_CHECKED_APPS_PACKAGE);
     }
 
     void updateAppModel(){
         appLockModel.updateAppPackages(installedAppsMap,AppLockModel.INSTALLED_APPS_PACKAGE);
         appLockModel.updateAppPackages(checkedAppsMap,AppLockModel.CHECKED_APPS_PACKAGE);
         appLockModel.updateRecommendedAppPackages(recommendedAppsMap);
+        appLockModel.updateAppPackages(notificationAppsMap,AppLockModel.NOTIFICATION_CHECKED_APPS_PACKAGE);
 
         appLockModel.loadAppPackages(AppLockModel.INSTALLED_APPS_PACKAGE);
         appLockModel.loadAppPackages(AppLockModel.CHECKED_APPS_PACKAGE);
         appLockModel.loadAppPackages(AppLockModel.RECOMMENDED_APPS_PACKAGE);
+        appLockModel.loadAppPackages(AppLockModel.NOTIFICATION_CHECKED_APPS_PACKAGE);
     }
 }

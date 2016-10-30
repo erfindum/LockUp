@@ -8,15 +8,19 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.MobileAds;
@@ -40,8 +44,8 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
     Vibrator patternViewVibrator;
     ValueAnimator patternAnimator;
     private String packageName;
-    private int packageColor;
     private long patternPassCode;
+    private RelativeLayout patternViewParent;
 
     public LockPatternView(Context context, OnPinLockUnlockListener patternLockListener) {
         super(context);
@@ -49,6 +53,7 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         setPinLockUnlockListener(patternLockListener);
         patternLockListener.onPinLocked();
         LayoutInflater.from(context).inflate(R.layout.pattern_lock_activity,this,true);
+        patternViewParent = (RelativeLayout) findViewById(R.id.pattern_lock_activity_parent_view);
         patternViewVibrator= (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         initializeLockView();
     }
@@ -64,9 +69,16 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         setAppIcon(packageName);
     }
 
-    void setWindowBackground(){
-        Drawable appColor = new ColorDrawable(Color.parseColor("#F52874F0"));
-        setBackground(appColor);
+    void setWindowBackground(int colorVibrant, int displayHeight){
+        GradientDrawable drawable = new GradientDrawable();
+        int[] colors = {Color.parseColor("#263238"),colorVibrant};
+        drawable.setColors(colors);
+        float radius = Math.round(displayHeight*.95);
+        drawable.setGradientRadius(radius);
+        drawable.setGradientCenter(0.5f,1f);
+        drawable.setGradientType(GradientDrawable.RADIAL_GRADIENT);
+        drawable.setShape(GradientDrawable.RECTANGLE);
+        patternViewParent.setBackground(drawable);
     }
 
     void initializeLockView(){
@@ -129,7 +141,7 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
     @Override
     public void onPatternNodeSelected(int selectedPatternNode) {
         this.selectedPatternNode = this.selectedPatternNode+String.valueOf(selectedPatternNode);
-        Log.d("AppLock","Selected Pattern "+ this.selectedPatternNode);
+       // Log.d("AppLock","Selected Pattern "+ this.selectedPatternNode);
         patternNodeSelectedCount=patternNodeSelectedCount+1;
         if(isVibratorEnabled){
             patternViewVibrator.vibrate(30);
@@ -140,10 +152,10 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
     @Override
     public void onPatternCompleted(boolean patternCompleted) {
         if(patternCompleted && !selectedPatternNode.equals("")){
-            Log.d("PatternLock Confirm",selectedPatternNode);
+           // Log.d("PatternLock Confirm",selectedPatternNode);
             long selectedPassCode= Long.parseLong(selectedPatternNode)*55439;
             if(patternPassCode == selectedPassCode){
-                Log.d("AppLock",selectedPatternNode + " " + patternPassCode);
+            //    Log.d("AppLock",selectedPatternNode + " " + patternPassCode);
                 patternView.resetPatternView();
                 resetPatternData();
                 postPatternCompleted(packageName);
@@ -171,7 +183,8 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if(event.getAction()!=KeyEvent.ACTION_UP || event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
+        if(event.getAction()!=KeyEvent.ACTION_UP && (event.getKeyCode() != KeyEvent.KEYCODE_BACK
+                || event.getKeyCode() != KeyEvent.KEYCODE_HOME)) {
             return super.dispatchKeyEvent(event);
         }
         startHome();

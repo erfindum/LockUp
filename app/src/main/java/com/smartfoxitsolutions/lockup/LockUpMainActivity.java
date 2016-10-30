@@ -2,20 +2,15 @@ package com.smartfoxitsolutions.lockup;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
-import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.ads.NativeExpressAdView;
-import com.smartfoxitsolutions.lockup.mediavault.MediaAlbumPickerActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveService;
 import com.smartfoxitsolutions.lockup.mediavault.MediaVaultActivity;
-
-import java.io.File;
 
 /**
  * Created by RAAJA on 16-09-2016.
@@ -57,6 +52,13 @@ public class LockUpMainActivity extends AppCompatActivity {
                 }else{
                     startActivity(new Intent(getBaseContext(),MediaMoveActivity.class));
                 }
+            }
+        });
+
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getBaseContext(),LockUpSettingsActivity.class));
             }
         });
     }

@@ -1,7 +1,5 @@
 package com.smartfoxitsolutions.lockup;
 
-
-
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -10,23 +8,23 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
-import com.smartfoxitsolutions.lockup.mediavault.MediaVaultActivity;
-
 /**
- * Created by RAAJA on 24-09-2016.
+ * Created by RAAJA on 24-10-2016.
  */
 
-public class OverlayPermissionDialog extends DialogFragment {
+public class NotificationPermissionDialog extends DialogFragment {
+
     TextView positive, negative;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View parent = inflater.inflate(R.layout.overlay_permission_dialog,container,false);
-        positive = (TextView) parent.findViewById(R.id.overlay_permission_positive_button);
-        negative = (TextView) parent.findViewById(R.id.overlay_permission_negative_button);
+        View parent = inflater.inflate(R.layout.notification_permission_dialog,container,false);
+        positive = (TextView) parent.findViewById(R.id.notification_permission_positive_button);
+        negative = (TextView) parent.findViewById(R.id.notification_permission_negative_button);
         getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         return parent;
     }
@@ -38,7 +36,7 @@ public class OverlayPermissionDialog extends DialogFragment {
         positive.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.requestOverlayPermission();
+                activity.requestNotificationPermission();
             }
         });
 
@@ -50,3 +48,5 @@ public class OverlayPermissionDialog extends DialogFragment {
         });
     }
 }
+
+

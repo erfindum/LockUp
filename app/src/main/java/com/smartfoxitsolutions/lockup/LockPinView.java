@@ -7,20 +7,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Vibrator;
 import android.support.v7.widget.AppCompatButton;
+import android.support.v7.widget.AppCompatImageButton;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.MobileAds;
@@ -33,15 +40,15 @@ import com.google.android.gms.ads.NativeExpressAdView;
 public class LockPinView extends FrameLayout implements View.OnClickListener{
     Context context;
 
-    NativeExpressAdView pinLockAdView;
-    ImageView appIconView;
-    AdRequest pinLockAdRequest;
-    AppCompatButton button_digit_one,button_digit_two,button_digit_three,button_digit_four,button_digit_five;
-    AppCompatButton button_digit_six,button_digit_seven,button_digit_eight,button_digit_nine,button_digit_zero,clear_pin_button;
-    ImageView img_trigger_one,img_trigger_two,img_trigger_three,img_trigger_four;
-    RelativeLayout pinLayout,triggerLayout;
-    Typeface digitTypFace;
-    Vibrator pinDigitVibrator;
+    private NativeExpressAdView pinLockAdView;
+    private ImageView appIconView;
+    private AdRequest pinLockAdRequest;
+    private AppCompatButton button_digit_one,button_digit_two,button_digit_three,button_digit_four,button_digit_five;
+    private AppCompatButton button_digit_six,button_digit_seven,button_digit_eight,button_digit_nine,button_digit_zero,clear_pin_button;
+    private ImageView img_trigger_one,img_trigger_two,img_trigger_three,img_trigger_four;
+    private Typeface digitTypFace;
+    private Vibrator pinDigitVibrator;
+    private RelativeLayout pinViewParent;
 
     private String selectedPin;
     private int pinDigitCount;
@@ -52,7 +59,6 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
     ValueAnimator triggerAnimator;
 
     private String packageName;
-    private int packageColor;
     long pinPassCode;
 
     private OnPinLockUnlockListener pinLockListener;
@@ -63,6 +69,7 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
         setPinLockUnlockListener(pinLockListener);
         pinLockListener.onPinLocked();
         LayoutInflater.from(context).inflate(R.layout.pin_lock_activity,this,true);
+        pinViewParent = (RelativeLayout) findViewById(R.id.pin_lock_activity_parent);
         pinDigitVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         initializeLockView();
     }
@@ -73,19 +80,23 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
 
 
     void setPackageName(String packageName){
-        Log.e(AppLockingService.TAG,packageName + " Set Package");
         this.packageName = packageName;
         setAppIcon(packageName);
     }
 
-    void setWindowBackground(){
-        Drawable appColor = new ColorDrawable(Color.parseColor("#F52874F0"));
-        setBackground(appColor);
+    void setWindowBackground(int colorVibrant,int displayHeight){
+        GradientDrawable drawable = new GradientDrawable();
+        int[] colors = {colorVibrant,Color.parseColor("#263238")};
+        drawable.setColors(colors);
+        float radius = Math.round(displayHeight*.95);
+        drawable.setGradientRadius(radius);
+        drawable.setGradientCenter(0.5f,1f);
+        drawable.setGradientType(GradientDrawable.RADIAL_GRADIENT);
+        drawable.setShape(GradientDrawable.RECTANGLE);
+        pinViewParent.setBackground(drawable);
     }
 
     void initializeLockView(){
-        pinLayout = (RelativeLayout) findViewById(R.id.pin_lock_activity_digit_group);
-        triggerLayout = (RelativeLayout) findViewById(R.id.pin_lock_activity_trigger_group);
         SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
         isVibratorEnabled = prefs.getBoolean(AppLockModel.VIBRATOR_ENABLED_PREF_KEY,true);
         selectedPin = "";
@@ -556,40 +567,6 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
         });
     }
 
-    /**
-     * Returns a Button reference from the digit passed
-     * @param digit Digit for which the button reference is to be returned
-     * @return Button reference
-     */
-
-    AppCompatButton getDigitButton(String digit){
-        if(Integer.parseInt(digit)>9 || Integer.parseInt(digit)<0){
-            throw new IllegalArgumentException("Digit cannot be less than 0 or more than 9");
-        }
-        switch(digit){
-            case "1":
-                return button_digit_one;
-            case "2":
-                return button_digit_two;
-            case "3":
-                return button_digit_three;
-            case "4":
-                return button_digit_four;
-            case "5":
-                return button_digit_five;
-            case "6":
-                return button_digit_six;
-            case "7":
-                return button_digit_seven;
-            case "8":
-                return button_digit_eight;
-            case "9":
-                return button_digit_nine;
-            case "0":
-                return button_digit_zero;
-        }
-        return null;
-    }
 
     ValueAnimator getDigitAnimators(String digit){
         if(Integer.parseInt(digit)>9 || Integer.parseInt(digit)<0){
@@ -702,18 +679,19 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        Log.d(AppLockingService.TAG,"OnMeasure Called");
+        Log.d("AppLock","Called onMeasure");
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        Log.d(AppLockingService.TAG,"OnLayout Called");
+        Log.d("AppLock","Called OnLayout");
     }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if(event.getAction()!=KeyEvent.ACTION_UP || event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
+        if(event.getAction()!=KeyEvent.ACTION_UP && (event.getKeyCode() != KeyEvent.KEYCODE_BACK
+                || event.getKeyCode() != KeyEvent.KEYCODE_HOME)) {
             return super.dispatchKeyEvent(event);
         }
         startHome();

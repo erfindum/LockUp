@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.GET_TASKS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
 
     <application
         android:allowBackup="true"
@@ -27,6 +28,7 @@
             android:value="GlideModule"
             />
         <activity android:name=".AppLoaderActivity"
+            android:excludeFromRecents="true"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -34,6 +36,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".LockUpMainActivity"
+            android:excludeFromRecents="true"
+            />
+        <activity android:name=".LockUpSettingsActivity"
             android:excludeFromRecents="true"
             />
         <activity android:name=".SetPinPatternActivity"
@@ -88,6 +93,13 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
                 <action android:name="android.intent.action.USER_PRESENT"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".AppLockRemovePackageReceiver"
+            android:priority="2147483647">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REMOVED"/>
+                <data android:scheme="package"/>
             </intent-filter>
         </receiver>
     </application>

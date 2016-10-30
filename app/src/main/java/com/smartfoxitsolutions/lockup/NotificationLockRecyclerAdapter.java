@@ -35,11 +35,14 @@ public class NotificationLockRecyclerAdapter extends RecyclerView.Adapter<Recycl
         this.context = context;
         this.appModel = appLockModel;
         pkgManager = context.getPackageManager();
-        this.checkedAppsMap = appLockModel.getCheckedAppsMap();
         this.notificationCheckedAppsMap = appLockModel.getNotificationCheckedAppMap();
-        this.checkedAppsName = appLockModel.getCheckedAppsName();
-        this.checkedAppsPackage = appLockModel.getCheckedAppsPackage();
         this.holderList = new ArrayList<>();
+    }
+
+    void setCheckedAppsMap(TreeMap<String,String> appsMap){
+        this.checkedAppsMap = appsMap;
+        this.checkedAppsName = new ArrayList<>(appsMap.values());
+        this.checkedAppsPackage = new ArrayList<>(appsMap.keySet());
     }
 
     @Override

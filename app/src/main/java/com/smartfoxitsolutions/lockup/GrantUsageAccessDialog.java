@@ -1,38 +1,49 @@
 package com.smartfoxitsolutions.lockup;
 
-import android.app.Dialog;
-import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 /**
  * Created by RAAJA on 11-09-2016.
  */
 public class GrantUsageAccessDialog extends DialogFragment {
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
-        dialogBuilder.setMessage(R.string.appLock_activity_usage_dialog_message)
-                .setPositiveButton(R.string.appLock_activity_usage_dialog_permit_text
-                        , new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
+    TextView positive, negative;
 
-                                AppLockActivity appLockActivity = (AppLockActivity) getActivity();
-                                appLockActivity.startUsageAccessSettingActivity();
-                            }
-                        })
-                .setNegativeButton(R.string.appLock_activity_usage_dialog_cancel_text,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dismiss();
-                            }
-                        });
-        return dialogBuilder.create();
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View parent = inflater.inflate(R.layout.usage_permission_dialog,container,false);
+        positive = (TextView) parent.findViewById(R.id.usage_permission_positive_button);
+        negative = (TextView) parent.findViewById(R.id.usage_permission_negative_button);
+        getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        return parent;
     }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        final AppLockActivity activity = (AppLockActivity) getActivity();
+        positive.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                activity.startUsageAccessSettingActivity();
+            }
+        });
+
+        negative.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    dismiss();
+            }
+        });
+    }
+
 }

@@ -106,6 +106,7 @@ public class NotificationLockService extends NotificationListenerService impleme
             uiHandler = new Handler(Looper.getMainLooper(), this);
             setWindowParams();
         }
+        updateNotificationAppMap();
     }
 
     WeakReference<NotificationLockService> getLockReference(){
@@ -149,118 +150,122 @@ public class NotificationLockService extends NotificationListenerService impleme
         Log.d("NotificationLock",String.valueOf(notif.priority == Notification.PRIORITY_HIGH) + " priority High");
         Log.d("NotificationLock",String.valueOf(notif.priority == Notification.PRIORITY_MAX) + " priority Max");
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            int notificationId = sbn.getId();
-            if(notificationIdMap.get(notificationId)==null){
-                notificationIdMap.put(notificationId,1);
-            }else
-            {
-                int notificationCount = notificationIdMap.get(notificationId);
-                notificationIdMap.put(notificationId,++notificationCount);
-            }
-            Notification.Builder builder = new Notification.Builder(getBaseContext());
-            String notifSecondaryText = "";
-           int notificationCount = notificationIdMap.get(notificationId);
-            if(notificationCount == 1){
-                notifSecondaryText = notificationCount +" New Message";
-            }else{
-                notifSecondaryText = notificationCount + " New Messages";
-            }
-
-            PendingIntent intent = notif.contentIntent;
-            Bitmap icon = null;
-            try{
-                BitmapDrawable mpa = (BitmapDrawable)getBaseContext().getPackageManager().getApplicationIcon(sbn.getPackageName());
-                if(mpa.getBitmap() != null){
-                    icon = mpa.getBitmap();
+            if(!AppLockingService.recentlyUnlockedApp.equals(sbn.getPackageName())) {
+                int notificationId = sbn.getId();
+                if (notificationIdMap.get(notificationId) == null) {
+                    notificationIdMap.put(notificationId, 1);
+                } else {
+                    int notificationCount = notificationIdMap.get(notificationId);
+                    notificationIdMap.put(notificationId, ++notificationCount);
                 }
-            }
-            catch (PackageManager.NameNotFoundException e){
-                e.printStackTrace();
-            }
-            builder.setContentIntent(intent)
-                    .setContentTitle(notificationAppsMap.get(sbn.getPackageName()))
-                    .setContentText(notifSecondaryText)
-                    .setOngoing(false)
-                    .setDefaults(Notification.DEFAULT_VIBRATE)
-                    .setColor(Color.parseColor("#37474F"))
-                    .setAutoCancel(true)
-                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                    .setSmallIcon(R.mipmap.ic_launcher);
-            if(icon != null){
-                builder.setLargeIcon(icon);
-            }
-            if(notif.priority== Notification.PRIORITY_HIGH || notif.priority == Notification.PRIORITY_MAX){
-                builder.setPriority(Notification.PRIORITY_MAX);
-                //
-            }
-            builder.build();
+                Notification.Builder builder = new Notification.Builder(getBaseContext());
+                String notifSecondaryText = "";
+                int notificationCount = notificationIdMap.get(notificationId);
+                if (notificationCount == 1) {
+                    notifSecondaryText = notificationCount + " New Message";
+                } else {
+                    notifSecondaryText = notificationCount + " New Messages";
+                }
 
-            notificationManager.notify(sbn.getId(),builder.build());
+                PendingIntent intent = notif.contentIntent;
+                Bitmap icon = null;
+                try {
+                    BitmapDrawable mpa = (BitmapDrawable) getBaseContext().getPackageManager().getApplicationIcon(sbn.getPackageName());
+                    if (mpa.getBitmap() != null) {
+                        icon = mpa.getBitmap();
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
+                builder.setContentIntent(intent)
+                        .setContentTitle(notificationAppsMap.get(sbn.getPackageName()))
+                        .setContentText(notifSecondaryText)
+                        .setOngoing(false)
+                        .setDefaults(Notification.DEFAULT_VIBRATE)
+                        .setColor(Color.parseColor("#37474F"))
+                        .setAutoCancel(true)
+                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                        .setSmallIcon(R.mipmap.ic_launcher);
+                if (icon != null) {
+                    builder.setLargeIcon(icon);
+                }
+                if ((notif.priority == Notification.PRIORITY_HIGH || notif.priority == Notification.PRIORITY_MAX)) {
+                    builder.setPriority(Notification.PRIORITY_MAX);
+                    //
+                }
+                builder.build();
 
-            cancelNotification(sbn.getKey());
+                notificationManager.notify(sbn.getId(), builder.build());
+
+                cancelNotification(sbn.getKey());
+            }else{
+                cancelNotification(sbn.getKey());
+            }
         }
         else if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2 && Build.VERSION.SDK_INT<Build.VERSION_CODES.LOLLIPOP){
-            int notificationId = sbn.getId();
-            if(notificationIdMap.get(notificationId)==null){
-                notificationIdMap.put(notificationId,1);
-            }
-            else{
+            if(!AppLockingService.recentlyUnlockedApp.equals(sbn.getPackageName())) {
+                int notificationId = sbn.getId();
+                if (notificationIdMap.get(notificationId) == null) {
+                    notificationIdMap.put(notificationId, 1);
+                } else {
+                    int notificationCount = notificationIdMap.get(notificationId);
+                    notificationIdMap.put(notificationId, ++notificationCount);
+                }
+                if ((notif.priority == Notification.PRIORITY_HIGH || notif.priority == Notification.PRIORITY_MAX)) {
+                    if (uiHandler.getLooper() != null) {
+                        if (tickerHider == null) {
+                            Message msg = uiHandler.obtainMessage(ADD_TICKER_VIEW);
+                            msg.arg1 = notificationIdMap.get(notificationId);
+                            msg.obj = sbn.getPackageName();
+                            msg.sendToTarget();
+                        } else {
+                            Message msg = uiHandler.obtainMessage(UPDATE_TICKER_VIEW);
+                            msg.arg1 = notificationIdMap.get(notificationId);
+                            msg.obj = sbn.getPackageName();
+                            msg.sendToTarget();
+                        }
+                    }
+                }
+                Notification.Builder builder = new Notification.Builder(getBaseContext());
+                String notifSecondaryText = "";
                 int notificationCount = notificationIdMap.get(notificationId);
-                notificationIdMap.put(notificationId,++notificationCount);
-            }
-            if(notif.priority== Notification.PRIORITY_HIGH || notif.priority == Notification.PRIORITY_MAX) {
-                if (uiHandler.getLooper() != null) {
-                    if (tickerHider == null) {
-                        Message msg = uiHandler.obtainMessage(ADD_TICKER_VIEW);
-                        msg.arg1 = notificationIdMap.get(notificationId);
-                        msg.obj = sbn.getPackageName();
-                        msg.sendToTarget();
-                    } else {
-                        Message msg = uiHandler.obtainMessage(UPDATE_TICKER_VIEW);
-                        msg.arg1 = notificationIdMap.get(notificationId);
-                        msg.obj = sbn.getPackageName();
-                        msg.sendToTarget();
-                    }
+                if (notificationCount == 1) {
+                    notifSecondaryText = notificationCount + " New Message";
+                } else {
+                    notifSecondaryText = notificationCount + " New Messages";
                 }
-            }
-            Notification.Builder builder = new Notification.Builder(getBaseContext());
-            String notifSecondaryText = "";
-            int notificationCount = notificationIdMap.get(notificationId);
-            if(notificationCount == 1){
-                notifSecondaryText = notificationCount +" New Message";
+
+                PendingIntent intent = notif.contentIntent;
+                Bitmap icon = null;
+                try {
+                    BitmapDrawable mpa = (BitmapDrawable) getBaseContext().getPackageManager().getApplicationIcon(sbn.getPackageName());
+                    if (mpa.getBitmap() != null) {
+                        icon = mpa.getBitmap();
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
+                builder.setContentIntent(intent)
+                        .setContentTitle(notificationAppsMap.get(sbn.getPackageName()))
+                        .setContentText(notifSecondaryText)
+                        .setOnlyAlertOnce(true)
+                        .setOngoing(false)
+                        .setAutoCancel(true)
+                        .setSmallIcon(R.mipmap.ic_launcher);
+                if (icon != null) {
+                    builder.setLargeIcon(icon);
+                }
+
+                builder.build();
+
+                notificationManager.notify(sbn.getId(), builder.build());
+
+                Log.d("NotificationLock", sbn.getTag() + " Tag");
+                Log.d("NotificationLock", sbn.getId() + " ID");
+                cancelNotification(sbn.getPackageName(), sbn.getTag(), sbn.getId());
             }else{
-                notifSecondaryText = notificationCount + " New Messages";
+                cancelNotification(sbn.getPackageName(), sbn.getTag(), sbn.getId());
             }
-
-            PendingIntent intent = notif.contentIntent;
-            Bitmap icon = null;
-            try{
-                BitmapDrawable mpa = (BitmapDrawable)getBaseContext().getPackageManager().getApplicationIcon(sbn.getPackageName());
-                if(mpa.getBitmap() != null){
-                    icon = mpa.getBitmap();
-                }
-            }
-            catch (PackageManager.NameNotFoundException e){
-                e.printStackTrace();
-            }
-            builder.setContentIntent(intent)
-                    .setContentTitle(notificationAppsMap.get(sbn.getPackageName()))
-                    .setContentText(notifSecondaryText)
-                    .setOnlyAlertOnce(true)
-                    .setOngoing(false)
-                    .setAutoCancel(true)
-                    .setSmallIcon(R.mipmap.ic_launcher);
-                    if(icon != null){
-                        builder.setLargeIcon(icon);
-                    }
-
-            builder.build();
-
-            notificationManager.notify(sbn.getId(),builder.build());
-
-            Log.d("NotificationLock",sbn.getTag()+ " Tag");
-            Log.d("NotificationLock",sbn.getId() + " ID");
-            cancelNotification(sbn.getPackageName(), sbn.getTag(),sbn.getId());
         }
     }
 

@@ -1,47 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/pattern_lock_activity_parent_view"
-    >
-
-    <com.google.android.gms.ads.NativeExpressAdView
-        android:id="@+id/pattern_lock_activity_ad_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/fiveDpDimension"
-        app:adSize ="300x190"
-        app:adUnitId="@string/pin_lock_activity_ad_unit_id"
-        />
-
-    <ImageView
-        android:id="@+id/pattern_lock_activity_app_icon_view"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_above="@+id/pattern_lock_activity_pattern_view"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="@dimen/tenDpDimension"
-        android:layout_marginTop="@dimen/tenDpDimension"
-        />
-
-    <com.smartfoxitsolutions.lockup.PatternLockView
-        android:id="@+id/pattern_lock_activity_pattern_view"
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:paddingLeft="@dimen/fiftyDpDimension"
-        android:paddingRight="@dimen/fiftyDpDimension"
-        android:paddingTop="@dimen/thirtyDpDimension"
-        android:paddingBottom="@dimen/twentyDpDimension"
-        app:nodeCellSize="@dimen/seventyDpDimension"
-        app:nodeCornerSize="3dp"
-        app:nodeSelectedCornerSize="5dp"
-        app:nodeColor="@array/nodeColors"
-        app:nodeSelectedColor="@array/nodeSelectedColors"
-        app:patternLineStroke="@dimen/sevenDpDimension"
-        app:patternLineColor="@color/white"
-        />
+        android:layout_height="match_parent"
+        android:id="@+id/pattern_lock_activity_parent_view"
+        >
 
-    </RelativeLayout>
+       <com.google.android.gms.ads.NativeExpressAdView
+           android:id="@+id/pattern_lock_activity_ad_view"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           app:adSize ="280x170"
+           app:adUnitId="@string/pin_lock_activity_ad_unit_id"
+           android:layout_above="@+id/pattern_lock_activity_app_icon_view"
+           android:layout_centerHorizontal="true"
+           />
+
+           <ImageView
+               android:id="@+id/pattern_lock_activity_app_icon_view"
+               android:layout_width="40dp"
+               android:layout_height="40dp"
+               android:layout_above="@+id/pattern_lock_activity_pattern_view"
+               android:layout_centerHorizontal="true"
+               android:layout_marginBottom="@dimen/tenDpDimension"
+               android:layout_marginTop="@dimen/tenDpDimension"
+               />
+
+           <com.smartfoxitsolutions.lockup.PatternLockView
+               android:id="@+id/pattern_lock_activity_pattern_view"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:layout_alignParentBottom="true"
+               android:paddingLeft="@dimen/fiftyDpDimension"
+               android:paddingRight="@dimen/fiftyDpDimension"
+               android:paddingTop="@dimen/thirtyDpDimension"
+               android:paddingBottom="@dimen/twentyDpDimension"
+               app:nodeCellSize="@dimen/seventyDpDimension"
+               app:nodeCornerSize="3dp"
+               app:nodeSelectedCornerSize="5dp"
+               app:nodeColor="@array/nodeColors"
+               app:nodeSelectedColor="@array/nodeSelectedColors"
+               app:patternLineStroke="@dimen/sevenDpDimension"
+               app:patternLineColor="@color/white"
+               />
+
+       </RelativeLayout>
+

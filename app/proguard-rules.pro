@@ -25,3 +25,4 @@
 -keep class * implements com.google.gson.JsonDeserializer
 
 -keep public class * implements com.bumptech.glide.module.GlideModule
+

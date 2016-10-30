@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:background="@color/backgroundGrey"
     >
@@ -16,6 +17,28 @@
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/fifteenDpDimension"
         android:layout_below="@+id/notification_lock_activity_tool_bar"
+        />
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/notification_lock_activity_empty_image"
+        android:layout_width="@dimen/seventyFiveDpDimension"
+        android:layout_height="@dimen/seventyFiveDpDimension"
+        android:layout_centerInParent="true"
+        app:srcCompat="@drawable/ic_app_lock_activity_hide_notif_empty_list"
+        android:visibility="invisible"
+        />
+
+    <TextView
+        android:id="@+id/notification_lock_activity_empty_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/notification_lock_activity_empty_image"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/twentyDpDimension"
+        android:textSize="@dimen/fifteenSpDimension"
+        android:textColor="@color/darkGrey"
+        android:text="@string/notification_lock_activity_empty_info"
+        android:visibility="invisible"
         />
 
 </RelativeLayout>

@@ -3,7 +3,7 @@
     <color name="colorMainPrimary">#2874F0</color>
     <color name="colorLightPrimary">#E3F2FD</color>
     <color name="colorMainPrimaryDark">#1565C0</color>
-    <color name="colorMainAccent">#FDD835</color>
+    <color name="colorMainAccent">#f7e830</color>
 
 
     <color name="textSecondaryColor">#42A5F5</color>
@@ -15,6 +15,7 @@
     <color name="white">#ffffff</color>
     <color name="transparentWhite">#7Dffffff</color>
     <color name="darkBlue">#1565C0</color>
+    <color name="darkGrey">#414144</color>
     <color name="errorRed">#ef5350</color>
     <color name="backgroundGrey">#E8E8E8</color>
     <color name="transparentBlue">#802196F3</color>
