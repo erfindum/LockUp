@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        >
+
+    <ImageView
+        android:id="@+id/native_ad_main_image"
+        android:layout_width="250dp"
+        android:layout_height="120dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        />
+    <ImageView
+        android:id="@+id/native_ad_icon_image"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_above="@+id/native_ad_text"
+        />
+
+    <TextView android:id="@+id/native_ad_title"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_above="@+id/native_ad_text"
+        android:layout_marginLeft="@dimen/twentyFiveDpDimension"
+        android:layout_marginStart="@dimen/twentyFiveDpDimension"
+        android:layout_marginTop="@dimen/oneDpDimension"
+        android:textSize="15sp"
+        android:gravity="start"
+        />
+    <TextView android:id="@+id/native_ad_text"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_above="@id/native_ad_main_image"
+        android:layout_marginTop="@dimen/oneDpDimension"
+        android:textSize="12sp"
+        android:maxLines="2"
+        />
+    </RelativeLayout>
