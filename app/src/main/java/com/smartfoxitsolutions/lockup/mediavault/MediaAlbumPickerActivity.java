@@ -14,9 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.transition.Transition;
 import android.util.DisplayMetrics;
-import android.view.Menu;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -58,10 +56,12 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
         mediaPickerBuckRecycler = (RecyclerView)findViewById(R.id.vault_album_picker_activity_recycler);
         loadingProgress = (ProgressBar)findViewById(R.id.vault_album_picker_activity_progress);
         loadingText = (TextView)findViewById(R.id.vault_album_picker_activity_load_text);
+        loadingText.setText(R.string.vault_album_picker_load_text);
         setMediaType(getIntent().getStringExtra(MEDIA_TYPE_KEY));
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.vault_album_picker_select_album_toolbar);
         measureItemView();
         getSupportLoaderManager().initLoader(20,null,this);
     }
@@ -184,7 +184,7 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        startActivity(new Intent(getBaseContext(),MediaVaultActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+        startActivity(new Intent(getBaseContext(),MediaVaultAlbumActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
         overridePendingTransition(0,0);
     }
 

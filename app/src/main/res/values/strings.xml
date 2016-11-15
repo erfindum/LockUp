@@ -174,14 +174,17 @@
     <string name="notification_lock_activity_empty_info">Lock apps to hide notifications </string>
 
     <!-- adMob App ID -->
-    <string name="pin_lock_activity_ad_app_id">ca-app-pub-7146089791969598~5483242665</string>
+    <string name="pin_lock_activity_ad_app_id">ca-app-pub-2878097117146801~6210554174</string>
 
     <!-- Pin Lock Activity -->
-    <string name="pin_lock_activity_ad_unit_id">ca-app-pub-7146089791969598/5556647862</string>
+    <string name="pin_lock_activity_ad_unit_id">1c2531f4f8844982a1be67c877dffc92</string>
     
     <!-- Album Picker Fragments -->
-    <string name="vault_album_picker_load_text">Loading Images</string>
+    <string name="vault_album_picker_load_text">Loading Albums</string>
     <string name="vault_album_picker_select_album_toolbar">Select An Album</string>
+    <string name="vault_album_picker_load_image_text">Loading Images</string>
+    <string name="vault_album_picker_load_video_text">Loading Videos</string>
+    <string name="vault_album_picker_load_audio_text">Loading Audios</string>
 
     <!-- Media Vault General -->
     <string name="media_vault_toolbar_title">Vault</string>

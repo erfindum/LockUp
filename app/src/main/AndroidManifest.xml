@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -50,7 +51,7 @@
         <activity android:name=".NotificationLockActivity"
             android:excludeFromRecents="true"
             />
-        <activity android:name=".mediavault.MediaVaultActivity"
+        <activity android:name=".mediavault.MediaVaultAlbumActivity"
             android:excludeFromRecents="true"
             android:theme="@style/DarkActivityTheme"
             />
@@ -66,13 +67,29 @@
         <activity android:name=".mediavault.MediaMoveActivity"
             android:excludeFromRecents="true"
             />
-
-        <service android:name=".AppLockingService" android:persistent="true" android:priority="1000">
+        <activity android:name=".mediavault.MediaVaultContentActivity"
+            android:excludeFromRecents="true"
+            />
+        <activity android:name=".mediavault.VaultImageViewActivity"
+            android:excludeFromRecents="true"
+            />
+        <activity android:name=".FingerPrintActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.smartfoxitsolutions.lockup.FingerPrintActivity"
+            />
+        <activity android:name="com.mopub.common.MoPubBrowser"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            />
+        <activity android:name="com.mopub.mobileads.MraidVideoPlayerActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
+        <service android:name=".services.AppLockingService" android:persistent="true" android:priority="1000">
         </service>
-        <service android:name=".GetPaletteColorService"/>
-        <service android:name=".mediavault.MediaMoveService" android:persistent="true"
+        <service android:name=".services.GetPaletteColorService"/>
+        <service android:name=".mediavault.services.MediaMoveService" android:persistent="true"
             android:process=":com.smartfoxitsolutions.lockup.mediaProcess"/>
-        <service android:name=".NotificationLockService"
+        <service android:name=".services.NotificationLockService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService"/>
@@ -80,14 +97,14 @@
         </service>
 
 
-        <receiver android:name=".AppLockServiceRestartReceiver"
+        <receiver android:name=".receivers.AppLockServiceRestartReceiver"
             android:enabled="true"
             >
             <intent-filter>
                 <action android:name="com.smartfoxitsolutions.lockup.RESTART_LOCK_SERVICE"/>
             </intent-filter>
         </receiver>
-        <receiver android:name=".AppLockServiceBootReceiver"
+        <receiver android:name=".receivers.AppLockServiceBootReceiver"
             android:exported="true" android:priority="2147483647">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
@@ -95,7 +112,7 @@
                 <action android:name="android.intent.action.USER_PRESENT"/>
             </intent-filter>
         </receiver>
-        <receiver android:name=".AppLockRemovePackageReceiver"
+        <receiver android:name=".receivers.AppLockRemovePackageReceiver"
             android:priority="2147483647">
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_REMOVED"/>

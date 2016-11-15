@@ -17,6 +17,7 @@
     <dimen name="fiveDpDimension">5dp</dimen>
     <dimen name="fifteenDpDimension">15dp</dimen>
     <dimen name="fiftyDpDimension">50dp</dimen>
+    <dimen name="fiftySixDpDimension">56dp</dimen>
     <dimen name="fourDpDimension">4dp</dimen>
     <dimen name="fourtyDpDimension">40dp</dimen>
     <dimen name="fourtyEightDpDimension">48dp</dimen>
@@ -30,12 +31,12 @@
     <dimen name="sixtyFiveDpDimension">65dp</dimen>
     <dimen name="sixteenDpDimension">16dp</dimen>
     <dimen name="seventyFiveDpDimension">75dp</dimen>
-
     <dimen name="tenDpDimension">10dp</dimen>
     <dimen name="threeDpDimension">3dp</dimen>
     <dimen name="thirtyDpDimension">30dp</dimen>
     <dimen name="thirtyTwoDpDimension">32dp</dimen>
     <dimen name="thirtyFiveDpDimension">35dp</dimen>
+    <dimen name="twelveDpDimesntion">12dp</dimen>
     <dimen name="twentyEightDpDImension">28dp</dimen>
     <dimen name="twentyFiveDpDimension">25dp</dimen>
     <dimen name="twentyDpDimension">20dp</dimen>

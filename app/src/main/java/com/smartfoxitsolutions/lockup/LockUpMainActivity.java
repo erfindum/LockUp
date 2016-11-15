@@ -7,10 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
 import android.view.View;
 
-import com.google.android.gms.ads.NativeExpressAdView;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
-import com.smartfoxitsolutions.lockup.mediavault.MediaMoveService;
-import com.smartfoxitsolutions.lockup.mediavault.MediaVaultActivity;
+import com.smartfoxitsolutions.lockup.mediavault.services.MediaMoveService;
+import com.smartfoxitsolutions.lockup.mediavault.MediaVaultAlbumActivity;
 
 /**
  * Created by RAAJA on 16-09-2016.
@@ -19,7 +18,6 @@ public class LockUpMainActivity extends AppCompatActivity {
 
     AppCompatImageButton appLockActivityButton, vaultActivityButton
                             ,adEarningButton,settingsButton,faqButton;
-    NativeExpressAdView adView;
 
 
     @Override
@@ -31,7 +29,6 @@ public class LockUpMainActivity extends AppCompatActivity {
         adEarningButton = (AppCompatImageButton) findViewById(R.id.main_screen_activity_user_profile_image);
         faqButton = (AppCompatImageButton) findViewById(R.id.main_screen_activity_faq_image);
         settingsButton= (AppCompatImageButton) findViewById(R.id.main_screen_activity_settings_image);
-        adView = (NativeExpressAdView) findViewById(R.id.main_screen_activity_adView);
         setImageButtonListeners();
     }
 
@@ -48,7 +45,7 @@ public class LockUpMainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(!MediaMoveService.SERVICE_STARTED) {
-                    startActivity(new Intent(getBaseContext(), MediaVaultActivity.class));
+                    startActivity(new Intent(getBaseContext(), MediaVaultAlbumActivity.class));
                 }else{
                     startActivity(new Intent(getBaseContext(),MediaMoveActivity.class));
                 }

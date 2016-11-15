@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.TextView;
 
+import com.smartfoxitsolutions.lockup.views.PatternLockView;
+
 /**
  * Created by RAAJA on 7-09-2016.
  *

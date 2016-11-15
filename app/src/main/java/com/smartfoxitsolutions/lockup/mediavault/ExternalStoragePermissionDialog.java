@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
-
 import com.smartfoxitsolutions.lockup.R;
 
 /**
@@ -25,15 +24,15 @@ public class ExternalStoragePermissionDialog extends DialogFragment {
                 .setPositiveButton(R.string.media_vault_permission_grant, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        MediaVaultActivity mediaVaultActivity = (MediaVaultActivity) getActivity();
-                        mediaVaultActivity.requestReadPermission();
+                        MediaVaultAlbumActivity mediaVaultAlbumActivity = (MediaVaultAlbumActivity) getActivity();
+                        mediaVaultAlbumActivity.requestReadPermission();
                     }
                 })
                 .setNegativeButton(R.string.media_vault_permission_deny, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        MediaVaultActivity mediaVaultActivity = (MediaVaultActivity) getActivity();
-                        mediaVaultActivity.permissionDenied();
+                        MediaVaultAlbumActivity mediaVaultAlbumActivity = (MediaVaultAlbumActivity) getActivity();
+                        mediaVaultAlbumActivity.permissionDenied();
                     }
                 });
         return dialogBuilder.create();

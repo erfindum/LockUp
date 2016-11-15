@@ -6,16 +6,13 @@
         android:layout_height="match_parent"
         android:id="@+id/pattern_lock_activity_parent_view"
         >
-
-       <com.google.android.gms.ads.NativeExpressAdView
-           android:id="@+id/pattern_lock_activity_ad_view"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           app:adSize ="280x170"
-           app:adUnitId="@string/pin_lock_activity_ad_unit_id"
-           android:layout_above="@+id/pattern_lock_activity_app_icon_view"
-           android:layout_centerHorizontal="true"
-           />
+        <include
+            android:id="@+id/pattern_lock_activity_native_image_view"
+            android:layout_width="270dp"
+            android:layout_height="190dp"
+            android:layout_centerHorizontal="true"
+            layout="@layout/native_ad_sample"
+            />
 
            <ImageView
                android:id="@+id/pattern_lock_activity_app_icon_view"
@@ -27,7 +24,7 @@
                android:layout_marginTop="@dimen/tenDpDimension"
                />
 
-           <com.smartfoxitsolutions.lockup.PatternLockView
+           <com.smartfoxitsolutions.lockup.views.PatternLockView
                android:id="@+id/pattern_lock_activity_pattern_view"
                android:layout_width="match_parent"
                android:layout_height="wrap_content"

@@ -96,7 +96,6 @@ public class VaultDbCursorLoader extends AsyncTaskLoader<Cursor> {
 
     @Override
     public void deliverResult(Cursor data) {
-        super.deliverResult(data);
         if(isReset()){
             data.close();
             return;

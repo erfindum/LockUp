@@ -40,16 +40,6 @@
         android:visibility="invisible"
         />
 
-    <com.google.android.gms.ads.NativeExpressAdView
-        android:id="@+id/pattern_lock_activity_finger_ad_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:adSize ="280x170"
-        app:adUnitId="@string/pin_lock_activity_ad_unit_id"
-        android:layout_above="@+id/pattern_lock_activity_finger_app_icon_view"
-        android:layout_centerHorizontal="true"
-        />
-
     <ImageView
         android:id="@+id/pattern_lock_activity_finger_app_icon_view"
         android:layout_width="40dp"
@@ -60,7 +50,7 @@
         android:layout_marginTop="@dimen/tenDpDimension"
         />
 
-    <com.smartfoxitsolutions.lockup.PatternLockView
+    <com.smartfoxitsolutions.lockup.views.PatternLockView
         android:id="@+id/pattern_lock_activity_finger_pattern_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

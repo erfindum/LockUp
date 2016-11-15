@@ -24,6 +24,15 @@ import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.smartfoxitsolutions.lockup.dialogs.GrantUsageAccessDialog;
+import com.smartfoxitsolutions.lockup.dialogs.NotificationPermissionDialog;
+import com.smartfoxitsolutions.lockup.dialogs.OverlayPermissionDialog;
+import com.smartfoxitsolutions.lockup.dialogs.RecommendedAppsAlertDialog;
+import com.smartfoxitsolutions.lockup.dialogs.StartAppLockDialog;
+import com.smartfoxitsolutions.lockup.services.AppLockingService;
+import com.smartfoxitsolutions.lockup.services.GetPaletteColorService;
+import com.smartfoxitsolutions.lockup.services.NotificationLockService;
+
 import java.lang.ref.WeakReference;
 
 /**
@@ -44,7 +53,7 @@ public class AppLockActivity extends AppCompatActivity {
     private static final String START_APP_LOG_DIALOG_TAG = "start_app_lock_dialog";
     public static final String APP_LOCK_FIRST_START_PREFERENCE_KEY = "app_lock_first_start";
 
-    static boolean shouldStartAppLock;
+    public static boolean shouldStartAppLock;
 
     Toolbar appLockActivityToolbar;
     RecyclerView appLockRecyclerView;
@@ -163,7 +172,7 @@ public class AppLockActivity extends AppCompatActivity {
         startDialog.show(fragmentTransaction,START_APP_LOG_DIALOG_TAG);
     }
 
-    void unlockRecommendedApp(AppLockRecyclerViewItem item,int position){
+    public void unlockRecommendedApp(AppLockRecyclerViewItem item,int position){
         if(appLockRecyclerAdapter!=null){
             appLockRecyclerAdapter.removeRecommendedApp(item,position);
         }
@@ -214,16 +223,16 @@ public class AppLockActivity extends AppCompatActivity {
     }
 
     @TargetApi(21)
-    void startUsageAccessSettingActivity(){
+    public void startUsageAccessSettingActivity(){
         startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS),USAGE_ACCESS_PERMISSION_REQUEST);
     }
 
     @TargetApi(23)
-    void requestOverlayPermission(){
+    public void requestOverlayPermission(){
         startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION),OVERLAY_PERMISSION_REQUEST);
     }
 
-    void requestNotificationPermission(){
+    public void requestNotificationPermission(){
         startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS),NOTIFICATION_PERMISSION_REQUEST);
     }
 

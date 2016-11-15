@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import com.smartfoxitsolutions.lockup.services.AppLockingService;
+
 /**
  * Created by RAAJA on 18-08-2016.
  */
@@ -24,8 +26,8 @@ public class LockUpSettingsActivity extends AppCompatActivity {
     private SharedPreferences prefs;
     private boolean isfingerPrintActive, shouldAppLockStart;
 
-    static String FINGER_PRINT_LOCK_SELECTION_PREFERENCE_KEY = "fingerPrintLockSelected";
-    static String APP_LOCKING_SERVICE_START_PREFERENCE_KEY = "fingerPrintLockSelected";
+    public static String FINGER_PRINT_LOCK_SELECTION_PREFERENCE_KEY = "fingerPrintLockSelected";
+    public static String APP_LOCKING_SERVICE_START_PREFERENCE_KEY = "appLockStopSettingsKey";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

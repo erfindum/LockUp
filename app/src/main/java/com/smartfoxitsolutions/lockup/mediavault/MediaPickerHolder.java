@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
-import android.widget.ImageView;
 
 import com.smartfoxitsolutions.lockup.R;
 
@@ -43,7 +42,7 @@ public class MediaPickerHolder extends RecyclerView.ViewHolder {
         setClickListener();
     }
 
-    ImageView getThumbnailView(){
+    AppCompatImageView getThumbnailView(){
         return this.thumbnailView;
     }
 
@@ -65,12 +64,12 @@ public class MediaPickerHolder extends RecyclerView.ViewHolder {
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                  sendImageSelected();
+                  sendMediaSelected();
             }
         });
     }
 
-    private void sendImageSelected(){
+    private void sendMediaSelected(){
         listener.onMediaPicked(getLayoutPosition(),this);
     }
 

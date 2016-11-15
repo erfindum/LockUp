@@ -1,24 +1,19 @@
 package com.smartfoxitsolutions.lockup.mediavault;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.mediavault.services.MediaMoveService;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicLong;
@@ -130,7 +125,7 @@ public class MediaMoveActivity extends AppCompatActivity {
     }
 
     void startVaultHome(){
-        startActivity(new Intent(this,MediaVaultActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+        startActivity(new Intent(this,MediaVaultAlbumActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
     }
 
     void startMoveService(){
@@ -178,15 +173,17 @@ public class MediaMoveActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if(msg.what == MediaMoveService.MEDIA_SUCCESSFULLY_MOVED){
-                int arg1 = msg.arg1;
-                int arg2 = msg.arg2;
-                String moveText = "Files " + arg1 + " of " + arg2;
-                activity.get().countText.setText(moveText);
-            }
-            if(msg.what == MediaMoveService.MEDIA_MOVE_COMPLETED){
-                activity.get().countText.setText(R.string.vault_move_activity_move_complete);
-                activity.get().enableDoneButton();
+            if(activity.get().countText!=null) {
+                if (msg.what == MediaMoveService.MEDIA_SUCCESSFULLY_MOVED) {
+                    int arg1 = msg.arg1;
+                    int arg2 = msg.arg2;
+                    String moveText = "Files " + arg1 + " of " + arg2;
+                    activity.get().countText.setText(moveText);
+                }
+                if (msg.what == MediaMoveService.MEDIA_MOVE_COMPLETED) {
+                    activity.get().countText.setText(R.string.vault_move_activity_move_complete);
+                    activity.get().enableDoneButton();
+                }
             }
         }
     }
@@ -203,15 +200,15 @@ public class MediaMoveActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        if(MediaMoveService.SERVICE_STARTED){
+            MediaMoveService.updateMessenger(null);
+        }
         finish();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if(MediaMoveService.SERVICE_STARTED){
-            MediaMoveService.updateMessenger(null);
-        }
     }
 
     @Override

@@ -1,11 +1,9 @@
 package com.smartfoxitsolutions.lockup;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +15,8 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+
+import com.smartfoxitsolutions.lockup.services.NotificationLockService;
 
 /**
  * Created by RAAJA on 20-10-2016.
