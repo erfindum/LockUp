@@ -19,20 +19,19 @@ public class MediaVaultAlbumPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        MediaVaultAlbumFragment frag;
         switch (position){
             case 0:
-                frag = new MediaVaultAlbumFragment();
-                frag.setMediaType(MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA);
-                return frag;
+                MediaVaultAlbumFragment audioFrag = new MediaVaultAlbumFragment();
+                audioFrag.setMediaType(MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA);
+                return audioFrag;
             case 1:
-                frag = new MediaVaultAlbumFragment();
-                frag.setMediaType(MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA);
-                return frag;
+                MediaVaultAlbumFragment imageFrag = new MediaVaultAlbumFragment();
+                imageFrag.setMediaType(MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA);
+                return imageFrag;
             case 2:
-                frag = new MediaVaultAlbumFragment();
-                frag.setMediaType(MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA);
-                return frag;
+                MediaVaultAlbumFragment videoFrag = new MediaVaultAlbumFragment();
+                videoFrag.setMediaType(MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA);
+                return videoFrag;
         }
 
         return null;

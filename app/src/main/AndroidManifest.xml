@@ -73,6 +73,12 @@
         <activity android:name=".mediavault.VaultImageViewActivity"
             android:excludeFromRecents="true"
             />
+        <activity android:name=".mediavault.VaultVideoPlayerActivity"
+            android:excludeFromRecents="true"
+            />
+        <activity android:name=".mediavault.VaultAudioPlayerActivity"
+            android:excludeFromRecents="true"
+            />
         <activity android:name=".FingerPrintActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:excludeFromRecents="true"
@@ -88,7 +94,8 @@
         </service>
         <service android:name=".services.GetPaletteColorService"/>
         <service android:name=".mediavault.services.MediaMoveService" android:persistent="true"
-            android:process=":com.smartfoxitsolutions.lockup.mediaProcess"/>
+           android:process=":com.smartfoxitsolutions.lockup.mediaProcess" />
+        <service android:name=".mediavault.services.AudioPlayerService"/>
         <service android:name=".services.NotificationLockService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>

@@ -44,6 +44,7 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     void swapCursor(Cursor cursor){
         if(cursor!=null){
             this.mediaCursor = cursor;
+            activity.loadingComplete();
             notifyDataSetChanged();
         }
         else{
@@ -160,21 +161,21 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
                 Glide.with(activity).load(uri).placeholder(getPlaceHolderImages())
                         .error(getPlaceHolderImages()).override(getItemSize(), getItemSize())
-                        .centerCrop().diskCacheStrategy(DiskCacheStrategy.ALL).crossFade()
+                        .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                         .into(mediaHolder.getThumbnailView());
                 break;
 
             case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
                 Glide.with(activity).load(uri).placeholder(getPlaceHolderImages())
                         .error(getPlaceHolderImages()).override(getItemSize(), getItemSize())
-                        .centerCrop().diskCacheStrategy(DiskCacheStrategy.RESULT).crossFade()
+                        .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                         .into(mediaHolder.getThumbnailView());
                 break;
 
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
                 Glide.with(activity).load(new AlbumArtModel(uri,activity)).placeholder(getPlaceHolderImages())
                         .error(getPlaceHolderImages()).override(getItemSize(), getItemSize())
-                        .centerCrop().diskCacheStrategy(DiskCacheStrategy.RESULT).crossFade()
+                        .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                         .into(mediaHolder.getThumbnailView());
         }
         if(!selectedAll) {
@@ -191,6 +192,13 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public int getItemCount() {
         return mediaCursor.getCount();
+    }
+
+    @Override
+    public void onViewRecycled(RecyclerView.ViewHolder holder) {
+        super.onViewRecycled(holder);
+        MediaPickerHolder currentHolder = (MediaPickerHolder) holder;
+        Glide.clear(currentHolder.getThumbnailView());
     }
 
     private void selectDeselectAllImages(){

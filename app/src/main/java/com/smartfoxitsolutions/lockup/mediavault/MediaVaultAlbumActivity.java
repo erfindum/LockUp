@@ -47,7 +47,6 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
     private String[] tabTitle;
     ExecutorService vaultExecutor;
     SetVaultTask vaultTask;
-    boolean isFirstRun;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,8 +56,6 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         tabLayout = (TabLayout) findViewById(R.id.media_vault_activity_tab_layout);
         viewPager = (ViewPager) findViewById(R.id.media_vault_activity_viewPager);
         mediaVaultFab = (FloatingActionButton) findViewById(R.id.media_vault_activity_fab);
-        isFirstRun = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE)
-                        .getBoolean(MEDIA_VAULT_FIRST_LOAD_PREF_KEY,true);
         setSupportActionBar(toolBar);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -69,9 +66,8 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         }else{
             displayVaultScreens();
         }
-        if(isFirstRun){
             setupVaultFolder();
-        }
+
     }
 
     void setFabListener(){
@@ -142,6 +138,7 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
 
     void displayVaultScreens(){
         viewPager.setAdapter(new MediaVaultAlbumPagerAdapter(getSupportFragmentManager(),tabTitle));
+        viewPager.setOffscreenPageLimit(2);
         viewPager.setCurrentItem(1);
         tabLayout.setupWithViewPager(viewPager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -190,17 +187,11 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
                         }
                     }
                 }
-                firstLoadComplete();
             }
 
         }
     }
 
-    void firstLoadComplete(){
-        SharedPreferences.Editor edit = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE).edit();
-        edit.putBoolean(MEDIA_VAULT_FIRST_LOAD_PREF_KEY,false);
-        edit.apply();
-    }
     void permissionDenied(){
         finish();
     }

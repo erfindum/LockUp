@@ -117,7 +117,7 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
                 return MediaStore.Video.Media.BUCKET_ID;
 
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                return MediaStore.Audio.Media.ALBUM_KEY;
+                return MediaStore.Audio.Media.ALBUM_ID;
         }
         return null;
     }
@@ -214,7 +214,7 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
                 case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
                     Glide.with(mediaAlbumActivity).load(uri).placeholder(getPlaceHolderImages())
                             .error(getPlaceHolderImages()).override(viewWidth, viewHeight)
-                            .centerCrop().diskCacheStrategy(DiskCacheStrategy.ALL).crossFade()
+                            .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                             .into(imageHolder.getThumbnailView());
                     break;
 
@@ -222,7 +222,8 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
                     Glide.with(mediaAlbumActivity).load(uri).asBitmap()
                             .placeholder(getPlaceHolderImages())
                             .error(getPlaceHolderImages()).override(viewWidth, viewHeight)
-                            .centerCrop().diskCacheStrategy(DiskCacheStrategy.RESULT)
+                            .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
                             .format(DecodeFormat.PREFER_ARGB_8888)
                             .into(imageHolder.getThumbnailView());
                     break;
@@ -231,12 +232,19 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
                     Glide.with(mediaAlbumActivity).load(new AlbumArtModel(uri,mediaAlbumActivity.getBaseContext()))
                             .placeholder(getPlaceHolderImages())
                             .error(getPlaceHolderImages()).override(viewWidth, viewHeight)
-                            .centerCrop().diskCacheStrategy(DiskCacheStrategy.RESULT).crossFade()
+                            .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                             .into(imageHolder.getThumbnailView());
             }
 
         imageHolder.getInfoText().setText(bucketNameList.get(position));
         imageHolder.getCountText().setText("(" + bucketCountList.get(position)+")");
+    }
+
+    @Override
+    public void onViewRecycled(RecyclerView.ViewHolder holder) {
+        super.onViewRecycled(holder);
+        MediaAlbumPickerHolder mediaHolder= (MediaAlbumPickerHolder) holder;
+        Glide.clear(mediaHolder.getThumbnailView());
     }
 
     @Override

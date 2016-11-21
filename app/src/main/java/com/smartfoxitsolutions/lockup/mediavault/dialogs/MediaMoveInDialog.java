@@ -1,4 +1,4 @@
-package com.smartfoxitsolutions.lockup.dialogs;
+package com.smartfoxitsolutions.lockup.mediavault.dialogs;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -12,13 +12,14 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
 
-import com.smartfoxitsolutions.lockup.AppLockActivity;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.mediavault.MediaPickerActivity;
 
 /**
- * Created by RAAJA on 11-09-2016.
+ * Created by RAAJA on 18-11-2016.
  */
-public class GrantUsageAccessDialog extends DialogFragment {
+
+public class MediaMoveInDialog extends DialogFragment {
 
     AppCompatImageView dialogIcon;
     TextView infoText,infoTextSub, positiveButton, negativeButton;
@@ -26,6 +27,7 @@ public class GrantUsageAccessDialog extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
         View parent = inflater.inflate(R.layout.lockup_default_dialog,container,false);
         dialogIcon = (AppCompatImageView) parent.findViewById(R.id.lockup_default_dialog_image);
         infoText = (TextView) parent.findViewById(R.id.lockup_default_dialog_info_text);
@@ -33,10 +35,10 @@ public class GrantUsageAccessDialog extends DialogFragment {
         positiveButton = (TextView) parent.findViewById(R.id.lockup_default_dialog_positive_button);
         negativeButton = (TextView) parent.findViewById(R.id.lockup_default_dialog_negative_button);
         dialogIcon.setImageResource(R.drawable.ic_lock_usage_permission_icon);
-        infoText.setText(R.string.appLock_activity_usage_dialog_message);
-        infoTextSub.setVisibility(View.GONE);
-        positiveButton.setText(R.string.appLock_activity_usage_dialog_permit_text);
-        negativeButton.setText(R.string.appLock_activity_usage_dialog_cancel_text);
+        infoText.setText(R.string.vault_move_dialog_move_in_title_text);
+        infoTextSub.setText(R.string.vault_move_dialog_move_in_sub_text);
+        positiveButton.setText(R.string.vault_move_dialog_move_in_positive);
+        negativeButton.setText(R.string.vault_move_dialog_move_negative);
         getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         return parent;
@@ -45,20 +47,21 @@ public class GrantUsageAccessDialog extends DialogFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        final AppLockActivity activity = (AppLockActivity) getActivity();
+        final MediaPickerActivity activity = (MediaPickerActivity) getActivity();
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.startUsageAccessSettingActivity();
+                activity.moveMediaFiles();
+                dismiss();
             }
         });
 
         negativeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    dismiss();
+                activity.moveMediaCancelled();
+                dismiss();
             }
         });
     }
-
 }

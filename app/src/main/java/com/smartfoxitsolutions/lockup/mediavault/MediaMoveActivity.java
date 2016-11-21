@@ -27,9 +27,7 @@ public class MediaMoveActivity extends AppCompatActivity {
     public static final String VAULT_TYPE_KEY = "vault_move_type";
     public static final int MOVE_TYPE_INTO_VAULT = 5;
     public static final int MOVE_TYPE_OUT_OF_VAULT = 6;
-
-    public static final String SERVICE_START_TYPE_KEY = "service_start_type";
-    public static final int SERVICE_START_TYPE_NEW = 10;
+    public static final int MOVE_TYPE_DELETE_FROM_VAULT = 7;
 
     public static final String MEDIA_FILE_NAMES_KEY = "media_file_names";
 
@@ -39,14 +37,14 @@ public class MediaMoveActivity extends AppCompatActivity {
 
     public static final String MEDIA_MOVE_MESSENGER_KEY = "media_move_messenger";
 
-
     TextView countText;
     Button doneButton;
-    TextView moveText;
-    int moveType, mediaSelectionType, serviceStartType, selectedFileCount;
+    TextView moveText, moveInfoText;
+    int moveType, mediaSelectionType, selectedFileCount;
     String albumBucketId, mediaType;
     String[] selectedMediaId,fileNames;
     AtomicLong timestamp;
+    boolean isOperationComplete;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,26 +53,25 @@ public class MediaMoveActivity extends AppCompatActivity {
         countText = (TextView) findViewById(R.id.media_move_activity_move_count);
         doneButton = (Button) findViewById(R.id.media_move_activity_button_done);
         moveText = (TextView) findViewById(R.id.media_move_activity_move_text);
+        moveInfoText = (TextView) findViewById(R.id.media_move_activity_move_info);
         timestamp = new AtomicLong(System.currentTimeMillis());
         Intent intent = getIntent();
-        serviceStartType = intent.getIntExtra(SERVICE_START_TYPE_KEY,0);
-        disableDoneButton();
-        setMoveText();
-        if(serviceStartType==SERVICE_START_TYPE_NEW){
-            moveType = intent.getIntExtra(VAULT_TYPE_KEY,2);
-            mediaSelectionType = intent.getIntExtra(MEDIA_SELECTION_TYPE,2);
-            selectedFileCount = intent.getIntExtra(MediaAlbumPickerActivity.SELECTED_FILE_COUNT_KEY,0);
-            albumBucketId = intent.getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY);
-            mediaType = intent.getStringExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY);
-            if(mediaSelectionType==MEDIA_SELECTION_TYPE_UNIQUE) {
-                selectedMediaId = intent.getStringArrayExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY);
-            }
-            boolean isFileNameSet = setFileNames();
-            if(isFileNameSet){
-               startMoveService();
-            }
-        }
+        setMoveBackgroundButton();
         registerListeners();
+        moveType = intent.getIntExtra(VAULT_TYPE_KEY,0);
+        mediaSelectionType = intent.getIntExtra(MEDIA_SELECTION_TYPE,0);
+        albumBucketId = intent.getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY);
+        mediaType = intent.getStringExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY);
+        if(mediaSelectionType==MEDIA_SELECTION_TYPE_UNIQUE) {
+            selectedMediaId = intent.getStringArrayExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY);
+        }
+        if(moveType == MOVE_TYPE_INTO_VAULT) {
+            selectedFileCount = intent.getIntExtra(MediaAlbumPickerActivity.SELECTED_FILE_COUNT_KEY,0);
+            setFileNames();
+        }
+        setMoveText();
+        startMoveService();
+
     }
 
     void setMoveText(){
@@ -84,23 +81,30 @@ public class MediaMoveActivity extends AppCompatActivity {
         if(moveType == MOVE_TYPE_OUT_OF_VAULT){
             moveText.setText(R.string.vault_move_activity_move_out_text);
         }
+        if(moveType == MOVE_TYPE_DELETE_FROM_VAULT){
+            moveText.setText(getResources().getString(R.string.vault_move_activity_delete_files));
+        }
     }
 
-    void disableDoneButton(){
-        doneButton.setEnabled(false);
-        doneButton.setTextColor(Color.parseColor("#1565C0"));
+    void setMoveBackgroundButton(){
+        doneButton.setText(getResources().getString(R.string.vault_move_activity_move_background));
+        isOperationComplete = false;
     }
 
-    void enableDoneButton(){
-        doneButton.setEnabled(true);
-        doneButton.setTextColor(Color.parseColor("#2874F0"));
+    void setDoneButton(){
+        doneButton.setText(getResources().getString(R.string.vault_move_activity_move_button));
     }
 
     void registerListeners(){
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startVaultHome();
+                if(isOperationComplete){
+                    startVaultHome();
+                }else{
+                    moveToBackground();
+                }
+
             }
         });
     }
@@ -128,6 +132,10 @@ public class MediaMoveActivity extends AppCompatActivity {
         startActivity(new Intent(this,MediaVaultAlbumActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
     }
 
+    void moveToBackground(){
+        startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME));
+    }
+
     void startMoveService(){
         Messenger messenger = new Messenger(new MoveHandler(getWeakReference()));
         Intent serviceIntent;
@@ -135,7 +143,6 @@ public class MediaMoveActivity extends AppCompatActivity {
             if(mediaSelectionType == MEDIA_SELECTION_TYPE_ALL) {
                 serviceIntent = new Intent(this, MediaMoveService.class);
                 serviceIntent.putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
-                        .putExtra(SERVICE_START_TYPE_KEY, SERVICE_START_TYPE_NEW)
                         .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY, albumBucketId)
                         .putExtra(MEDIA_FILE_NAMES_KEY,fileNames)
                         .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY, mediaType)
@@ -146,18 +153,56 @@ public class MediaMoveActivity extends AppCompatActivity {
             if(mediaSelectionType == MEDIA_SELECTION_TYPE_UNIQUE){
                 serviceIntent = new Intent(this, MediaMoveService.class);
                 serviceIntent.putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
-                        .putExtra(SERVICE_START_TYPE_KEY, SERVICE_START_TYPE_NEW)
                         .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,albumBucketId)
                         .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,mediaType)
                         .putExtra(MEDIA_FILE_NAMES_KEY,fileNames)
                         .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,selectedMediaId)
                         .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT)
-                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);;
+                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
                 startService(serviceIntent);
             }
         }
         if(moveType == MOVE_TYPE_OUT_OF_VAULT){
-
+            if(mediaSelectionType == MEDIA_SELECTION_TYPE_ALL) {
+                serviceIntent = new Intent(this, MediaMoveService.class);
+                serviceIntent.putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
+                        .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY, albumBucketId)
+                        .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY, mediaType)
+                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY, MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT)
+                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
+                startService(serviceIntent);
+            }
+            if(mediaSelectionType == MEDIA_SELECTION_TYPE_UNIQUE){
+                serviceIntent = new Intent(this, MediaMoveService.class);
+                serviceIntent.putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+                        .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,albumBucketId)
+                        .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,mediaType)
+                        .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,selectedMediaId)
+                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT)
+                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
+                startService(serviceIntent);
+            }
+        }
+        if(moveType == MOVE_TYPE_DELETE_FROM_VAULT){
+            if(mediaSelectionType == MEDIA_SELECTION_TYPE_ALL) {
+                serviceIntent = new Intent(this, MediaMoveService.class);
+                serviceIntent.putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
+                        .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY, albumBucketId)
+                        .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY, mediaType)
+                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY, MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT)
+                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
+                startService(serviceIntent);
+            }
+            if(mediaSelectionType == MEDIA_SELECTION_TYPE_UNIQUE){
+                serviceIntent = new Intent(this, MediaMoveService.class);
+                serviceIntent.putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+                        .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,albumBucketId)
+                        .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,mediaType)
+                        .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,selectedMediaId)
+                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT)
+                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
+                startService(serviceIntent);
+            }
         }
     }
 
@@ -182,7 +227,9 @@ public class MediaMoveActivity extends AppCompatActivity {
                 }
                 if (msg.what == MediaMoveService.MEDIA_MOVE_COMPLETED) {
                     activity.get().countText.setText(R.string.vault_move_activity_move_complete);
-                    activity.get().enableDoneButton();
+                    activity.get().isOperationComplete = true;
+                    activity.get().moveInfoText.setVisibility(View.INVISIBLE);
+                    activity.get().setDoneButton();
                 }
             }
         }
@@ -203,16 +250,11 @@ public class MediaMoveActivity extends AppCompatActivity {
         if(MediaMoveService.SERVICE_STARTED){
             MediaMoveService.updateMessenger(null);
         }
-        finish();
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public void onBackPressed() {
+        super.onBackPressed();
+        moveToBackground();
     }
 }

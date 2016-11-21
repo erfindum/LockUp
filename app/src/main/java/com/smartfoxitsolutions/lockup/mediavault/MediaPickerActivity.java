@@ -9,6 +9,9 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -21,10 +24,13 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.DimensionConverter;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.mediavault.dialogs.MediaMoveInDialog;
 
 import java.util.ArrayList;
 
@@ -34,15 +40,20 @@ import java.util.ArrayList;
 
 public class MediaPickerActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    static final String MOVE_IN_DIALOG_TAG ="media_move_in_dialog";
+
     private RecyclerView mediaPickerRecycler;
     private int noOfColumns, itemSize;
     private String bucketId, mediaType;
     private MediaPickerAdapter mediaPickerAdapter;
+    private ProgressBar loadingProgress;
+    private TextView loadingText;
     private AppCompatImageButton selectAllButton,lockButton;
     private ArrayList<String> selectedMediaId;
     private RelativeLayout bottomBar;
     private ValueAnimator bottomBarAnimator;
     private boolean isLockPressed;
+    private DialogFragment moveInDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,13 +61,15 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
         setContentView(R.layout.vault_media_picker_activity);
         mediaPickerRecycler = (RecyclerView) findViewById(R.id.vault_media_picker_recycler);
         bottomBar = (RelativeLayout) findViewById(R.id.vault_media_picker_bottom_bar);
-        bottomBar.setVisibility(View.GONE);
         selectAllButton = (AppCompatImageButton) findViewById(R.id.vault_media_picker_select_all);
         lockButton = (AppCompatImageButton) findViewById(R.id.vault_media_picker_lock);
+        loadingText = (TextView) findViewById(R.id.vault_media_picker_activity_load_text);
+        loadingProgress = (ProgressBar) findViewById(R.id.vault_media_picker_activity_progress);
         Toolbar toolbar = (Toolbar) findViewById(R.id.vault_media_picker_activity_tool_bar);
         setBucketId(getIntent().getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY));
         String albumName = getIntent().getStringExtra(MediaAlbumPickerActivity.ALBUM_NAME_KEY);
         setMediaType(getIntent().getStringExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY));
+        setLoadingText();
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -99,6 +112,19 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
         return this.mediaType;
     }
 
+    void setLoadingText(){
+        switch (getMediaType()){
+            case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
+                loadingText.setText(R.string.vault_album_picker_load_image_text);
+                return;
+            case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
+                loadingText.setText(R.string.vault_album_picker_load_video_text);
+                return;
+            case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
+                loadingText.setText(R.string.vault_album_picker_load_audio_text);
+        }
+    }
+
     void setListeners(){
         selectAllButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,38 +138,17 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
         lockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!mediaPickerAdapter.getSelectedAll() && !mediaPickerAdapter.getSelectedMediaIds().isEmpty()){
+                if(!mediaPickerAdapter.getSelectedAll() && mediaPickerAdapter.getSelectedMediaIds().isEmpty()){
                     isLockPressed=false;
+                    return;
                 }
                 if (mediaPickerAdapter !=null && !isLockPressed){
                     isLockPressed = true;
-                    if(mediaPickerAdapter.getSelectedAll()){
-                        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
-                                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
-                                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
-                                .putExtra(MediaAlbumPickerActivity.SELECTED_FILE_COUNT_KEY,mediaPickerAdapter.mediaCursor.getCount())
-                                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT)
-                                .putExtra(MediaMoveActivity.SERVICE_START_TYPE_KEY,MediaMoveActivity.SERVICE_START_TYPE_NEW)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                    }
-
-                    if(!mediaPickerAdapter.getSelectedAll() && !mediaPickerAdapter.getSelectedMediaIds().isEmpty()){
-                        selectedMediaId = mediaPickerAdapter.getSelectedMediaIds();
-                        String[] mediaIdArray = new String[selectedMediaId.size()];
-                        String[] mediaId =selectedMediaId.toArray(mediaIdArray);
-                        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
-                                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
-                                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
-                                .putExtra(MediaAlbumPickerActivity.SELECTED_FILE_COUNT_KEY,mediaId.length)
-                                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,mediaId)
-                                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT)
-                                .putExtra(MediaMoveActivity.SERVICE_START_TYPE_KEY,MediaMoveActivity.SERVICE_START_TYPE_NEW)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                    }
+                    moveInDialog = new MediaMoveInDialog();
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.addToBackStack(MOVE_IN_DIALOG_TAG);
+                    moveInDialog.show(fragmentTransaction,MOVE_IN_DIALOG_TAG);
                 }
 
             }
@@ -151,14 +156,41 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
 
     }
 
+    public void moveMediaCancelled(){
+        isLockPressed = false;
+    }
+
+    public void moveMediaFiles(){
+        if(mediaPickerAdapter.getSelectedAll()){
+            startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
+                    .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
+                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
+                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
+                    .putExtra(MediaAlbumPickerActivity.SELECTED_FILE_COUNT_KEY,mediaPickerAdapter.mediaCursor.getCount())
+                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT));
+        }
+
+        if(!mediaPickerAdapter.getSelectedAll() && !mediaPickerAdapter.getSelectedMediaIds().isEmpty()){
+            selectedMediaId = mediaPickerAdapter.getSelectedMediaIds();
+            String[] mediaIdArray = new String[selectedMediaId.size()];
+            String[] mediaId =selectedMediaId.toArray(mediaIdArray);
+            startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
+                    .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
+                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
+                    .putExtra(MediaAlbumPickerActivity.SELECTED_FILE_COUNT_KEY,mediaId.length)
+                    .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,mediaId)
+                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT));
+        }
+    }
+
     void setBottomBarAnimation(){
-        bottomBarAnimator = ValueAnimator.ofInt(0,1);
-        bottomBarAnimator.setDuration(500).setInterpolator(new AccelerateDecelerateInterpolator());
+        bottomBarAnimator = new ValueAnimator();
+        bottomBarAnimator.setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator());
         bottomBarAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
-                bottomBar.setScaleY(0);
                 bottomBar.setVisibility(View.VISIBLE);
             }
 
@@ -172,7 +204,7 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 Log.d("Vault",animation.getAnimatedValue() + "");
-                bottomBar.setScaleY((int) animation.getAnimatedValue());
+                bottomBar.setTop((int) animation.getAnimatedValue());
             }
         });
     }
@@ -185,6 +217,14 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
         setNoOfColumns(displayWidth/ itemSize);
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if(hasFocus){
+            bottomBarAnimator.setIntValues(bottomBar.getBottom(),bottomBar.getTop());
+        }
+    }
+
     void startBottomBarAnimation(){
         bottomBarAnimator.start();
     }
@@ -192,6 +232,7 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if(id == 23){
+            loadingStarted();
           return getMediaCursorLoader(getMediaType());
         }
         return null;
@@ -204,15 +245,31 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
             mediaPickerAdapter.setItemSize(getItemSize());
             mediaPickerRecycler.setAdapter(mediaPickerAdapter);
             mediaPickerRecycler.setLayoutManager(new GridLayoutManager(getBaseContext(),getNoOfColumns(), GridLayoutManager.VERTICAL,false));
+            loadingComplete();
         }else{
                mediaPickerAdapter.swapCursor(data);
-
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mediaPickerAdapter.swapCursor(null);
+    }
+
+    public void loadingStarted() {
+        loadingProgress.setVisibility(View.VISIBLE);
+        loadingText.setVisibility(View.VISIBLE);
+        mediaPickerRecycler.setVisibility(View.INVISIBLE);
+    }
+
+    public void loadingComplete() {
+        try {
+            loadingProgress.setVisibility(View.INVISIBLE);
+            loadingText.setVisibility(View.INVISIBLE);
+            mediaPickerRecycler.setVisibility(View.VISIBLE);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     CursorLoader getMediaCursorLoader(String media){
@@ -236,14 +293,25 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
                             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,videoProjection,videoSelection,videoSelectionArgs,videoOrderBy);
 
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                String[] audioProjection = {MediaStore.Audio.Media._ID,MediaStore.Audio.Media.ALBUM_KEY};
-                String audioSelection = MediaStore.Audio.Media.ALBUM_KEY+"=?";
+                String[] audioProjection = {MediaStore.Audio.Media._ID,MediaStore.Audio.Media.ALBUM_ID};
+                String audioSelection = MediaStore.Audio.Media.ALBUM_ID+"=?";
                 String[] audioSelectionArgs = {getBucketId()};
                 String audioOrderBy = MediaStore.Audio.Media._ID;
                 return   new CursorLoader(getBaseContext(),
                             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,audioProjection,audioSelection,audioSelectionArgs,audioOrderBy);
         }
         return null;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mediaPickerAdapter !=null){
+           if(mediaPickerAdapter.getSelectedAll() || !mediaPickerAdapter.getSelectedMediaIds().isEmpty()){
+               mediaPickerAdapter.selectedAllImages();
+               return;
+           }
+        }
+        super.onBackPressed();
     }
 
     @Override

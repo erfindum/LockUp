@@ -26,9 +26,10 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/vault_media_picker_bottom_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:background="@color/white"
         android:layout_alignParentBottom="true"
+        android:visibility="invisible"
         >
         <View
             android:id="@+id/vault_media_picker_divider"
@@ -46,31 +47,46 @@
 
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/vault_media_picker_lock"
-            android:layout_width="@dimen/twentyFiveDpDimension"
-            android:layout_height="@dimen/twentyFiveDpDimension"
+            android:layout_width="@dimen/fiftyDpDimension"
+            android:layout_height="@dimen/fiftyDpDimension"
             android:layout_toRightOf="@+id/vault_media_picker_icon_separator"
             android:layout_toEndOf="@+id/vault_media_picker_icon_separator"
             android:layout_marginLeft="@dimen/twentyDpDimension"
             android:layout_marginStart="@dimen/twentyDpDimension"
-            android:layout_marginTop="@dimen/tenDpDimension"
-            android:layout_marginBottom="@dimen/tenDpDimension"
-            android:background="@color/white"
+            android:padding="@dimen/sevenDpDimension"
+            android:background="@null"
             app:srcCompat="@drawable/ic_vault_lock_blue"
-            android:scaleType="fitCenter"
+            android:scaleType="fitXY"
             />
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/vault_media_picker_select_all"
-            android:layout_width="@dimen/twentyFiveDpDimension"
-            android:layout_height="@dimen/twentyFiveDpDimension"
+            android:layout_width="@dimen/fiftyDpDimension"
+            android:layout_height="@dimen/fiftyDpDimension"
             android:layout_toLeftOf="@+id/vault_media_picker_icon_separator"
             android:layout_toStartOf="@+id/vault_media_picker_icon_separator"
             android:layout_marginRight="@dimen/twentyDpDimension"
             android:layout_marginEnd="@dimen/twentyDpDimension"
-            android:layout_marginTop="@dimen/tenDpDimension"
-            android:layout_marginBottom="@dimen/tenDpDimension"
-            android:background="@color/white"
+            android:padding="@dimen/fiveDpDimension"
+            android:background="@null"
             app:srcCompat="@drawable/ic_vault_selected_all"
-            android:scaleType="fitCenter"
+            android:scaleType="fitXY"
             />
     </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/vault_media_picker_activity_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        />
+    <TextView
+        android:id="@+id/vault_media_picker_activity_load_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/vault_media_picker_activity_progress"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/twentyDpDimension"
+        android:textColor="#4770B7"
+        android:textSize="@dimen/fifteenSpDimension"
+        />
 </RelativeLayout>

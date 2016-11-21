@@ -14,7 +14,8 @@
 
     <color name="white">#ffffff</color>
     <color name="transparentWhite">#7Dffffff</color>
-    <color name="darkBlue">#1565C0</color>
+    <color name="darkBlue_pin">#1565C0</color>
+    <color name="darkBlue_audio_control">#0D47A1</color>
     <color name="darkGrey">#414144</color>
     <color name="errorRed">#ef5350</color>
     <color name="backgroundGrey">#E8E8E8</color>
@@ -22,5 +23,6 @@
     <color name="placeholderColor">#EBEBEB</color>
     <color name="tickerHiderColor">#37474F</color>
     <color name="tickerHiderMessageColor">#42A5F5</color>
+    <color name="transparentBlack">#80000000</color>
 
 </resources>

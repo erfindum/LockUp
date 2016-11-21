@@ -4,9 +4,13 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +28,8 @@ import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.DimensionConverter;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.mediavault.dialogs.MediaDeleteDialog;
+import com.smartfoxitsolutions.lockup.mediavault.dialogs.MediaMoveOutDialog;
 
 import java.util.ArrayList;
 
@@ -34,18 +40,22 @@ import java.util.ArrayList;
 public class MediaVaultContentActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     static String SELECTED_MEDIA_FILE_KEY = "selected_media_file";
+    static String MOVE_OUT_VAULT_MEDIA_TAG = "move_out_vault_media";
+    static String DELETE_VAULT_MEDIA_TAG = "delete_vault_media";
+
 
     private RecyclerView mediaVaultContentRecycler;
     private int noOfColumns, itemSize;
     private String bucketId, mediaType;
     private MediaVaultContentAdapter mediaContentAdapter;
-    private AppCompatImageButton selectAllButton,unlockButton;
+    private AppCompatImageButton selectAllButton,unlockButton, deleteButton;
     private ProgressBar loadingProgress;
     private TextView loadingText;
     private ArrayList<String> selectedMediaId;
     private RelativeLayout bottomBar;
     private ValueAnimator bottomBarAnimator;
-    private boolean isLockPressed;
+    private boolean isLockPressed,isDeletePressed;
+    private DialogFragment moveOutDialog, deleteFilesDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,6 +66,7 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
         bottomBar.setVisibility(View.GONE);
         selectAllButton = (AppCompatImageButton) findViewById(R.id.vault_media_content_select_all);
         unlockButton = (AppCompatImageButton) findViewById(R.id.vault_media_content_unlock);
+        deleteButton = (AppCompatImageButton) findViewById(R.id.vault_media_content_delete_button);
         loadingProgress = (ProgressBar) findViewById(R.id.vault_media_content_activity_progress);
         loadingText = (TextView) findViewById(R.id.vault_media_content_activity_load_text);
         Toolbar toolbar = (Toolbar) findViewById(R.id.vault_media_content_activity_tool_bar);
@@ -131,43 +142,97 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
         unlockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            /*    if(!mediaContentAdapter.getSelectedAll() && !mediaContentAdapter.getSelectedMediaIds().isEmpty()){
-                    isLockPressed=false;
+              if(!mediaContentAdapter.getSelectedAll() && mediaContentAdapter.getSelectedMediaIds().isEmpty()){
+                  isLockPressed=false;
+                  return;
                 }
                 if (mediaContentAdapter !=null && !isLockPressed){
                     isLockPressed = true;
-                    if(mediaContentAdapter.getSelectedAll()){
-                        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
-                                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
-                                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
-                                .putExtra(MediaAlbumPickerActivity.SELECTED_FILE_COUNT_KEY,mediaContentAdapter.mediaCursor.getCount())
-                                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT)
-                                .putExtra(MediaMoveActivity.SERVICE_START_TYPE_KEY,MediaMoveActivity.SERVICE_START_TYPE_NEW)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                    }
-
-                    if(!mediaContentAdapter.getSelectedAll() && !mediaContentAdapter.getSelectedMediaIds().isEmpty()){
-                        selectedMediaId = mediaContentAdapter.getSelectedMediaIds();
-                        String[] mediaIdArray = new String[selectedMediaId.size()];
-                        String[] mediaId =selectedMediaId.toArray(mediaIdArray);
-                        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
-                                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
-                                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
-                                .putExtra(MediaAlbumPickerActivity.SELECTED_FILE_COUNT_KEY,mediaId.length)
-                                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,mediaId)
-                                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT)
-                                .putExtra(MediaMoveActivity.SERVICE_START_TYPE_KEY,MediaMoveActivity.SERVICE_START_TYPE_NEW)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                    }
-                } */
+                    moveOutDialog = new MediaMoveOutDialog();
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.addToBackStack(MOVE_OUT_VAULT_MEDIA_TAG);
+                    moveOutDialog.show(fragmentTransaction,MOVE_OUT_VAULT_MEDIA_TAG);
+                }
 
             }
         });
 
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!mediaContentAdapter.getSelectedAll() && mediaContentAdapter.getSelectedMediaIds().isEmpty()){
+                    isDeletePressed=false;
+                    return;
+                }
+                if (mediaContentAdapter !=null && !isDeletePressed){
+                    Log.d("VaultMedia",mediaContentAdapter.getSelectedMediaIds().size() + " selected size");
+                    for(String id : mediaContentAdapter.getSelectedMediaIds()){
+                        Log.d("VaultMedia",id + " selected file");
+                    }
+                    isDeletePressed = true;
+                    deleteFilesDialog = new MediaDeleteDialog();
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.addToBackStack(DELETE_VAULT_MEDIA_TAG);
+                    deleteFilesDialog.show(fragmentTransaction,DELETE_VAULT_MEDIA_TAG);
+                }
+
+            }
+        });
+
+    }
+
+    public void moveMediaFiles(){
+        if(mediaContentAdapter.getSelectedAll()){
+            startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
+                    .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
+                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
+                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
+                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
+        }
+
+        if(!mediaContentAdapter.getSelectedAll() && !mediaContentAdapter.getSelectedMediaIds().isEmpty()){
+            selectedMediaId = mediaContentAdapter.getSelectedMediaIds();
+            String[] mediaIdArray = new String[selectedMediaId.size()];
+            String[] mediaId =selectedMediaId.toArray(mediaIdArray);
+            startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
+                    .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
+                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
+                    .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,mediaId)
+                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
+        }
+    }
+
+    public void deleteMediaFiles(){
+        if(mediaContentAdapter.getSelectedAll()){
+            startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
+                    .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
+                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
+                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
+                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
+        }
+
+        if(!mediaContentAdapter.getSelectedAll() && !mediaContentAdapter.getSelectedMediaIds().isEmpty()){
+            selectedMediaId = mediaContentAdapter.getSelectedMediaIds();
+            String[] mediaIdArray = new String[selectedMediaId.size()];
+            String[] mediaId =selectedMediaId.toArray(mediaIdArray);
+            startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
+                    .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
+                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
+                    .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,mediaId)
+                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
+        }
+    }
+
+    public void moveMediaCancelled(){
+        isLockPressed = false;
+    }
+
+    public void deleteMediaCancelled(){
+        isDeletePressed = false;
     }
 
     void setBottomBarAnimation(){
@@ -277,13 +342,12 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         if(MediaVaultContentAdapter.isLongPressed && mediaContentAdapter !=null){
             mediaContentAdapter.clearAllSelections();
             MediaVaultContentAdapter.isLongPressed = false;
             return;
         }
-        finish();
+        super.onBackPressed();
     }
 
     @Override

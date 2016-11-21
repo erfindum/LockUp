@@ -144,7 +144,7 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
 
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
                 String[] audioProjection = {MediaStore.Audio.Media._ID, MediaStore.Audio.Media.ALBUM
-                        ,MediaStore.Audio.Media.ALBUM_KEY};
+                        ,MediaStore.Audio.Media.ALBUM_ID};
                 String audioOrderBy = MediaStore.Audio.Media.ALBUM + " COLLATE NOCASE";
                     return   new CursorLoader(getBaseContext(),
                             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,audioProjection,null,null,audioOrderBy);
@@ -174,23 +174,15 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
     @Override
     protected void onPause() {
         super.onPause();
-        if(mediaAdapter !=null){
-            mediaAdapter.closeResources();
-            mediaAdapter = null;
-        }
-        finish();
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        startActivity(new Intent(getBaseContext(),MediaVaultAlbumActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-        overridePendingTransition(0,0);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if(mediaAdapter !=null){
+            mediaAdapter.closeResources();
+            mediaAdapter = null;
+        }
     }
 
 }

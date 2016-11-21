@@ -46,7 +46,7 @@ public class VaultImageViewPagerAdapter extends PagerAdapter {
         }
         LayoutInflater inflater = LayoutInflater.from(activity);
         View parent = inflater.inflate(R.layout.vault_image_view_activity_item,container,false);
-        SubsamplingScaleImageView imageView = (SubsamplingScaleImageView) parent.findViewById(R.id.vault_image_view_recycler_image_view);
+        SubsamplingScaleImageView imageView = (SubsamplingScaleImageView) parent.findViewById(R.id.vault_image_view_pager_image_view);
         imageView.setOrientation(SubsamplingScaleImageView.ORIENTATION_USE_EXIF);
         if(viewState==null) {
             imageView.setImage(
@@ -68,6 +68,7 @@ public class VaultImageViewPagerAdapter extends PagerAdapter {
         activity.viewState = imageView.getState();
         viewState = null;
         container.addView(parent);
+        activity.originalFileName.setText(originalNameList.get(position));
         Log.d("VaultImage","Called instantiate View "+ position);
         return parent;
     }
@@ -83,6 +84,7 @@ public class VaultImageViewPagerAdapter extends PagerAdapter {
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
+        container.removeView((View) object);
         File oldFile = new File(vaultPathList.get(position) + "." + fileExtensionList.get(position));
         if (oldFile.exists()) {
             oldFile.renameTo(new File(vaultPathList.get(position)));

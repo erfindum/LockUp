@@ -74,7 +74,7 @@ public class MediaPickerHolder extends RecyclerView.ViewHolder {
     }
 
     private void setItemAnimation(){
-        itemAnimator = ValueAnimator.ofInt(0,1);
+        itemAnimator = ValueAnimator.ofFloat(0,1);
         itemAnimator.setDuration(200).setInterpolator(new OvershootInterpolator());
         itemAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -95,10 +95,11 @@ public class MediaPickerHolder extends RecyclerView.ViewHolder {
         itemAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                int animationValue = (int) animation.getAnimatedValue();
+                float animationValue = (float) animation.getAnimatedValue();
                 ticker.setScaleX(animationValue);
                 ticker.setScaleY(animationValue);
             }
         });
     }
+
 }

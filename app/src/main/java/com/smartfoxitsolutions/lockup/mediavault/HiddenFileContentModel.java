@@ -9,6 +9,7 @@ import java.util.LinkedList;
 public class HiddenFileContentModel {
 
 private static LinkedList<String> mediaVaultFile, mediaOriginalName, mediaExtension;
+private static boolean isAudioAlbumChanged;
 
 static {
     mediaVaultFile = new LinkedList<>();
@@ -28,17 +29,26 @@ static {
         return mediaExtension;
     }
 
+    public static boolean getIsAudioAlbumChanged(){
+        return isAudioAlbumChanged;
+    }
+
     public static void setMediaVaultFile(LinkedList<String> mediaVaultFileName){
-        mediaVaultFile = mediaVaultFileName;
+        mediaVaultFile.clear();
+        mediaVaultFile.addAll(mediaVaultFileName);
     }
 
     public static void setMediaOriginalName(LinkedList<String> mediaOriginalFileName){
-        mediaOriginalName = mediaOriginalFileName;
+        mediaOriginalName.clear();
+        mediaOriginalName.addAll(mediaOriginalFileName);
     }
 
     public static void setMediaExtension(LinkedList<String> mediaExtensionName){
-        mediaExtension = mediaExtensionName;
+        mediaExtension.clear();
+        mediaExtension.addAll(mediaExtensionName);
     }
 
-
+    public static void setIsAudioAlbumChanged(boolean isAudiChanged){
+        isAudioAlbumChanged = isAudiChanged;
+    }
 }

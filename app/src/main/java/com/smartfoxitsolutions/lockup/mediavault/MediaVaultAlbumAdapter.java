@@ -190,7 +190,7 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             thumbnailFile.renameTo(renamedFile);
             Glide.with(mediaAlbumFragment.getContext()).load(renamedFile).placeholder(getPlaceHolderImages())
                     .error(getPlaceHolderImages()).override(viewWidth, viewHeight)
-                    .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).crossFade()
+                    .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                     .into(mediaHolder.getThumbnailView());
         }
         mediaHolder.getInfoText().setText(bucketNameList.get(position));

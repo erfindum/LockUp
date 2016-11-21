@@ -26,9 +26,10 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/vault_media_content_bottom_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/fiftyDpDimension"
         android:background="@color/white"
         android:layout_alignParentBottom="true"
+
         >
         <View
             android:id="@+id/vault_media_content_divider"
@@ -37,42 +38,44 @@
             android:background="@color/dividerColor"
             android:layout_alignParentTop="true"
             />
-        <View
-            android:id="@+id/vault_media_content_icon_separator"
-            android:layout_width="1dp"
-            android:layout_height="1dp"
-            android:layout_centerHorizontal="true"
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/vault_media_content_delete_button"
+            android:layout_width="@dimen/fiftyDpDimension"
+            android:layout_height="@dimen/fiftyDpDimension"
+            android:layout_toLeftOf="@+id/vault_media_content_select_all"
+            android:layout_toStartOf="@+id/vault_media_content_select_all"
+            android:layout_marginRight="@dimen/twentyDpDimension"
+            android:layout_marginEnd="@dimen/twentyDpDimension"
+            android:padding="@dimen/sevenDpDimension"
+            android:background="@null"
+            app:srcCompat="@drawable/ic_delete_button_blue"
+            android:scaleType="fitXY"
             />
 
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/vault_media_content_unlock"
-            android:layout_width="@dimen/twentyFiveDpDimension"
-            android:layout_height="@dimen/twentyFiveDpDimension"
-            android:layout_toRightOf="@+id/vault_media_content_icon_separator"
-            android:layout_toEndOf="@+id/vault_media_content_icon_separator"
+            android:layout_width="@dimen/fiftyDpDimension"
+            android:layout_height="@dimen/fiftyDpDimension"
+            android:layout_toRightOf="@+id/vault_media_content_select_all"
+            android:layout_toEndOf="@+id/vault_media_content_select_all"
             android:layout_marginLeft="@dimen/twentyDpDimension"
             android:layout_marginStart="@dimen/twentyDpDimension"
-            android:layout_marginTop="@dimen/tenDpDimension"
-            android:layout_marginBottom="@dimen/tenDpDimension"
-            android:background="@color/white"
+            android:padding="@dimen/sevenDpDimension"
+            android:background="@null"
             app:srcCompat="@drawable/ic_vault_unlock_blue"
-            android:scaleType="fitCenter"
+            android:scaleType="fitXY"
             />
 
 
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/vault_media_content_select_all"
-            android:layout_width="@dimen/twentyFiveDpDimension"
-            android:layout_height="@dimen/twentyFiveDpDimension"
-            android:layout_toLeftOf="@+id/vault_media_content_icon_separator"
-            android:layout_toStartOf="@+id/vault_media_content_icon_separator"
-            android:layout_marginRight="@dimen/twentyDpDimension"
-            android:layout_marginEnd="@dimen/twentyDpDimension"
-            android:layout_marginTop="@dimen/tenDpDimension"
-            android:layout_marginBottom="@dimen/tenDpDimension"
-            android:background="@color/white"
+            android:layout_width="@dimen/fiftyDpDimension"
+            android:layout_height="@dimen/fiftyDpDimension"
+            android:layout_centerHorizontal="true"
+            android:padding="@dimen/fiveDpDimension"
+            android:background="@null"
             app:srcCompat="@drawable/ic_vault_selected_all"
-            android:scaleType="fitCenter"
+            android:scaleType="fitXY"
             />
     </RelativeLayout>
 
@@ -89,7 +92,7 @@
         android:layout_below="@id/vault_media_content_activity_progress"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/twentyDpDimension"
-        android:textColor="@android:color/black"
+        android:textColor="#4770B7"
         android:textSize="@dimen/fifteenSpDimension"
         />
 </RelativeLayout>

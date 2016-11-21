@@ -37,7 +37,7 @@
             android:layout_below="@id/vault_album_picker_activity_progress"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/twentyDpDimension"
-            android:textColor="@android:color/black"
+            android:textColor="#4770B7"
             android:textSize="@dimen/fifteenSpDimension"
             android:text="@string/vault_album_picker_load_text"
             />

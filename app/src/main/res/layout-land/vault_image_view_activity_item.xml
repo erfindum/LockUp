@@ -4,7 +4,7 @@
     android:background="@android:color/black"
     >
     <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-        android:id="@+id/vault_image_view_recycler_image_view"
+        android:id="@+id/vault_image_view_pager_image_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />

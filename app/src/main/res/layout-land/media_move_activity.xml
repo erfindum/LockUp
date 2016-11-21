@@ -56,6 +56,7 @@
         android:textColor="@color/colorMainPrimary"
         android:textSize="@dimen/fifteenSpDimension"
         android:text="@string/vault_move_activity_move_button"
+        android:padding="8dp"
         />
 
 </RelativeLayout>

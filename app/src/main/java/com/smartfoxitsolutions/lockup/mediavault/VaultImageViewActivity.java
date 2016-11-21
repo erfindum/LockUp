@@ -2,12 +2,14 @@ package com.smartfoxitsolutions.lockup.mediavault;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.RelativeLayout;
@@ -20,18 +22,18 @@ import com.smartfoxitsolutions.lockup.R;
  * Created by RAAJA on 14-11-2016.
  */
 
-public class VaultImageViewActivity extends AppCompatActivity {
+public class VaultImageViewActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener{
 
     static final String IMAGE_VIEW_STATE = "image_view_state";
 
     ViewPager imageViewPager;
-    RelativeLayout topBar;
-    RelativeLayout bottomBar;
+    RelativeLayout topBar,bottomBar;
     AppCompatImageButton backButton, deleteButton, unlockButton;
     TextView originalFileName;
     VaultImageViewPagerAdapter imageAdapter;
     ImageViewState viewState;
-    ValueAnimator displayAnimator, hideAnimator;
+    ValueAnimator displayTopBarAnim, hideTopBarAnim, displayBottomBarAnim,hideBottomBarAnim;
+    AnimatorSet displayBarAnimSet,hideBarAnimSet;
     boolean isTopBottomVisible;
 
     @Override
@@ -59,6 +61,7 @@ public class VaultImageViewActivity extends AppCompatActivity {
             imageAdapter = new VaultImageViewPagerAdapter(this);
             imageViewPager.setAdapter(imageAdapter);
             imageViewPager.setCurrentItem(currentItem);
+            imageViewPager.addOnPageChangeListener(this);
         }
     }
 
@@ -73,27 +76,66 @@ public class VaultImageViewActivity extends AppCompatActivity {
     }
 
     void setAnimators(){
-        displayAnimator = ValueAnimator.ofInt(0,1);
-        displayAnimator.setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator());
-        displayAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                super.onAnimationStart(animation);
-                isTopBottomVisible = true;
-            }
-        });
-        displayAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        displayTopBarAnim = new ValueAnimator();
+        displayTopBarAnim.setDuration(150).setInterpolator(new AccelerateDecelerateInterpolator());
+        displayTopBarAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 int value = (int) animation.getAnimatedValue();
                 topBar.setBottom(value);
-                bottomBar.setTop(value);
+                Log.d("VaultImage","Top Bar values " + value);
+
             }
         });
 
-        hideAnimator = ValueAnimator.ofInt(1,0);
-        hideAnimator.setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator());
-        hideAnimator.addListener(new AnimatorListenerAdapter() {
+        hideTopBarAnim = new ValueAnimator();
+        hideTopBarAnim.setDuration(150).setInterpolator(new AccelerateDecelerateInterpolator());
+        hideTopBarAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                int value = (int) animation.getAnimatedValue();
+                topBar.setBottom(value);
+            }
+        });
+
+        displayBottomBarAnim = new ValueAnimator();
+        displayBottomBarAnim.setDuration(150).setInterpolator(new AccelerateDecelerateInterpolator());
+        displayBottomBarAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                int value = (int) animation.getAnimatedValue();
+                bottomBar.setTop(value);
+                Log.d("VaultImage","Bottom Bar values " + value);
+            }
+        });
+
+        hideBottomBarAnim = new ValueAnimator();
+        hideBottomBarAnim.setDuration(150).setInterpolator(new AccelerateDecelerateInterpolator());
+        hideBottomBarAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                int value = (int) animation.getAnimatedValue();
+                bottomBar.setTop(value);
+                Log.d("VaultImage","Bottom Bar Hide values " + value);
+            }
+        });
+
+        displayBarAnimSet = new AnimatorSet();
+        displayBarAnimSet.playTogether(displayTopBarAnim,displayBottomBarAnim);
+        displayBarAnimSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+                isTopBottomVisible = true;
+                topBar.setVisibility(View.VISIBLE);
+                bottomBar.setVisibility(View.VISIBLE);
+            }
+        });
+
+
+        hideBarAnimSet = new AnimatorSet();
+        hideBarAnimSet.playTogether(hideTopBarAnim,hideBottomBarAnim);
+        hideBarAnimSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
@@ -102,23 +144,55 @@ public class VaultImageViewActivity extends AppCompatActivity {
                 bottomBar.setVisibility(View.INVISIBLE);
             }
         });
-        hideAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                int value = (int) animation.getAnimatedValue();
-                topBar.setBottom(value);
-                bottomBar.setTop(value);
-            }
-        });
+
     }
     void showTopBottomBars(){
-        topBar.setVisibility(View.VISIBLE);
-        bottomBar.setVisibility(View.VISIBLE);
-        displayAnimator.start();
+        if(hideBarAnimSet.isStarted()){
+            hideBarAnimSet.removeAllListeners();
+            hideBarAnimSet.cancel();
+        }
+        displayBarAnimSet.start();
     }
 
     void hideTopBottomBars(){
-        hideAnimator.start();
+       if(displayBarAnimSet.isStarted()){
+            displayBarAnimSet.removeAllListeners();
+            displayBarAnimSet.cancel();
+        }
+        hideBarAnimSet.start();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if(hasFocus){
+            int topBarBottomPosition = topBar.getBottom();
+            int topBarTopPosition = topBar.getTop();
+            int bottomBarBottomPosition = bottomBar.getBottom();
+            int bottomBarTopPosition = bottomBar.getTop();
+            displayTopBarAnim.setIntValues(topBarTopPosition,topBarBottomPosition);
+            hideTopBarAnim.setIntValues(topBarBottomPosition,topBarTopPosition);
+            displayBottomBarAnim.setIntValues(bottomBarBottomPosition,bottomBarTopPosition);
+            hideBottomBarAnim.setIntValues(bottomBarTopPosition,bottomBarBottomPosition);
+        }
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        if(isTopBottomVisible){
+            isTopBottomVisible = false;
+            hideTopBottomBars();
+        }
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 
     @Override
@@ -143,6 +217,10 @@ public class VaultImageViewActivity extends AppCompatActivity {
         super.onDestroy();
         if(imageAdapter!=null){
             imageAdapter.closeAdapter();
+            imageViewPager.removeOnPageChangeListener(this);
         }
+        HiddenFileContentModel.getMediaOriginalName().clear();
+        HiddenFileContentModel.getMediaVaultFile().clear();
+        HiddenFileContentModel.getMediaExtension().clear();
     }
 }

@@ -1,6 +1,7 @@
 package com.smartfoxitsolutions.lockup.services;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,12 +10,14 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -26,6 +29,7 @@ import com.google.gson.reflect.TypeToken;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.FingerPrintActivity;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 import com.smartfoxitsolutions.lockup.receivers.AppLockServiceRestartReceiver;
 import com.smartfoxitsolutions.lockup.views.LockPatternView;
 import com.smartfoxitsolutions.lockup.views.LockPatternViewFinger;
@@ -141,7 +145,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        startForeground(596804950,new Notification());
+        startForeground(596804950,getNotification());
         isAppLockRunning = true;
         appLockMode = getBaseContext().getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE)
                 .getInt(AppLockModel.APP_LOCK_LOCKMODE,54);
@@ -180,6 +184,18 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
             Log.d("AppLock",color.getValue() + " ");
         }
         return START_STICKY;
+    }
+
+   Notification getNotification(){
+       NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(getBaseContext());
+            notifBuilder.setContentTitle("AppLock Running");
+        notifBuilder.setContentText("Touch to disable AppLock")
+                .setOngoing(true)
+                .setAutoCancel(false)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setOnlyAlertOnce(true)
+                .setColor(Color.parseColor("#ffffff"));
+        return notifBuilder.build();
     }
 
     @Override

@@ -32,10 +32,9 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
     private MediaVaultAlbumAdapter mediaAdapter;
     private TextView loadingText;
     private ProgressBar loadingProgress;
-    private AppCompatImageView imageView;
+    private AppCompatImageView emptyPlaceholder;
     int viewWidth, viewHeight,noOfColumns;
     private String mediaType;
-    private Toolbar toolbar;
     private MediaVaultAlbumActivity activity;
 
 
@@ -47,7 +46,7 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
         mediaVaultBuckRecycler = (RecyclerView) parent.findViewById(R.id.vault_fragment_recycler);
         loadingProgress = (ProgressBar)parent.findViewById(R.id.vault_fragment_progress);
         loadingText = (TextView)parent.findViewById(R.id.vault_fragment_load_text);
-        imageView = (AppCompatImageView) parent.findViewById(R.id.vault_fragment_placeholder);
+        emptyPlaceholder = (AppCompatImageView) parent.findViewById(R.id.vault_fragment_placeholder);
         if(savedInstanceState!=null){
             setMediaType(savedInstanceState.getString(MediaAlbumPickerActivity.MEDIA_TYPE_KEY));
         }
@@ -60,7 +59,20 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
         super.onActivityCreated(savedInstanceState);
         activity = (MediaVaultAlbumActivity) getActivity();
         measureItemView();
-        activity.getSupportLoaderManager().initLoader(getLoaderID(),null,this);
+        initLoader(getMediaType());
+    }
+
+    void initLoader(String mediaType){
+        switch(mediaType){
+            case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
+                activity.getSupportLoaderManager().initLoader(38,null,this);
+                return;
+            case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
+                activity.getSupportLoaderManager().initLoader(39,null,this);
+                return;
+            case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
+                activity.getSupportLoaderManager().initLoader(40,null,this);
+        }
     }
 
     void setMediaType(String media){
@@ -69,18 +81,6 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
 
     String getMediaType(){
         return this.mediaType;
-    }
-
-    int getLoaderID(){
-        switch (getMediaType()){
-            case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
-                return 38;
-            case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
-                return 39;
-            case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                return 40;
-        }
-        return 0;
     }
 
     void measureItemView(){
@@ -134,7 +134,13 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
             mediaVaultBuckRecycler.setAdapter(mediaAdapter);
             mediaVaultBuckRecycler.setLayoutManager(new GridLayoutManager(activity.getBaseContext()
                                 ,noOfColumns,GridLayoutManager.VERTICAL,false));
+            if(data.getCount()<=0){
+                loadEmptyPlaceholder();
+            }
         }else{
+            if(data.getCount()<=0){
+                loadEmptyPlaceholder();
+            }
             mediaAdapter.swapCursor(data);
         }
     }
@@ -160,9 +166,33 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
         return null;
     }
 
+    void loadEmptyPlaceholder(){
+        switch(getMediaType()){
+            case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
+                emptyPlaceholder.setImageResource(R.drawable.ic_vault_image_placeholder_empty);
+                loadingText.setVisibility(View.VISIBLE);
+                loadingText.setText(getResources().getString(R.string.vault_album_picker_load_failed_image_text));
+
+
+            case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
+                emptyPlaceholder.setImageResource(R.drawable.ic_vault_video_placeholder_empty);
+                loadingText.setVisibility(View.VISIBLE);
+                loadingText.setText(getResources().getString(R.string.vault_album_picker_load_failed_video_text));
+
+
+            case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
+                emptyPlaceholder.setImageResource(R.drawable.ic_vault_audio_placeholder_empty);
+                loadingText.setVisibility(View.VISIBLE);
+                loadingText.setText(getResources().getString(R.string.vault_album_picker_load_failed_audio_text));
+
+        }
+
+    }
+
     public void loadingStarted() {
         loadingProgress.setVisibility(View.VISIBLE);
         loadingText.setVisibility(View.VISIBLE);
+        loadingText.setText(getResources().getString(R.string.vault_album_picker_load_text));
         mediaVaultBuckRecycler.setVisibility(View.INVISIBLE);
     }
 
