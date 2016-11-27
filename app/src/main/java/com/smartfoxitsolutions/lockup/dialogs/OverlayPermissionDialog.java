@@ -14,7 +14,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
 
-import com.smartfoxitsolutions.lockup.AppLockActivity;
+
+import com.smartfoxitsolutions.lockup.LockUpMainActivity;
 import com.smartfoxitsolutions.lockup.R;
 
 /**
@@ -47,7 +48,7 @@ public class OverlayPermissionDialog extends DialogFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        final AppLockActivity activity = (AppLockActivity) getActivity();
+        final LockUpMainActivity activity = (LockUpMainActivity) getActivity();
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

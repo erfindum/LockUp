@@ -92,9 +92,10 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <service android:name=".services.AppLockingService" android:persistent="true" android:priority="1000">
         </service>
+        <service android:name=".services.AppLockForegroundService"/>
         <service android:name=".services.GetPaletteColorService"/>
-        <service android:name=".mediavault.services.MediaMoveService" android:persistent="true"
-           android:process=":com.smartfoxitsolutions.lockup.mediaProcess" />
+        <service android:name=".mediavault.services.MediaMoveService" android:persistent="true"/>
+         <!--  android:process=":com.smartfoxitsolutions.lockup.mediaProcess" /> -->
         <service android:name=".mediavault.services.AudioPlayerService"/>
         <service android:name=".services.NotificationLockService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">

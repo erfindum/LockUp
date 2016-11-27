@@ -27,4 +27,7 @@
 -keep public class * implements com.bumptech.glide.module.GlideModule
 
 -keep class com.mopub.mobileads.** {*;}
+-dontwarn com.facebook.ads.internal.**
+
+
 

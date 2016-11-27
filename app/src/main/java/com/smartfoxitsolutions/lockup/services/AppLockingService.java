@@ -1,6 +1,7 @@
 package com.smartfoxitsolutions.lockup.services;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -183,18 +184,19 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         for(Map.Entry<String,Integer> color : checkedAppColorMap.entrySet() ){
             Log.d("AppLock",color.getValue() + " ");
         }
+        startService(new Intent(getBaseContext(),AppLockForegroundService.class));
         return START_STICKY;
     }
 
    Notification getNotification(){
        NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(getBaseContext());
-            notifBuilder.setContentTitle("AppLock Running");
-        notifBuilder.setContentText("Touch to disable AppLock")
-                .setOngoing(true)
-                .setAutoCancel(false)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setOnlyAlertOnce(true)
-                .setColor(Color.parseColor("#ffffff"));
+       notifBuilder.setContentTitle("AppLock Running");
+       notifBuilder.setContentText("Touch to disable AppLock");
+       notifBuilder .setOngoing(true)
+               .setAutoCancel(true)
+               .setSmallIcon(R.mipmap.ic_launcher)
+               .setOnlyAlertOnce(true)
+               .setColor(Color.parseColor("#ffffff"));
         return notifBuilder.build();
     }
 
@@ -233,7 +235,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                    if (Settings.canDrawOverlays(getBaseContext())) {
                                        FingerPrintActivity.updateService(this);
-                                       lockPinViewFinger = new LockPinViewFinger(getBaseContext(), this,isFingerPrintLockActive );
+                                       lockPinViewFinger = new LockPinViewFinger(getBaseContext(), this,this,isFingerPrintLockActive );
                                        lockPinViewFinger.setPackageName(checkedAppPackage[0]);
                                        lockPinViewFinger.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
                                        windowManager.addView(lockPinViewFinger, params);

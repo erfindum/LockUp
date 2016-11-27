@@ -12,13 +12,16 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Vibrator;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.mopub.nativeads.MoPubNative;
 import com.mopub.nativeads.MoPubStaticNativeAdRenderer;
@@ -26,6 +29,7 @@ import com.mopub.nativeads.NativeAd;
 import com.mopub.nativeads.NativeErrorCode;
 import com.mopub.nativeads.ViewBinder;
 import com.smartfoxitsolutions.lockup.AppLockModel;
+import com.smartfoxitsolutions.lockup.DimensionConverter;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
 
@@ -55,6 +59,7 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         LayoutInflater.from(context).inflate(R.layout.pattern_lock_activity,this,true);
         patternViewParent = (RelativeLayout) findViewById(R.id.pattern_lock_activity_parent_view);
         patternViewVibrator= (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        initAds();
         initializeLockView();
     }
 
@@ -71,7 +76,7 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
 
     public void setWindowBackground(int colorVibrant, int displayHeight){
         GradientDrawable drawable = new GradientDrawable();
-        int[] colors = {Color.parseColor("#263238"),colorVibrant};
+        int[] colors = {colorVibrant,Color.parseColor("#263238")};
         drawable.setColors(colors);
         float radius = Math.round(displayHeight*.95);
         drawable.setGradientRadius(radius);
@@ -90,7 +95,6 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         patternPassCode = prefs.getLong(AppLockModel.USER_SET_LOCK_PASS_CODE,0);
         registerListeners();
         setPatternAnimator();
-        initAds();
     }
 
     void setAppIcon(String packageName){
@@ -135,16 +139,34 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         MoPubNative.MoPubNativeNetworkListener moPubNativeListener = new MoPubNative.MoPubNativeNetworkListener() {
             @Override
             public void onNativeLoad(NativeAd nativeAd) {
-                View adView =  nativeAd.createAdView(context,patternViewParent);
-                nativeAd.renderAdView(adView);
-                nativeAd.prepare(adView);
-                Log.d("LockUpMopub","Called native load");
+                Log.d("LockUpMopub","Called onNativeLoad Finger");
+                if(context!=null) {
+                    View adViewRender = nativeAd.createAdView(context, null);
+                    addRenderedAd(adViewRender);
+                    nativeAd.renderAdView(adViewRender);
+                    nativeAd.prepare(adViewRender);
+                    nativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
+                        @Override
+                        public void onImpression(View view) {
+                            Toast.makeText(context,"Impression Will be tracked",Toast.LENGTH_LONG)
+                                    .show();
+                        }
+
+                        @Override
+                        public void onClick(View view) {
+                            Toast.makeText(context,"Native ad clicked",Toast.LENGTH_LONG)
+                                    .show();
+                            postPatternCompleted(packageName);
+                        }
+                    });
+                }
             }
 
             @Override
             public void onNativeFail(NativeErrorCode errorCode) {
-                Log.d("LockUpMopub",errorCode +" error");
+                Log.d("LockUpMopub",errorCode+ " errorcode");
             }
+
         };
 
         MoPubNative mMoPubNative = new MoPubNative(context
@@ -152,17 +174,25 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
 
         ViewBinder viewBinder = new ViewBinder.Builder(R.layout.native_ad_sample)
                 .mainImageId(R.id.native_ad_main_image)
-                .iconImageId(R.id.native_ad_icon_image)
                 .titleId(R.id.native_ad_title)
                 .textId(R.id.native_ad_text)
+                .callToActionId(R.id.native_ad_call_to_action)
                 .build();
 
         MoPubStaticNativeAdRenderer adRenderer = new MoPubStaticNativeAdRenderer(viewBinder);
-        mMoPubNative.registerAdRenderer(adRenderer);
 
+        mMoPubNative.registerAdRenderer(adRenderer);
         mMoPubNative.makeRequest();
     }
 
+    void addRenderedAd(View adView){
+        int marginTop = Math.round(DimensionConverter.convertDpToPixel(20f,context.getApplicationContext()));
+        FrameLayout.LayoutParams parms = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT
+                , ViewGroup.LayoutParams.WRAP_CONTENT);
+        parms.topMargin = marginTop;
+        parms.gravity = Gravity.TOP|Gravity.CENTER;
+        this.addView(adView,parms);
+    }
 
     @Override
     public void onPatternNodeSelected(int selectedPatternNode) {

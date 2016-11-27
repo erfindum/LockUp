@@ -61,7 +61,8 @@ public class MediaMoveService extends Service implements Handler.Callback{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-            moveType = intent.getIntExtra(MediaMoveActivity.VAULT_TYPE_KEY,2);
+        startForeground(25648751,getForegroundNotification());
+        moveType = intent.getIntExtra(MediaMoveActivity.VAULT_TYPE_KEY,2);
             setMoveInfo(intent);
             startMediaMoveTask();
         SERVICE_STARTED = true;
@@ -88,7 +89,7 @@ public class MediaMoveService extends Service implements Handler.Callback{
 
     void startMediaMoveTask(){
         if(moveType == MediaMoveActivity.MOVE_TYPE_INTO_VAULT) {
-            startForeground(3542124, getNotifBuilder().build());
+            notifManager.notify(3542124, getNotifBuilder().build());
             moveInTask = new MediaMoveInTask(getBaseContext(), this);
             moveInTask.setTaskRequirements(mediaSelectionType, albumBucketId, mediaType, selectedMediaId, fileNames);
             mediaMoveService.submit(moveInTask);
@@ -96,14 +97,14 @@ public class MediaMoveService extends Service implements Handler.Callback{
 
         }
         if(moveType == MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT){
-            startForeground(6584923, getNotifBuilder().build());
+            notifManager.notify(6584923, getNotifBuilder().build());
             moveOutTask = new MediaMoveOutTask(getBaseContext(), this);
             moveOutTask.setTaskRequirements(mediaSelectionType,albumBucketId,mediaType,selectedMediaId);
             mediaMoveService.submit(moveOutTask);
 
         }
         if(moveType == MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT){
-            startForeground(5421359, getNotifBuilder().build());
+            notifManager.notify(5421359, getNotifBuilder().build());
             mediaDeleteTask = new MediaDeleteTask(getBaseContext(), this);
             mediaDeleteTask.setTaskRequirements(mediaSelectionType,albumBucketId,mediaType,selectedMediaId);
             mediaMoveService.submit(mediaDeleteTask);

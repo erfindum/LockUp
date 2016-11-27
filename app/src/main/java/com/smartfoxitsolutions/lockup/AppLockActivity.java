@@ -29,6 +29,7 @@ import com.smartfoxitsolutions.lockup.dialogs.NotificationPermissionDialog;
 import com.smartfoxitsolutions.lockup.dialogs.OverlayPermissionDialog;
 import com.smartfoxitsolutions.lockup.dialogs.RecommendedAppsAlertDialog;
 import com.smartfoxitsolutions.lockup.dialogs.StartAppLockDialog;
+import com.smartfoxitsolutions.lockup.services.AppLockForegroundService;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
 import com.smartfoxitsolutions.lockup.services.GetPaletteColorService;
 import com.smartfoxitsolutions.lockup.services.NotificationLockService;
@@ -41,13 +42,7 @@ import java.lang.ref.WeakReference;
 public class AppLockActivity extends AppCompatActivity {
     private static final String TAG = "AppLockActivity ";
 
-    public static final int USAGE_ACCESS_PERMISSION_REQUEST=3;
-    public static final int USAGE_ACCESS_PERMISSION_REQUEST_LINEAR=4;
-    public static final int OVERLAY_PERMISSION_REQUEST = 5;
-    public static final int OVERLAY_PERMISSION_REQUEST_LINEAR = 7;
     public static final int NOTIFICATION_PERMISSION_REQUEST = 6;
-    private static final String USAGE_ACCESS_DIALOG_TAG = "usageAccessPermissionDialog";
-    private static final String OVERLAY_ACCESS_DIALOG_TAG = "overlay_permission_dialog";
     private static final String NOTIFICATION_ACCESS_DIALOG_TAG = "notification_permission_dialog";
     private static final String RECOMMENDED_APPS_ALERT_DIALOG_TAG = "recommended_apps_alert_dialog";
     private static final String START_APP_LOG_DIALOG_TAG = "start_app_lock_dialog";
@@ -60,7 +55,7 @@ public class AppLockActivity extends AppCompatActivity {
     AppLockRecyclerAdapter appLockRecyclerAdapter;
     private AppLockModel appLockModel;
     private static boolean usagePermissionGranted,overlayPermissionGranted;
-    private DialogFragment notificationPermissionDialog,overlayPermissionDialog,usageDialog;
+    private DialogFragment notificationPermissionDialog;
     private SharedPreferences prefs;
     private NotificationMapUpdateReceiver notifUpdateReceiver;
 
@@ -76,10 +71,6 @@ public class AppLockActivity extends AppCompatActivity {
         appLockActivityToolbar.setTitleTextColor(Color.WHITE);
         if(getSupportActionBar()!=null) {
             getSupportActionBar().setTitle(R.string.appLock_activity_title);
-        }
-        checkAndSetUsagePermissions(USAGE_ACCESS_PERMISSION_REQUEST);
-        if(Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
-            overlayPermissionGranted = true;
         }
         calculateMarginHeader();
         displayRecyclerView();
@@ -97,24 +88,6 @@ public class AppLockActivity extends AppCompatActivity {
 
     }
 
-    private void setUsageAccessPermissionGranted(boolean granted){
-        usagePermissionGranted = granted;
-    }
-
-    private void setOverlayPermissionGranted(boolean isGranted){
-        overlayPermissionGranted = isGranted;
-    }
-
-    static boolean getUsageAccessPermissionGranted(){
-        return usagePermissionGranted;
-    }
-
-    static boolean getOverlayPermissionGranted(){
-        return overlayPermissionGranted;
-    }
-
-
-
     private void displayRecyclerView(){
         appLockRecyclerAdapter = new AppLockRecyclerAdapter(appLockModel, this);
         appLockRecyclerView.setAdapter(appLockRecyclerAdapter);
@@ -128,21 +101,6 @@ public class AppLockActivity extends AppCompatActivity {
 
     }
 
-    void startUsagePermissionDialog(){
-        usageDialog = new GrantUsageAccessDialog();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction =fragmentManager.beginTransaction();
-        fragmentTransaction.addToBackStack(USAGE_ACCESS_DIALOG_TAG);
-        usageDialog.show(fragmentTransaction,USAGE_ACCESS_DIALOG_TAG);
-    }
-
-    void startOverlayPermissionDialog(){
-        overlayPermissionDialog = new OverlayPermissionDialog();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction =fragmentManager.beginTransaction();
-        fragmentTransaction.addToBackStack(OVERLAY_ACCESS_DIALOG_TAG);
-        overlayPermissionDialog.show(fragmentTransaction,OVERLAY_ACCESS_DIALOG_TAG);
-    }
 
     void startNotificationPermissionDialog(){
         if(!NotificationLockService.isNotificationServiceConnected) {
@@ -178,60 +136,6 @@ public class AppLockActivity extends AppCompatActivity {
         }
     }
 
-    @TargetApi(21)
-    void checkAndSetUsagePermissions(int requestFlag){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            AppOpsManager opsManager = (AppOpsManager) getApplicationContext().getSystemService(APP_OPS_SERVICE);
-            if (opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), getPackageName()) == AppOpsManager.MODE_ALLOWED) {
-                setUsageAccessPermissionGranted(true);
-                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
-                    if(requestFlag == USAGE_ACCESS_PERMISSION_REQUEST){
-                    checkAndSetOverlayPermission(OVERLAY_PERMISSION_REQUEST);
-                    }
-                    if(requestFlag == USAGE_ACCESS_PERMISSION_REQUEST_LINEAR){
-                        checkAndSetOverlayPermission(OVERLAY_PERMISSION_REQUEST_LINEAR);
-                    }
-                }
-                Log.d(AppLockingService.TAG,String.valueOf(opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), getPackageName())
-                        == AppOpsManager.MODE_ALLOWED));
-            } else {
-                setUsageAccessPermissionGranted(false);
-                Log.d(AppLockingService.TAG,"No Usage");
-            }
-        }
-    }
-
-    @TargetApi(23)
-    void checkAndSetOverlayPermission(int requestFlag){
-        AppOpsManager opsManager = (AppOpsManager) getApplicationContext().getSystemService(APP_OPS_SERVICE);
-        if (opsManager.checkOpNoThrow(AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW, Process.myUid(), getPackageName()) == AppOpsManager.MODE_ALLOWED) {
-            setOverlayPermissionGranted(true);
-            Log.d(AppLockingService.TAG,String.valueOf(opsManager.checkOpNoThrow(AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW
-                    , Process.myUid(), getPackageName())
-                    == AppOpsManager.MODE_ALLOWED));
-        }
-        else
-        {
-            if(requestFlag == OVERLAY_PERMISSION_REQUEST) {
-                setOverlayPermissionGranted(false);
-            }
-            if(requestFlag == OVERLAY_PERMISSION_REQUEST_LINEAR){
-                startOverlayPermissionDialog();
-            }
-            Log.d(AppLockingService.TAG,"No Overlay");
-        }
-    }
-
-    @TargetApi(21)
-    public void startUsageAccessSettingActivity(){
-        startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS),USAGE_ACCESS_PERMISSION_REQUEST);
-    }
-
-    @TargetApi(23)
-    public void requestOverlayPermission(){
-        startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION),OVERLAY_PERMISSION_REQUEST);
-    }
-
     public void requestNotificationPermission(){
         startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS),NOTIFICATION_PERMISSION_REQUEST);
     }
@@ -239,14 +143,6 @@ public class AppLockActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == USAGE_ACCESS_PERMISSION_REQUEST){
-            usageDialog.dismiss();
-            checkAndSetUsagePermissions(USAGE_ACCESS_PERMISSION_REQUEST_LINEAR);
-        }else
-        if(requestCode == OVERLAY_PERMISSION_REQUEST){
-            overlayPermissionDialog.dismiss();
-            checkAndSetOverlayPermission(OVERLAY_PERMISSION_REQUEST);
-        }
         if(requestCode == NOTIFICATION_PERMISSION_REQUEST){
             notificationPermissionDialog.dismiss();
             return;
@@ -275,16 +171,9 @@ public class AppLockActivity extends AppCompatActivity {
             appLockRecyclerAdapter.updateAppModel();
             Log.d(TAG,"");
         }
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && getUsageAccessPermissionGranted()){
-            startService(new Intent(this,AppLockingService.class));
-            startService(new Intent(this,GetPaletteColorService.class));
-        }
-        else if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
-            startService(new Intent(this,AppLockingService.class));
-            startService(new Intent(this,GetPaletteColorService.class));
-        }
+        startService(new Intent(this,AppLockingService.class));
+        startService(new Intent(this,GetPaletteColorService.class));
         LocalBroadcastManager.getInstance(this).unregisterReceiver(notifUpdateReceiver);
-
         Log.d(TAG,"Called onStop");
     }
 

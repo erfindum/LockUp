@@ -19,15 +19,18 @@ import android.support.v4.os.CancellationSignal;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mopub.nativeads.MoPubNative;
 import com.mopub.nativeads.MoPubStaticNativeAdRenderer;
@@ -80,6 +83,7 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
         patternViewVibrator= (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         fingerprintManager = FingerprintManagerCompat.from(context);
         cancelSignal = new CancellationSignal();
+        initAds();
         initializeLockView();
     }
 
@@ -100,7 +104,7 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
 
     public void setWindowBackground(int colorVibrant, int displayHeight){
         GradientDrawable drawable = new GradientDrawable();
-        int[] colors = {Color.parseColor("#263238"),colorVibrant};
+        int[] colors = {colorVibrant,Color.parseColor("#263238")};
         drawable.setColors(colors);
         float radius = Math.round(displayHeight*.95);
         drawable.setGradientRadius(radius);
@@ -132,7 +136,7 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
             pinPatternSwitchButton.setVisibility(INVISIBLE);
             switchToPatternView();
         }
-        initAds();
+
     }
 
     void setAppIcon(String packageName){
@@ -220,16 +224,33 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
             @Override
             public void onNativeLoad(NativeAd nativeAd) {
                 Log.d("LockUpMopub","Called onNativeLoad Finger");
-                View adViewRender = nativeAd.createAdView(context,null);
-                addRenderedAd(adViewRender);
-                nativeAd.renderAdView(adViewRender);
-                nativeAd.prepare(adViewRender);
+                if(context!=null) {
+                    View adViewRender = nativeAd.createAdView(context, null);
+                    addRenderedAd(adViewRender);
+                    nativeAd.renderAdView(adViewRender);
+                    nativeAd.prepare(adViewRender);
+                    nativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
+                        @Override
+                        public void onImpression(View view) {
+                            Toast.makeText(context,"Impression Will be tracked",Toast.LENGTH_LONG)
+                                    .show();
+                        }
+
+                        @Override
+                        public void onClick(View view) {
+                            Toast.makeText(context,"Native ad clicked",Toast.LENGTH_LONG)
+                                    .show();
+                            postPatternCompleted(packageName);
+                        }
+                    });
+                }
             }
 
             @Override
             public void onNativeFail(NativeErrorCode errorCode) {
                 Log.d("LockUpMopub",errorCode+ " errorcode");
             }
+
         };
 
         MoPubNative mMoPubNative = new MoPubNative(context
@@ -237,9 +258,9 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
 
         ViewBinder viewBinder = new ViewBinder.Builder(R.layout.native_ad_sample)
                 .mainImageId(R.id.native_ad_main_image)
-                .iconImageId(R.id.native_ad_icon_image)
                 .titleId(R.id.native_ad_title)
                 .textId(R.id.native_ad_text)
+                .callToActionId(R.id.native_ad_call_to_action)
                 .build();
 
         MoPubStaticNativeAdRenderer adRenderer = new MoPubStaticNativeAdRenderer(viewBinder);
@@ -249,12 +270,12 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
     }
 
     void addRenderedAd(View adView){
-        int height  = Math.round(DimensionConverter.convertDpToPixel(270f,context.getApplicationContext()));
-        int width = Math.round(DimensionConverter.convertDpToPixel(210f,context.getApplicationContext()));
-        RelativeLayout.LayoutParams parms = new RelativeLayout.LayoutParams(width,height);
-        parms.addRule(RelativeLayout.ABOVE,R.id.pattern_lock_activity_finger_app_icon_view);
-        parms.addRule(RelativeLayout.CENTER_HORIZONTAL,RelativeLayout.TRUE);
-        patternViewParent.addView(adView,parms);
+        int marginTop = Math.round(DimensionConverter.convertDpToPixel(20f,context.getApplicationContext()));
+        FrameLayout.LayoutParams parms = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT
+                , ViewGroup.LayoutParams.WRAP_CONTENT);
+        parms.topMargin = marginTop;
+        parms.gravity = Gravity.TOP|Gravity.CENTER;
+        this.addView(adView,parms);
     }
 
 

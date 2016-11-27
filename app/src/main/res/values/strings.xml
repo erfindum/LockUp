@@ -173,8 +173,9 @@
     <string name="notification_lock_activity_title">NotificationLock</string>
     <string name="notification_lock_activity_empty_info">Lock apps to hide notifications </string>
 
-    <!-- adMob App ID -->
+    <!-- facebook App ID -->
     <string name="pin_lock_activity_ad_app_id">ca-app-pub-2878097117146801~6210554174</string>
+    <string name="facebook_app_id">361979890807218</string>
 
     <!-- Pin Lock Activity -->
     <string name="pin_lock_activity_ad_unit_id">1c2531f4f8844982a1be67c877dffc92</string>

@@ -423,14 +423,6 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             }
             int listPosition = listItemPosition-getHeaderTwoSize();
             AppCompatImageButton lockButton = itemView.getLockButton();
-            if((Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) && !AppLockActivity.getUsageAccessPermissionGranted()){
-                activity.startUsagePermissionDialog();
-                return;
-            }
-            if((Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) && !AppLockActivity.getOverlayPermissionGranted()){
-                activity.startOverlayPermissionDialog();
-                return;
-            }
             if(checkedAppsMap.containsKey(checkedAppsPackage.get(listPosition))) {
                 changeLockButtonImage(lockButton,false);
                 itemView.getLockButtonAnimator().start();
@@ -454,14 +446,6 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             }
             int listPosition = listItemPosition-getHeaderThreeSize();
             AppCompatImageButton lockButton = itemView.getLockButton();
-            if((Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) && !AppLockActivity.getUsageAccessPermissionGranted()){
-                activity.startUsagePermissionDialog();
-                return;
-            }
-            if((Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) && !AppLockActivity.getOverlayPermissionGranted()){
-                activity.startOverlayPermissionDialog();
-                return;
-            }
             if(installedAppsMap.containsKey(installedAppsPackage.get(listPosition))) {
                 changeLockButtonImage(lockButton,true);
                 itemView.getLockButtonAnimator().start();
@@ -498,14 +482,6 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         recommendedAppLocked.set(position,false);
     }
 
-    void closeAppLockRecyclerAdapter(){
-        for(AppLockRecyclerViewItem holder : itemHolder){
-            holder.setOnAppListItemClickListener(null);
-        }
-        LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(NotificationLockService.UPDATE_LOCK_PACKAGES));
-        activity = null;
-    }
-
     void loadNotificationAppsMap(){
         appLockModel.loadAppPackages(AppLockModel.NOTIFICATION_CHECKED_APPS_PACKAGE);
         notificationAppsMap = appLockModel.getNotificationCheckedAppMap();
@@ -525,5 +501,13 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         appLockModel.loadAppPackages(AppLockModel.CHECKED_APPS_PACKAGE);
         appLockModel.loadAppPackages(AppLockModel.RECOMMENDED_APPS_PACKAGE);
         appLockModel.loadAppPackages(AppLockModel.NOTIFICATION_CHECKED_APPS_PACKAGE);
+    }
+
+    void closeAppLockRecyclerAdapter(){
+        for(AppLockRecyclerViewItem holder : itemHolder){
+            holder.setOnAppListItemClickListener(null);
+        }
+        LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(NotificationLockService.UPDATE_LOCK_PACKAGES));
+        activity = null;
     }
 }
