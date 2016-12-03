@@ -11,13 +11,14 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.MediaAlbumPickerActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
+import com.smartfoxitsolutions.lockup.mediavault.MediaVaultAlbumActivity;
+import com.smartfoxitsolutions.lockup.services.AppLockForegroundService;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,6 +33,7 @@ public class MediaMoveService extends Service implements Handler.Callback{
 
     public static final int MEDIA_SUCCESSFULLY_MOVED = 4;
     public static final int MEDIA_MOVE_COMPLETED = 5;
+    private static String MEDIA_TYPE = MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA;
 
 
     int moveType, mediaSelectionType;
@@ -62,6 +64,9 @@ public class MediaMoveService extends Service implements Handler.Callback{
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         startForeground(25648751,getForegroundNotification());
+        startService(new Intent(getBaseContext(), AppLockForegroundService.class)
+                        .putExtra(AppLockForegroundService.FOREGROUND_SERVICE_TYPE
+                                ,AppLockForegroundService.MEDIA_MOVE_SERVICE));
         moveType = intent.getIntExtra(MediaMoveActivity.VAULT_TYPE_KEY,2);
             setMoveInfo(intent);
             startMediaMoveTask();
@@ -74,7 +79,7 @@ public class MediaMoveService extends Service implements Handler.Callback{
             albumBucketId = intent.getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY);
             mediaType = intent.getStringExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY);
             Messenger messenger = intent.getParcelableExtra(MediaMoveActivity.MEDIA_MOVE_MESSENGER_KEY);
-            updateMessenger(messenger);
+            updateMoveMessenger(messenger);
             if(mediaSelectionType==MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE) {
                 selectedMediaId = intent.getStringArrayExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY);
             }
@@ -83,52 +88,39 @@ public class MediaMoveService extends Service implements Handler.Callback{
             }
     }
 
-    public static void updateMessenger(Messenger messenger){
+    public static void updateMoveMessenger(Messenger messenger){
         activityMessenger = messenger;
     }
 
     void startMediaMoveTask(){
         if(moveType == MediaMoveActivity.MOVE_TYPE_INTO_VAULT) {
-            notifManager.notify(3542124, getNotifBuilder().build());
             moveInTask = new MediaMoveInTask(getBaseContext(), this);
             moveInTask.setTaskRequirements(mediaSelectionType, albumBucketId, mediaType, selectedMediaId, fileNames);
             mediaMoveService.submit(moveInTask);
-
-
         }
         if(moveType == MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT){
-            notifManager.notify(6584923, getNotifBuilder().build());
             moveOutTask = new MediaMoveOutTask(getBaseContext(), this);
             moveOutTask.setTaskRequirements(mediaSelectionType,albumBucketId,mediaType,selectedMediaId);
             mediaMoveService.submit(moveOutTask);
 
         }
         if(moveType == MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT){
-            notifManager.notify(5421359, getNotifBuilder().build());
             mediaDeleteTask = new MediaDeleteTask(getBaseContext(), this);
             mediaDeleteTask.setTaskRequirements(mediaSelectionType,albumBucketId,mediaType,selectedMediaId);
             mediaMoveService.submit(mediaDeleteTask);
-
         }
+        notifManager.notify(3542124, getNotifBuilder().build());
     }
 
     Notification getForegroundNotification(){
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(getBaseContext());
-        notifBuilder.setContentTitle("Media is being moved");
-        if(moveType == MediaMoveActivity.MOVE_TYPE_INTO_VAULT) {
-            notifBuilder.setContentTitle("Moving files into vault");
-        }
-        if(moveType == MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT){
-            notifBuilder.setContentTitle("Moving files out of vault");
-        }
-        if (moveType == MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT){
-            notifBuilder.setContentTitle("Deleting vault media files");
-        }
+        notifBuilder.setContentTitle("LockUp Vault");
+        notifBuilder.setContentText("Moving Media");
                 notifBuilder.setOngoing(true)
                 .setAutoCancel(false)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setOnlyAlertOnce(true)
-                .setColor(Color.parseColor("#ffffff"));
+                .setColor(Color.parseColor("#2874F0"));
         return notifBuilder.build();
     }
 
@@ -139,7 +131,7 @@ public class MediaMoveService extends Service implements Handler.Callback{
             .setProgress(fileNames.length,0,false);
         }
         if(moveType == MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT){
-            notifBuilder.setContentTitle(getResources().getString(R.string.vault_move_activity_move_in_text))
+            notifBuilder.setContentTitle(getResources().getString(R.string.vault_move_activity_move_out_text))
             .setProgress(0,0,false);
         }
         if (moveType == MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT){
@@ -151,11 +143,7 @@ public class MediaMoveService extends Service implements Handler.Callback{
                 .setAutoCancel(false)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setOnlyAlertOnce(true)
-                .setContentIntent(PendingIntent.getActivity(getBaseContext(),4,new Intent(getBaseContext(), MediaMoveActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                        ,0))
-                .setColor(Color.parseColor("#ffffff"));
+                .setColor(Color.parseColor("#2874F0"));
         return notifBuilder;
     }
 
@@ -168,15 +156,8 @@ public class MediaMoveService extends Service implements Handler.Callback{
             String notifString = moveCount + " / "+totalCount;
             notifBuilder.setContentText(notifString);
             notifBuilder.setProgress(totalCount,moveCount,false);
-            if(moveType == MediaMoveActivity.MOVE_TYPE_INTO_VAULT){
-                notifManager.notify(3542124,notifBuilder.build());
-            }
-            if(moveType == MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT){
-                notifManager.notify(6584923,notifBuilder.build());
-            }
-            if(moveType == MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT){
-                notifManager.notify(5421359,notifBuilder.build());
-            }
+            notifManager.notify(3542124,notifBuilder.build());
+
             if(activityMessenger!=null && activityMessenger.getBinder().isBinderAlive()){
                 Message mssg = Message.obtain();
                 mssg.what = msg.what;
@@ -195,6 +176,7 @@ public class MediaMoveService extends Service implements Handler.Callback{
             if(activityMessenger!=null && activityMessenger.getBinder().isBinderAlive()){
                 Message mssg = Message.obtain();
                 mssg.what = msg.what;
+                mssg.obj = mediaType;
                 try {
                     activityMessenger.send(mssg);
                 }
@@ -202,6 +184,31 @@ public class MediaMoveService extends Service implements Handler.Callback{
                     e.printStackTrace();
                 }
             }
+            notifManager.cancel(3542124);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getBaseContext());
+            if(moveType == MediaMoveActivity.MOVE_TYPE_INTO_VAULT) {
+                builder.setContentTitle(getResources().getString(R.string.vault_move_activity_move_complete));
+            }
+            if(moveType == MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT){
+                builder.setContentTitle(getResources().getString(R.string.vault_move_activity_move_complete));
+            }
+            if (moveType == MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT){
+                builder.setContentTitle(getResources().getString(R.string.vault_move_activity_delete_complete));
+            }
+            MEDIA_TYPE = mediaType;
+            builder.setContentText(getResources().getString(R.string.vault_move_activity_vault_redirect_message))
+                    .setOngoing(false)
+                    .setAutoCancel(true)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentIntent(PendingIntent.getActivity(getBaseContext(),29,new Intent(getBaseContext()
+                                    , MediaVaultAlbumActivity.class)
+                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY, MEDIA_TYPE)
+                            ,PendingIntent.FLAG_UPDATE_CURRENT))
+                    .setOnlyAlertOnce(true)
+                    .setColor(Color.parseColor("#2874F0"));
+            notifManager.notify(7549682, builder.build());
             closeService();
             return true;
         }

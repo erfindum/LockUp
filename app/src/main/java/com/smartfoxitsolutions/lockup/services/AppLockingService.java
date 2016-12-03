@@ -147,6 +147,9 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         startForeground(596804950,getNotification());
+        startService(new Intent(getBaseContext(),AppLockForegroundService.class)
+                    .putExtra(AppLockForegroundService.FOREGROUND_SERVICE_TYPE,
+                            AppLockForegroundService.APP_LOCK_SERVICE));
         isAppLockRunning = true;
         appLockMode = getBaseContext().getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE)
                 .getInt(AppLockModel.APP_LOCK_LOCKMODE,54);
@@ -184,7 +187,6 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         for(Map.Entry<String,Integer> color : checkedAppColorMap.entrySet() ){
             Log.d("AppLock",color.getValue() + " ");
         }
-        startService(new Intent(getBaseContext(),AppLockForegroundService.class));
         return START_STICKY;
     }
 

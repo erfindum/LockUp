@@ -58,7 +58,6 @@
         <activity android:name=".mediavault.MediaAlbumPickerActivity"
             android:excludeFromRecents="true"
             android:theme="@style/DarkActivityTheme"
-            android:parentActivityName=".LockUpMainActivity"
             />
         <activity android:name=".mediavault.MediaPickerActivity"
             android:excludeFromRecents="true"
@@ -66,9 +65,25 @@
             />
         <activity android:name=".mediavault.MediaMoveActivity"
             android:excludeFromRecents="true"
-            />
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="video/*"/>
+                <data android:mimeType="audio/*"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="video/*"/>
+                <data android:mimeType="audio/*"/>
+            </intent-filter>
+            </activity>
         <activity android:name=".mediavault.MediaVaultContentActivity"
             android:excludeFromRecents="true"
+            android:theme="@style/DarkActivityTheme"
             />
         <activity android:name=".mediavault.VaultImageViewActivity"
             android:excludeFromRecents="true"
@@ -95,8 +110,7 @@
         <service android:name=".services.AppLockForegroundService"/>
         <service android:name=".services.GetPaletteColorService"/>
         <service android:name=".mediavault.services.MediaMoveService" android:persistent="true"/>
-         <!--  android:process=":com.smartfoxitsolutions.lockup.mediaProcess" /> -->
-        <service android:name=".mediavault.services.AudioPlayerService"/>
+        <service android:name=".mediavault.services.ShareMoveService" android:persistent="true"/>
         <service android:name=".services.NotificationLockService"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>

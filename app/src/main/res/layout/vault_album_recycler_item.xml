@@ -30,10 +30,12 @@
         android:layout_alignLeft="@+id/vault_album_picker_recycler_item_thumbnail"
         android:layout_alignStart="@+id/vault_album_picker_recycler_item_thumbnail"
         android:layout_marginTop="@dimen/twoDpDimension"
-        android:maxLength="12"
         android:maxLines="1"
+        android:ellipsize="end"
         android:textColor="@color/textDarkGrey"
         android:textSize="@dimen/twelveSpDimension"
+        android:layout_marginRight="@dimen/fiveDpDimension"
+        android:layout_marginEnd="@dimen/fiveDpDimension"
         />
 
         <TextView
@@ -44,9 +46,11 @@
             android:layout_alignLeft="@+id/vault_album_picker_recycler_item_thumbnail"
             android:layout_alignStart="@+id/vault_album_picker_recycler_item_thumbnail"
             android:maxLines="1"
-            android:maxLength="6"
+            android:ellipsize="end"
             android:textColor="@color/textDarkGrey"
             android:textSize="@dimen/twelveSpDimension"
+            android:layout_marginRight="@dimen/fiveDpDimension"
+            android:layout_marginEnd="@dimen/fiveDpDimension"
             />
     </RelativeLayout>
 

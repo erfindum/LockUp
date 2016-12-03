@@ -42,17 +42,12 @@ public class MediaMoveOutTask implements Runnable {
     private VaultDbHelper vaultDatabaseHelper;
     private SQLiteDatabase vaultDb;
     private Message mssg;
-    private LinkedList<String> scanner_file_path,scanner_alternate_file_path,vault_media_path, vault_thumbnail_path
-                                ,vault_id_list;
+    private LinkedList<String> scanner_file_path;
 
     MediaMoveOutTask(Context ctxt, Handler.Callback callback){
         this.context = ctxt;
         this.uiHandler = new Handler(Looper.getMainLooper(),callback);
         scanner_file_path = new LinkedList<>();
-        scanner_alternate_file_path = new LinkedList<>();
-        vault_media_path = new LinkedList<>();
-        vault_thumbnail_path = new LinkedList<>();
-        vault_id_list = new LinkedList<>();
     }
 
     void setTaskRequirements(int selectionType, String bucketId, String media,String[] selectedMediaId){
@@ -70,7 +65,7 @@ public class MediaMoveOutTask implements Runnable {
 
         return new String[]{MediaVaultModel.ID_COLUMN_NAME,MediaVaultModel.ORIGINAL_MEDIA_PATH
                         ,MediaVaultModel.VAULT_MEDIA_PATH,MediaVaultModel.VAULT_BUCKET_ID
-                        ,MediaVaultModel.MEDIA_TYPE,MediaVaultModel.THUMBNAIL_PATH};
+                        ,MediaVaultModel.MEDIA_TYPE,MediaVaultModel.THUMBNAIL_PATH,MediaVaultModel.FILE_EXTENSION};
     }
 
     String getMediaCursorType(String media){
@@ -129,6 +124,9 @@ public class MediaMoveOutTask implements Runnable {
                     moveMediaToStorage(mediaCursor);
                 }catch (IOException e){
                     e.printStackTrace();
+                    mssg = uiHandler.obtainMessage();
+                    mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
+                    mssg.sendToTarget();
                 }
             }
         }
@@ -145,6 +143,9 @@ public class MediaMoveOutTask implements Runnable {
                     moveMediaToStorage(mediaCursor);
                 }catch (IOException e){
                     e.printStackTrace();
+                    mssg = uiHandler.obtainMessage();
+                    mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
+                    mssg.sendToTarget();
                 }
 
             }
@@ -159,41 +160,70 @@ public class MediaMoveOutTask implements Runnable {
                 int vaultMediaIndex = cursor.getColumnIndex(MediaVaultModel.VAULT_MEDIA_PATH);
                 int originalFilePathIndex = cursor.getColumnIndex(MediaVaultModel.ORIGINAL_MEDIA_PATH);
                 int thumbnailPathIndex = cursor.getColumnIndex(MediaVaultModel.THUMBNAIL_PATH);
+                int extensionIndex = cursor.getColumnIndex(MediaVaultModel.FILE_EXTENSION);
 
                 String vaultMediaPath = cursor.getString(vaultMediaIndex);
                 String originalFilePath = cursor.getString(originalFilePathIndex);
                 String thumbnailPath = cursor.getString(thumbnailPathIndex);
                 String vaultId = cursor.getString(vaultIdIndex);
+                String extension = cursor.getString(extensionIndex);
 
                 boolean mediaCopied = false;
-                mediaCopied = copyMediaFile(vaultMediaPath, originalFilePath);
+                mediaCopied = copyMediaFile(vaultMediaPath, originalFilePath,extension);
                 Log.d("VaultMedia", String.valueOf(mediaCopied) + " mediacopied");
                 if (mediaCopied) {
-                    scanner_file_path.add(originalFilePath);
-                    vault_media_path.add(vaultMediaPath);
-                    vault_thumbnail_path.add(thumbnailPath);
-                    vault_id_list.add(vaultId);
-                    Log.d("VaultMedia", " DB Data Set");
-                    mssg = uiHandler.obtainMessage();
-                    mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
-                    mssg.arg1 = cursor.getPosition() + 1;
-                    mssg.arg2 = cursor.getCount();
-                    mssg.sendToTarget();
+                    File vaultFile = new File(vaultMediaPath);
+                    boolean deleteVaultFile = false;
+                    if(vaultFile.exists()) {
+                        deleteVaultFile = vaultFile.delete();
+                    }else{
+                        File alternateMediaFile = new File(vaultMediaPath+"."+extension);
+                        if(alternateMediaFile.exists()){
+                            deleteVaultFile = alternateMediaFile.delete();
+                        }
+                    }
+                    boolean deleteThumbnailFile = false;
+                    if(deleteVaultFile) {
+                        File thumbnailFile = new File(thumbnailPath);
+                        if(thumbnailFile.exists()) {
+                            deleteThumbnailFile = thumbnailFile.delete();
+                        }else{
+                            File alternateThumbnailFile = new File(thumbnailPath+".jpg");
+                            if(alternateThumbnailFile.exists()){
+                                deleteThumbnailFile = alternateThumbnailFile.delete();
+                            }
+                        }
+                        Log.d("VaultMedia",String.valueOf(deleteThumbnailFile) + " thumbnail renamed");
+                    }
+                    try {
+                        if (deleteThumbnailFile) {
+                            String selection = MediaVaultModel.ID_COLUMN_NAME+ " IN (" +
+                                    "?)"+ " AND " + MediaVaultModel.MEDIA_TYPE+"=?"+" AND "
+                                    + MediaVaultModel.VAULT_BUCKET_ID+"=?";
+                            String[] selectionArgs = new String[]{vaultId, getMediaCursorType(mediaType), albumBucketId};
+                            int deletedFromDb = vaultDb.delete(MediaVaultModel.TABLE_NAME, selection, selectionArgs);
+                            Log.d("VaultMedia"," Deleted from database " + vaultId);
+                           if(!scanner_file_path.isEmpty()) {
+                                MediaScannerConnection.scanFile(context.getApplicationContext(), new String[]{scanner_file_path.get(0)}, null,
+                                        new MediaScannerConnection.OnScanCompletedListener() {
+                                            @Override
+                                            public void onScanCompleted(String path, Uri uri) {
+                                                Log.d("VaultMedia", " Scanned " + path);
+                                            }
+                                        });
+                                scanner_file_path.clear();
+                            }
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
+                mssg = uiHandler.obtainMessage();
+                mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
+                mssg.arg1 = cursor.getPosition() + 1;
+                mssg.arg2 = cursor.getCount();
+                mssg.sendToTarget();
             } while (cursor.moveToNext());
-            boolean removeDone = removeFromDb();
-            Log.d("VaultMedia", "Inserted to DB " + String.valueOf(removeDone));
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                Log.d("VaultMedia", "Media Scanner Started");
-                scanner_file_path.addAll(scanner_alternate_file_path);
-                runMediaScanner(scanner_file_path);
-            } else {
-                Log.d("VaultMedia", "Media Scanner Started below 19");
-                sendScanBroadcast();
-            }
-
-
             mssg = uiHandler.obtainMessage();
             mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
             mssg.sendToTarget();
@@ -202,7 +232,7 @@ public class MediaMoveOutTask implements Runnable {
         }
     }
 
-    private boolean copyMediaFile(String vaultMediaPath, String originalFilePath) throws IOException{
+    private boolean copyMediaFile(String vaultMediaPath, String originalFilePath, String extension) throws IOException{
         BufferedInputStream buffInput = null;
         BufferedOutputStream buffOutput = null;
         boolean mediaCopied = false;
@@ -212,7 +242,12 @@ public class MediaMoveOutTask implements Runnable {
                 buffInput = new BufferedInputStream(new FileInputStream(vaultMediaFile));
             }
             else{
-                return false;
+                File alternateVaultMediaFile = new File(vaultMediaPath+"."+extension);
+                if(alternateVaultMediaFile.exists()){
+                    buffInput = new BufferedInputStream(new FileInputStream(alternateVaultMediaFile));
+                }else{
+                    return false;
+                }
             }
             File originalMediaFile = new File(originalFilePath);
             boolean destCreated = false;
@@ -223,19 +258,23 @@ public class MediaMoveOutTask implements Runnable {
             }
             if(destCreated && originalMediaFile.exists()){
                 String alternateFilePath = originalFilePath.substring(0,originalFilePath.lastIndexOf(File.separator));
-                String alternateFileName = originalFilePath.substring(originalFilePath.lastIndexOf(File.separator)+1);
+                String alternateFileName = originalFilePath.substring(originalFilePath.lastIndexOf(File.separator)+1
+                                                                ,originalFilePath.lastIndexOf("."));
                 File alternateFile = new File(alternateFilePath+File.separator
-                                            +System.currentTimeMillis()+"_"+alternateFileName);
-                alternateFile.createNewFile();
-                buffOutput = new BufferedOutputStream(new FileOutputStream(alternateFile));
-                byte[] buffer = new byte[1024];
-                int length;
-                while((length = buffInput.read(buffer))>0){
-                    buffOutput.write(buffer,0,length);
+                                            +alternateFileName+"_"+System.currentTimeMillis()+"."+extension);
+               boolean alternateFileCreated = alternateFile.createNewFile();
+                if(alternateFileCreated) {
+                    buffOutput = new BufferedOutputStream(new FileOutputStream(alternateFile));
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = buffInput.read(buffer)) > 0) {
+                        buffOutput.write(buffer, 0, length);
+                    }
+                    scanner_file_path.add(alternateFile.getAbsolutePath());
+                    return true;
+                }else{
+                    return false;
                 }
-                scanner_alternate_file_path.add(alternateFilePath+File.separator
-                        +System.currentTimeMillis()+"_"+alternateFileName);
-                return true;
             }
             if(destCreated && !originalMediaFile.exists()){
                 boolean created = originalMediaFile.createNewFile();
@@ -246,6 +285,7 @@ public class MediaMoveOutTask implements Runnable {
                     while((length = buffInput.read(buffer))>0){
                         buffOutput.write(buffer,0,length);
                     }
+                    scanner_file_path.add(originalFilePath);
                     return true;
                 }
                 else{
@@ -264,55 +304,7 @@ public class MediaMoveOutTask implements Runnable {
                 buffOutput.close();
             }
         }
-        return mediaCopied;
-    }
-
-    private boolean removeFromDb(){
-        int deleteCount = 0;
-        for (int i = 0; i < vault_media_path.size(); i++) {
-            File vaultFile = new File(vault_media_path.get(i));
-            boolean deleteVaultFile = false;
-            if(vaultFile.exists()) {
-                deleteVaultFile = vaultFile.delete();
-            }
-            boolean deleteThumbnailFile = false;
-            if(deleteVaultFile) {
-                File thumbnailFile = new File(vault_thumbnail_path.get(i));
-                if(thumbnailFile.exists()) {
-                    deleteThumbnailFile = thumbnailFile.delete();
-                }
-                Log.d("VaultMedia",String.valueOf(deleteThumbnailFile) + " thumbnail renamed");
-            }
-            try {
-                if (deleteThumbnailFile) {
-                    String selection = MediaVaultModel.ID_COLUMN_NAME+ " IN (" +
-                            "?)"+ " AND " + MediaVaultModel.MEDIA_TYPE+"=?"+" AND "
-                            + MediaVaultModel.VAULT_BUCKET_ID+"=?";
-                    String[] selectionArgs = new String[]{vault_id_list.get(i), getMediaCursorType(mediaType), albumBucketId};
-                    int deletedFromDb = vaultDb.delete(MediaVaultModel.TABLE_NAME, selection, selectionArgs);
-                    Log.d("VaultMedia"," Deleted from database " + vault_id_list.get(i));
-                    deleteCount += deletedFromDb;
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-        Log.d("VaultMedia"," Inserted and deleted " + deleteCount);
-        return true;
-    }
-
-    private boolean runMediaScanner(LinkedList<String> originalFilePathList){
-        Log.d("VaultMedia",originalFilePathList.size()+" Path size");
-        String[] pathDummyArray = new String[originalFilePathList.size()];
-        String[] pathArray = originalFilePathList.toArray(pathDummyArray);
-        MediaScannerConnection.scanFile(context.getApplicationContext(), pathArray, null
-                , new MediaScannerConnection.OnScanCompletedListener() {
-                    @Override
-                    public void onScanCompleted(String path, Uri uri) {
-                        Log.d("VaultMedia",path);
-                    }
-                });
-        return true;
+        return false;
     }
 
     private boolean sendScanBroadcast(){

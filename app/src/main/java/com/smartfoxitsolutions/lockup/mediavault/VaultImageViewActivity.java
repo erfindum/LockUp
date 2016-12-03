@@ -4,8 +4,12 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
@@ -17,6 +21,8 @@ import android.widget.TextView;
 
 import com.davemorrissey.labs.subscaleview.ImageViewState;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.mediavault.dialogs.ImageViewDeleteDialog;
+import com.smartfoxitsolutions.lockup.mediavault.dialogs.ImageViewUnlockDialog;
 
 /**
  * Created by RAAJA on 14-11-2016.
@@ -34,7 +40,8 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
     ImageViewState viewState;
     ValueAnimator displayTopBarAnim, hideTopBarAnim, displayBottomBarAnim,hideBottomBarAnim;
     AnimatorSet displayBarAnimSet,hideBarAnimSet;
-    boolean isTopBottomVisible;
+    boolean isTopBottomVisible,isDeletePressed, isUnlockPressed;;
+    private String imageBucketId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,9 +54,11 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
         deleteButton = (AppCompatImageButton) findViewById(R.id.vault_image_view_activity_delete_button);
         unlockButton = (AppCompatImageButton) findViewById(R.id.vault_image_view_activity_unlock);
         originalFileName = (TextView) findViewById(R.id.vault_image_view_activity_original_name);
+        imageBucketId = getIntent().getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY);
         if(savedInstanceState!=null){
             viewState = (ImageViewState) savedInstanceState.getSerializable(IMAGE_VIEW_STATE);
         }
+        setListeners();
         setAnimators();
     }
 
@@ -63,16 +72,46 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
             imageViewPager.setCurrentItem(currentItem);
             imageViewPager.addOnPageChangeListener(this);
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
         if(viewState != null){
             imageAdapter.setImageViewState(viewState);
             imageAdapter.notifyDataSetChanged();
         }
+    }
+
+    void setListeners(){
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isDeletePressed) {
+                    isDeletePressed=true;
+                    DialogFragment deleteDialog = new ImageViewDeleteDialog();
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.addToBackStack("delete_image_dialog");
+                    deleteDialog.show(fragmentTransaction, "delete_image_dialog");
+                }
+            }
+        });
+
+        unlockButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isUnlockPressed){
+                    isUnlockPressed = true;
+                    DialogFragment unlockDialog = new ImageViewUnlockDialog();
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.addToBackStack("unlock_image_dialog");
+                    unlockDialog.show(fragmentTransaction, "unlock_image_dialog");
+                }
+            }
+        });
     }
 
     void setAnimators(){
@@ -177,6 +216,34 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
         }
     }
 
+    public void deleteImage(){
+        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
+                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,imageBucketId)
+                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA)
+                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,
+                        new String[]{HiddenFileContentModel.getMediaId().get(imageViewPager.getCurrentItem())})
+                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
+    }
+
+    public void unlockImage(){
+        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
+                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,imageBucketId)
+                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA)
+                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,
+                        new String[]{HiddenFileContentModel.getMediaId().get(imageViewPager.getCurrentItem())})
+                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
+    }
+
+    public void deleteImageCancelled(){
+        isDeletePressed = false;
+    }
+
+    public void unlockImageCancelled(){
+        isUnlockPressed = false;
+    }
+
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
         if(isTopBottomVisible){
@@ -205,8 +272,8 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         if(imageAdapter!=null){
             imageAdapter.renameCurrentFile(imageViewPager.getCurrentItem());
         }
@@ -222,5 +289,6 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
         HiddenFileContentModel.getMediaOriginalName().clear();
         HiddenFileContentModel.getMediaVaultFile().clear();
         HiddenFileContentModel.getMediaExtension().clear();
+        HiddenFileContentModel.getMediaId().clear();
     }
 }

@@ -13,7 +13,6 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaScannerConnection;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -22,6 +21,7 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.smartfoxitsolutions.lockup.AppLoaderActivity;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.mediavault.MediaAlbumPickerActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
@@ -35,9 +35,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by RAAJA on 13-10-2016.
@@ -51,31 +52,16 @@ public class MediaMoveInTask implements Runnable {
    private String albumBucketId, mediaType;
    private String[] selectedMediaId, fileNames;
    private int viewWidth, viewHeight;
-   private AtomicLong timestamp;
    private VaultDbHelper vaultDatabaseHelper;
    private SQLiteDatabase vaultDb;
    private Handler uiHandler;
+   private ContentValues insertValues;
    private Message mssg;
-   private LinkedList<String> original_media_path,vault_media_path,original_file_name,vault_file_name,vault_bucket_id,vault_bucket_name
-           ,file_extension, vault_thumbnail_path,scanner_file_path, vault_thumbnail_path_dummy, vault_media_path_dummy
-           ,vault_media_failed_list,vault_thumbnail_failed_list;
 
     public MediaMoveInTask(Context ctxt, Handler.Callback callback) {
         this.context = ctxt;
         this.uiHandler = new Handler(Looper.getMainLooper(),callback);
-        original_file_name = new LinkedList<>();
-        original_media_path = new LinkedList<>();
-        vault_media_path = new LinkedList<>();
-        vault_file_name = new LinkedList<>();
-        vault_bucket_id = new LinkedList<>();
-        vault_bucket_name = new LinkedList<>();
-        file_extension = new LinkedList<>();
-        vault_thumbnail_path = new LinkedList<>();
-        scanner_file_path = new LinkedList<>();
-        vault_thumbnail_path_dummy = new LinkedList<>();
-        vault_media_path_dummy = new LinkedList<>();
-        vault_media_failed_list = new LinkedList<>();
-        vault_thumbnail_failed_list = new LinkedList<>();
+        insertValues = new ContentValues();
     }
 
     void setTaskRequirements(int selectionType, String bucketId, String media,String[] selectedMediaId, String[] fileNames){
@@ -86,9 +72,8 @@ public class MediaMoveInTask implements Runnable {
         this.fileNames = fileNames;
         this.contentResolver = context.getContentResolver();
         SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
-        this.viewWidth = prefs.getInt(MediaAlbumPickerActivity.THUMBNAIL_WIDTH_KEY,0);
-        this.viewHeight = prefs.getInt(MediaAlbumPickerActivity.THUMBNAIL_HEIGHT_KEY,0);
-        timestamp = new AtomicLong(System.currentTimeMillis());
+        this.viewWidth = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_WIDTH_KEY,155);
+        this.viewHeight = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_HEIGHT_KEY,115);
         String databasePath = Environment.getExternalStorageDirectory()+ File.separator
                 +".lockup"+File.separator+"vault_db";
         vaultDatabaseHelper = new VaultDbHelper(context.getApplicationContext(),databasePath,null,1);
@@ -226,6 +211,22 @@ public class MediaMoveInTask implements Runnable {
         return null;
     }
 
+    private String getBucketId(String path){
+        StringBuffer pathBucketId = new StringBuffer();
+        try {
+            byte[] pathBucketByte = path.getBytes("UTF-8");
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] pathDigest = md.digest(pathBucketByte);
+            pathBucketId = new StringBuffer();
+            for (int i = 0; i < pathDigest.length; ++i) {
+                pathBucketId.append(Integer.toHexString((pathDigest[i] & 0xFF) | 0x100).substring(1,3));
+            }
+        }catch (NoSuchAlgorithmException | UnsupportedEncodingException e){
+            e.printStackTrace();
+        }
+        return pathBucketId.toString();
+    }
+
     @Override
     public void run() {
         Cursor mediaCursor;
@@ -244,6 +245,9 @@ public class MediaMoveInTask implements Runnable {
                     moveMediaToVault(mediaCursor);
                 }catch (IOException e){
                     e.printStackTrace();
+                    mssg = uiHandler.obtainMessage();
+                    mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
+                    mssg.sendToTarget();
                 }
             }
         }
@@ -256,64 +260,49 @@ public class MediaMoveInTask implements Runnable {
                 mssg.arg1 = 0;
                 mssg.arg2 = mediaCursor.getCount();
                 mssg.sendToTarget();
-               try {
-                   moveMediaToVault(mediaCursor);
-               }catch (IOException e){
-                   e.printStackTrace();
-               }
-
+                try {
+                    moveMediaToVault(mediaCursor);
+                }catch (IOException e){
+                    e.printStackTrace();
+                    mssg = uiHandler.obtainMessage();
+                    mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
+                    mssg.sendToTarget();
+                }
             }
         }
     }
 
    private void moveMediaToVault(Cursor cursor) throws IOException{
         cursor.moveToFirst();
-       try {
            do {
                int dataIndex = cursor.getColumnIndex(getDataIndex(mediaType));
-               int bucketIdIndex = cursor.getColumnIndex(getBucketIndex(mediaType));
+              // int bucketIdIndex = cursor.getColumnIndex(getBucketIndex(mediaType));
                int bucketNameIndex = cursor.getColumnIndex(getBucketNameIndex(mediaType));
                String dataPath = cursor.getString(dataIndex);
-               String uniqueBucketId = cursor.getString(bucketIdIndex);
                String uniqueBucketName = cursor.getString(bucketNameIndex);
-               String originalFileName = dataPath.substring(dataPath.lastIndexOf("/") + 1, dataPath.lastIndexOf("."));
-               String extension = dataPath.substring(dataPath.lastIndexOf(".") + 1);
-               String destPathDummy = "";
-               String destPath = "";
-               String thumbnailPathDummy = "";
-               String thumbnailPath = "";
+               String uniqueBucketId = "";
                if(mediaType.equals(MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA)){
-                 //  uniqueBucketId = uniqueBucketId.substring(uniqueBucketId.lastIndexOf("-"));
-                   destPathDummy = Environment.getExternalStorageDirectory() + File.separator
-                           + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
-                           + uniqueBucketId + File.separator + originalFileName + "." + extension;
-                   destPath = Environment.getExternalStorageDirectory() + File.separator
-                           + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
-                           + uniqueBucketId + File.separator + fileNames[cursor.getPosition()];
-                   thumbnailPathDummy = Environment.getExternalStorageDirectory() + File.separator
-                           + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
-                           + uniqueBucketId + File.separator + ".thumbs" + File.separator + uniqueBucketId
-                           + File.separator + originalFileName + "." + "jpg";
-                   thumbnailPath = Environment.getExternalStorageDirectory() + File.separator
-                           + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
-                           + uniqueBucketId + File.separator + ".thumbs" + File.separator + uniqueBucketId
-                           + File.separator + fileNames[cursor.getPosition()];
-               }else{
-                   destPathDummy = Environment.getExternalStorageDirectory() + File.separator
-                           + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
-                           + uniqueBucketId + File.separator + originalFileName + "." + extension;
-                   destPath = Environment.getExternalStorageDirectory() + File.separator
-                           + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
-                           + uniqueBucketId + File.separator + fileNames[cursor.getPosition()];
-                   thumbnailPathDummy = Environment.getExternalStorageDirectory() + File.separator
-                           + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
-                           + uniqueBucketId + File.separator + ".thumbs" + File.separator + uniqueBucketId
-                           + File.separator + originalFileName + "." + "jpg";
-                   thumbnailPath = Environment.getExternalStorageDirectory() + File.separator
-                           + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
-                           + uniqueBucketId + File.separator + ".thumbs" + File.separator + uniqueBucketId
-                           + File.separator + fileNames[cursor.getPosition()];
+                   uniqueBucketId = getBucketId(uniqueBucketName);
+               }else {
+                   uniqueBucketId = getBucketId(dataPath.substring(0, dataPath.lastIndexOf(File.separator)));
                }
+               String originalFileName = dataPath.substring(dataPath.lastIndexOf(File.separator) + 1, dataPath.lastIndexOf("."));
+               String extension = dataPath.substring(dataPath.lastIndexOf(".") + 1);
+               String destPathDummy = Environment.getExternalStorageDirectory() + File.separator
+                       + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
+                       + uniqueBucketId + File.separator + originalFileName + "." + extension;
+               String destPath = Environment.getExternalStorageDirectory() + File.separator
+                       + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
+                       + uniqueBucketId + File.separator + fileNames[cursor.getPosition()];
+               String thumbnailPathDummy = Environment.getExternalStorageDirectory() + File.separator
+                       + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
+                       + uniqueBucketId + File.separator + ".thumbs" + File.separator + uniqueBucketId
+                       + File.separator + originalFileName + "." + "jpg";
+               String thumbnailPath = Environment.getExternalStorageDirectory() + File.separator
+                       + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
+                       + uniqueBucketId + File.separator + ".thumbs" + File.separator + uniqueBucketId
+                       + File.separator + fileNames[cursor.getPosition()];
+
                boolean mediaCopied = false;
                mediaCopied = copyMediaFile(dataPath, destPathDummy);
                boolean thumbnailCopied = false;
@@ -341,50 +330,61 @@ public class MediaMoveInTask implements Runnable {
                        Log.d("VaultMedia", String.valueOf(thumbnailCopied) + " thumbnail copied");
                    }
                    Log.d("VaultMedia", " ThumbnailCreated");
-               } else {
-                   scanner_file_path.add(dataPath);
+               }  else
+               {
                    continue;
                }
                if (thumbnailCopied) {
-                   original_media_path.add(dataPath);
-                   scanner_file_path.add(dataPath);
-                   vault_media_path.add(destPath);
-                   vault_media_path_dummy.add(destPathDummy);
-                   original_file_name.add(originalFileName);
-                   vault_file_name.add(fileNames[cursor.getPosition()]);
-                   vault_bucket_id.add(uniqueBucketId);
-                   vault_bucket_name.add(uniqueBucketName);
-                   file_extension.add(extension);
-                   vault_thumbnail_path.add(thumbnailPath);
-                   vault_thumbnail_path_dummy.add(thumbnailPathDummy);
-                   Log.d("VaultMedia", " DB Data Set");
+                   boolean renamedFile = renameVaultMedia(destPathDummy,destPath);
+                   boolean renamedThumbnail = false;
+                   if(renamedFile) {
+                       renamedThumbnail = renameVaultMedia(thumbnailPathDummy, thumbnailPath);
+                       Log.d("VaultMedia",String.valueOf(renamedThumbnail) + " thumbnail renamed");
+                   }else{
+                       deleteFailedFiles(destPathDummy);
+                   }
+                   if(renamedThumbnail) {
+                       insertValues.put(MediaVaultModel.ORIGINAL_MEDIA_PATH, dataPath);
+                       insertValues.put(MediaVaultModel.VAULT_MEDIA_PATH, destPath);
+                       insertValues.put(MediaVaultModel.ORIGINAL_FILE_NAME, originalFileName);
+                       insertValues.put(MediaVaultModel.VAULT_FILE_NAME, fileNames[cursor.getPosition()]);
+                       insertValues.put(MediaVaultModel.VAULT_BUCKET_ID, uniqueBucketId);
+                       insertValues.put(MediaVaultModel.VAULT_BUCKET_NAME, uniqueBucketName);
+                       insertValues.put(MediaVaultModel.FILE_EXTENSION, extension);
+                       insertValues.put(MediaVaultModel.MEDIA_TYPE, getVaultMediaType(mediaType));
+                       insertValues.put(MediaVaultModel.TIME_STAMP, fileNames[cursor.getPosition()]);
+                       insertValues.put(MediaVaultModel.THUMBNAIL_PATH, thumbnailPath);
+                       long insertedRow = 0;
+                       if (vaultDb != null) {
+                           insertedRow = vaultDb.insert(MediaVaultModel.TABLE_NAME, "NULL", insertValues);
+                       }
+                       deleteOriginalMedia(dataPath);
+                      MediaScannerConnection.scanFile(context.getApplicationContext(), new String[]{dataPath}, null,
+                              new MediaScannerConnection.OnScanCompletedListener() {
+                          @Override
+                          public void onScanCompleted(String path, Uri uri) {
+                              Log.d("VaultMedia"," Scanned " + path);
+                          }
+                      });
+                       Log.d("VaultMedia"," Inserted and deleted");
+                   }
+                   else{
+                       deleteFailedFiles(thumbnailPathDummy);
+                   }
                    mssg = uiHandler.obtainMessage();
                    mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
                    mssg.arg1 = cursor.getPosition() + 1;
                    mssg.arg2 = cursor.getCount();
                    mssg.sendToTarget();
+               }else{
+                   continue;
                }
-
                Log.d("VaultMedia", String.valueOf(uiHandler == null) + " uiHandler null?");
            } while (cursor.moveToNext());
-           boolean insertDone = insertIntoDb();
-           Log.d("VaultMedia", "Inserted to DB " + String.valueOf(insertDone));
-
-           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-               Log.d("VaultMedia", "Media Scanner Started");
-               runMediaScanner(scanner_file_path);
-           } else {
-               Log.d("VaultMedia", "Media Scanner Started below 19");
-               sendScanBroadcast();
-           }
-
-
            mssg = uiHandler.obtainMessage();
            mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
            mssg.sendToTarget();
-       }catch (Exception e){
-           e.printStackTrace();
-       }
+            cursor.close();
     }
 
     private boolean copyMediaFile(String mediaPath, String destPath) throws IOException{
@@ -524,45 +524,6 @@ public class MediaMoveInTask implements Runnable {
         return null;
     }
 
-    private boolean insertIntoDb(){
-           ContentValues insertValues = new ContentValues();
-           for (int i = 0; i < original_media_path.size(); i++) {
-               boolean renamedFile = renameVaultMedia(vault_media_path_dummy.get(i),vault_media_path.get(i));
-               boolean renamedThumbnail = false;
-               if(renamedFile) {
-                  renamedThumbnail = renameVaultMedia(vault_thumbnail_path_dummy.get(i), vault_thumbnail_path.get(i));
-                   Log.d("VaultMedia",String.valueOf(renamedThumbnail) + " thumbnail renamed");
-               }else{
-                   vault_media_failed_list.add(vault_media_path_dummy.get(i));
-               }
-               if(renamedThumbnail) {
-                   insertValues.put(MediaVaultModel.ORIGINAL_MEDIA_PATH, original_media_path.get(i));
-                   insertValues.put(MediaVaultModel.VAULT_MEDIA_PATH, vault_media_path.get(i));
-                   insertValues.put(MediaVaultModel.ORIGINAL_FILE_NAME, original_file_name.get(i));
-                   insertValues.put(MediaVaultModel.VAULT_FILE_NAME, vault_file_name.get(i));
-                   insertValues.put(MediaVaultModel.VAULT_BUCKET_ID, vault_bucket_id.get(i));
-                   insertValues.put(MediaVaultModel.VAULT_BUCKET_NAME, vault_bucket_name.get(i));
-                   insertValues.put(MediaVaultModel.FILE_EXTENSION, file_extension.get(i));
-                   insertValues.put(MediaVaultModel.MEDIA_TYPE, getVaultMediaType(mediaType));
-                   insertValues.put(MediaVaultModel.TIME_STAMP, vault_file_name.get(i));
-                   insertValues.put(MediaVaultModel.THUMBNAIL_PATH, vault_thumbnail_path.get(i));
-                   long insertedRow = 0;
-                   if (vaultDb != null) {
-                       insertedRow = vaultDb.insert(MediaVaultModel.TABLE_NAME, "NULL", insertValues);
-                   }
-                   deleteOriginalMedia(original_media_path.get(i));
-                   Log.d("VaultMedia"," Inserted and deleted");
-               }
-               else{
-                   vault_thumbnail_failed_list.add(vault_thumbnail_path_dummy.get(i));
-               }
-
-           }
-            deleteFailedFiles(vault_media_failed_list);
-        deleteFailedFiles(vault_thumbnail_failed_list);
-        return true;
-    }
-
     private boolean deleteOriginalMedia(String path){
         File deletePath = new File(path);
         if(deletePath.exists()){
@@ -571,12 +532,10 @@ public class MediaMoveInTask implements Runnable {
         return false;
     }
 
-    private void deleteFailedFiles(LinkedList<String> failedList){
-        for(String dummy : failedList){
-            File deleteDummy = new File(dummy);
-            if(deleteDummy.exists()){
-                deleteDummy.delete();
-            }
+    private void deleteFailedFiles(String deletePath){
+        File deleteDummy = new File(deletePath);
+        if(deleteDummy.exists()){
+            deleteDummy.delete();
         }
     }
 
@@ -590,26 +549,10 @@ public class MediaMoveInTask implements Runnable {
         }
         return false;
     }
-
-    private boolean runMediaScanner(LinkedList<String> originalFilePathList){
-        Log.d("VaultMedia",originalFilePathList.size()+" Path size");
-        String[] pathDummyArray = new String[originalFilePathList.size()];
-        String[] pathArray = originalFilePathList.toArray(pathDummyArray);
-        MediaScannerConnection.scanFile(context.getApplicationContext(), pathArray, null
-                , new MediaScannerConnection.OnScanCompletedListener() {
-                    @Override
-                    public void onScanCompleted(String path, Uri uri) {
-                       Log.d("VaultMedia",path);
-                    }
-                });
-        return true;
-    }
-
     private boolean sendScanBroadcast(){
         context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,Uri.parse("file://"+Environment.getExternalStorageDirectory())));
         return true;
     }
-
      void closeTask(){
         if(context!=null){
             context = null;

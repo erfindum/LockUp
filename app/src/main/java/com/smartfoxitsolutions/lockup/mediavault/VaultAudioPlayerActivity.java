@@ -4,13 +4,15 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
@@ -18,6 +20,7 @@ import android.support.v7.widget.AppCompatImageView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -25,10 +28,12 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.smartfoxitsolutions.lockup.R;
-import com.smartfoxitsolutions.lockup.mediavault.services.AudioPlayerService;
+import com.smartfoxitsolutions.lockup.mediavault.dialogs.AudioPlayerDeleteDialog;
+import com.smartfoxitsolutions.lockup.mediavault.dialogs.AudioPlayerUnlockDialog;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
+import java.io.IOException;
+import java.util.LinkedList;
 
 /**
  * Created by RAAJA on 17-11-2016.
@@ -36,25 +41,21 @@ import java.lang.ref.WeakReference;
 
 public class VaultAudioPlayerActivity extends AppCompatActivity {
 
-    public static final int PLAY_BUTTON_PRESSED = 23;
-    public static final int PREVIOUS_TRACK_PRESSED = 24;
-    public static final int NEXT_TRACK_PRESSED = 25;
-    public static final int SEEK_BAR_POSITION_CHANGED = 26;
-    public static final int NEW_ALBUM_SET = 27;
-
-    public static final String CURRENT_AUDIO_POSITION = "current_audio_position";
-    public static final String SHOULD_STOP_AUDIO_PLAYER = "should_stop_audio_player";
-
-
-    RelativeLayout parentView;
-    AppCompatImageView albumArtView;
-    AppCompatImageButton backButton, playPauseButton, playPreviousButton,playNextButton,deleteButton, unlockButton;
-    SeekBar audioSeekBar;
-    TextView titleText, durationText;
-    int currentPosition, imageViewHeight, imageViewWidth;
-    static Messenger audioServiceMessenger, audioActivityMessenger;
-    Drawable placeholder;
-    boolean isAlbumArtLoaded;
+    private RelativeLayout parentView;
+    private AppCompatImageView albumArtView;
+    private AppCompatImageButton backButton, playPauseButton, playPreviousButton,playNextButton,deleteButton, unlockButton;
+    private SeekBar audioSeekBar;
+    private TextView titleText, durationText;
+    private LinkedList<String> originalFileNameList, vaultFileList, fileExtensionList;
+    private MediaPlayer audioPlayer;
+    private Handler uiHandler;
+    private Runnable audioSeekTask;
+    private  static int currentPosition,currentAudioProgress;
+    private int imageViewWidth,imageViewHeight;
+    private Drawable placeholder;
+    boolean isAlbumArtLoaded,isAudioStopped,isConfigChanged;
+    private String audioBucketId;
+    private boolean isDeletePressed,isUnlockPressed;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,13 +73,14 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
         titleText = (TextView) findViewById(R.id.vault_audio_player_activity_original_name);
         durationText = (TextView) findViewById(R.id.vault_audio_player_activity_duration_text);
         currentPosition = getIntent().getIntExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,0);
+        uiHandler = new Handler(getMainLooper());
+        originalFileNameList = HiddenFileContentModel.getMediaOriginalName();
+        vaultFileList = HiddenFileContentModel.getMediaVaultFile();
+        fileExtensionList = HiddenFileContentModel.getMediaExtension();
+        audioBucketId = getIntent().getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY);
         setActivityBackground();
-        setListeners();
+        setRunnable();
         loadPlaceHolder();
-    }
-
-    public static void setAudioServiceMessenger(Messenger serviceMessenger){
-        audioServiceMessenger = serviceMessenger;
     }
 
     void setActivityBackground(){
@@ -96,17 +98,94 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
     }
 
     void setListeners(){
+
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isDeletePressed) {
+                    isDeletePressed=true;
+                    DialogFragment deleteDialog = new AudioPlayerDeleteDialog();
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.addToBackStack("delete_audio_dialog");
+                    deleteDialog.show(fragmentTransaction, "delete_audio_dialog");
+                    audioPlayer.pause();
+                }
+            }
+        });
+
+        unlockButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isUnlockPressed){
+                    isUnlockPressed = true;
+                    DialogFragment unlockDialog = new AudioPlayerUnlockDialog();
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.addToBackStack("unlock_audio_dialog");
+                    unlockDialog.show(fragmentTransaction, "unlock_audio_dialog");
+                    audioPlayer.pause();
+                }
+            }
+        });
+
+        audioPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                    uiHandler.removeCallbacks(audioSeekTask);
+                    audioPlayer.start();
+                    audioSeekBar.setMax(audioPlayer.getDuration());
+                    audioPlayer.seekTo(currentAudioProgress);
+                    audioSeekBar.setProgress(currentAudioProgress);
+                    currentAudioProgress=0;
+                    playPauseButton.setImageResource(R.drawable.selector_audio_vault_pause);
+                    uiHandler.post(audioSeekTask);
+            }
+        });
+
+        audioPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+            @Override
+            public void onSeekComplete(MediaPlayer mp) {
+                audioPlayer.start();
+            }
+        });
+
+        audioPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                audioPlayer.pause();
+                isAudioStopped = true;
+                uiHandler.removeCallbacks(audioSeekTask);
+                setDuration(0);
+                audioSeekBar.setProgress(0);
+                playPauseButton.setImageResource(R.drawable.selector_audio_vault_play);
+            }
+        });
+
         playPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(audioServiceMessenger!=null) {
-                 try {
-                     Message msg = Message.obtain();
-                     msg.what = PLAY_BUTTON_PRESSED;
-                     audioServiceMessenger.send(msg);
-                 }catch (RemoteException e){
-                     e.printStackTrace();
-                 }
+                if(isAudioStopped){
+                   audioPlayer.seekTo(audioSeekBar.getProgress());
+                   uiHandler.post(audioSeekTask);
+                   playPauseButton.setImageResource(R.drawable.selector_audio_vault_pause);
+                   isAudioStopped=false;
+                    return;
+                }
+                if(audioPlayer.isPlaying()){
+                    audioPlayer.pause();
+                    playPauseButton.setImageResource(R.drawable.selector_audio_vault_play);
+
+                }else{
+                    audioPlayer.seekTo(audioPlayer.getCurrentPosition());
+                    playPauseButton.setImageResource(R.drawable.selector_audio_vault_pause);
                 }
             }
         });
@@ -114,29 +193,56 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
         playPreviousButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(audioServiceMessenger!=null) {
+                if(currentPosition>0){
+                    File previousFile = new File(vaultFileList.get(currentPosition-1));
+                    if(previousFile.exists()){
+                        previousFile.renameTo(new File(vaultFileList.get(currentPosition-1)+"."
+                                +fileExtensionList.get(currentPosition-1)));
+                    }
                     try {
-                        Message msg = Message.obtain();
-                        msg.what = PREVIOUS_TRACK_PRESSED;
-                        audioServiceMessenger.send(msg);
-                    }catch (RemoteException e){
+                        audioPlayer.reset();
+                        audioPlayer.setDataSource(vaultFileList.get(currentPosition-1) + "." + fileExtensionList.get(currentPosition-1));
+                        audioPlayer.prepare();
+                    }catch (IOException e){
                         e.printStackTrace();
                     }
+                    File currentFile = new File(vaultFileList.get(currentPosition)+"."
+                            +fileExtensionList.get(currentPosition));
+                    if(currentFile.exists()){
+                        currentFile.renameTo(new File(vaultFileList.get(currentPosition)));
+                    }
+                    currentPosition-=1;
+                    setTitleText(currentPosition);
+                    loadAlbumArt(currentPosition);
                 }
+
             }
         });
 
         playNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(audioServiceMessenger!=null) {
+                if(currentPosition<vaultFileList.size()-1){
+                    File nextFile = new File(vaultFileList.get(currentPosition+1));
+                    if(nextFile.exists()){
+                        nextFile.renameTo(new File(vaultFileList.get(currentPosition+1)+"."
+                                +fileExtensionList.get(currentPosition+1)));
+                    }
                     try {
-                        Message msg = Message.obtain();
-                        msg.what = NEXT_TRACK_PRESSED;
-                        audioServiceMessenger.send(msg);
-                    }catch (RemoteException e){
+                        audioPlayer.reset();
+                        audioPlayer.setDataSource(vaultFileList.get(currentPosition+1) + "." + fileExtensionList.get(currentPosition+1));
+                        audioPlayer.prepare();
+                    }catch (IOException e){
                         e.printStackTrace();
                     }
+                    File currentFile = new File(vaultFileList.get(currentPosition)+"."
+                            +fileExtensionList.get(currentPosition));
+                    if(currentFile.exists()){
+                        currentFile.renameTo(new File(vaultFileList.get(currentPosition)));
+                    }
+                    currentPosition+=1;
+                    setTitleText(currentPosition);
+                    loadAlbumArt(currentPosition);
                 }
             }
         });
@@ -146,38 +252,12 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if(fromUser) {
                     seekBar.setProgress(progress);
-                    int seconds = (progress/ 1000) % 60 ;
-                    int minutes = ((progress/ (1000*60)) % 60);
-                    int hours   = ((progress/ (1000*60*60)));
-                    String secondsString = ""+seconds;
-                    String minutesString = ""+minutes;
-                    String hoursString = ""+hours;
-                    if(hours<10){
-                        hoursString = "0"+hoursString;
-                    }
-                    if(minutes<10){
-                        minutesString = "0"+minutesString;
-                    }
-                    if(seconds<10){
-                        secondsString = "0"+secondsString;
-                    }
-                    if(hours==0) {
-                        durationText.setText(minutesString + ":" + secondsString);
-                    }
-                    if(hours>0){
-                        durationText.setText(hoursString + ":" + minutesString + ":" + secondsString);
-                    }
-                    if (audioServiceMessenger != null) {
-                        try {
-                            Message msg = Message.obtain();
-                            msg.what = SEEK_BAR_POSITION_CHANGED;
-                            msg.arg1 = progress;
-                            audioServiceMessenger.send(msg);
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    setDuration(progress);
                     playPauseButton.setImageResource(R.drawable.selector_audio_vault_pause);
+                    audioPlayer.seekTo(progress);
+                    if(isAudioStopped){
+                        uiHandler.post(audioSeekTask);
+                    }
                 }
             }
 
@@ -198,40 +278,77 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
         placeholder = ContextCompat.getDrawable(this, R.drawable.ic_audio_player_placeholder);
     }
 
+    void setRunnable(){
+        audioSeekTask = new Runnable() {
+            @Override
+            public void run() {
+                    int currentDuration =0;
+                        currentDuration = audioPlayer.getCurrentPosition();
+                        audioSeekBar.setProgress(currentDuration);
+                        setDuration(currentDuration);
+                        uiHandler.postDelayed(this,1000);
+            }
+        };
+    }
+
+    public void deleteAudio(){
+        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
+                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,audioBucketId)
+                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA)
+                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,
+                        new String[]{HiddenFileContentModel.getMediaId().get(currentPosition)})
+                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
+    }
+
+    public void unlockAudio(){
+        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
+                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,audioBucketId)
+                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA)
+                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,
+                        new String[]{HiddenFileContentModel.getMediaId().get(currentPosition)})
+                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
+    }
+
+    public void deleteAudioCancelled(){
+        isDeletePressed = false;
+        audioPlayer.seekTo(audioSeekBar.getProgress());
+    }
+
+    public void unlockAudioCancelled(){
+        isUnlockPressed = false;
+        audioPlayer.seekTo(audioSeekBar.getProgress());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+            isConfigChanged = false;
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        if(HiddenFileContentModel.getMediaVaultFile().isEmpty()){
-            finish();
-        }
-        audioActivityMessenger = new Messenger(new AudioActivityMessenger(new WeakReference<>(this)));
-        AudioPlayerService.setAudioActivityMessenger(audioActivityMessenger);
-        File currentFile = new File(HiddenFileContentModel.getMediaVaultFile().get(currentPosition));
+        File currentFile = new File(vaultFileList.get(currentPosition));
         if(currentFile.exists()){
-            currentFile.renameTo(new File(HiddenFileContentModel.getMediaVaultFile().get(currentPosition)
-                    +"."+HiddenFileContentModel.getMediaExtension().get(currentPosition)));
+            currentFile.renameTo(new File(vaultFileList.get(currentPosition)
+                    +"."+fileExtensionList.get(currentPosition)));
         }
-        if(HiddenFileContentModel.getIsAudioAlbumChanged()) {
-            if(AudioPlayerService.isAudioServiceStarted){
-                if (audioServiceMessenger != null) {
-                    try {
-                        Message msg = Message.obtain();
-                        msg.what = NEW_ALBUM_SET;
-                        audioServiceMessenger.send(msg);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }else{
-                startAudioPlayer();
-            }
+        audioPlayer = new MediaPlayer();
+        setListeners();
+        audioPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try {
+            audioPlayer.reset();
+            audioPlayer.setDataSource(vaultFileList.get(currentPosition) + "." + fileExtensionList.get(currentPosition));
+            audioPlayer.prepareAsync();
+        }catch (IOException e){
+            e.printStackTrace();
+        }catch (IllegalStateException f){
+            f.printStackTrace();
         }
-    }
-
-    void startAudioPlayer(){
-        startService(new Intent(this.getBaseContext(), AudioPlayerService.class)
-                .putExtra(CURRENT_AUDIO_POSITION, currentPosition)
-                .putExtra(SHOULD_STOP_AUDIO_PLAYER,false));
+        setTitleText(currentPosition);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
@@ -242,22 +359,22 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
                 isAlbumArtLoaded = true;
                 imageViewHeight = albumArtView.getHeight();
                 imageViewWidth = albumArtView.getWidth();
-                loadAlbumArt();
+                loadAlbumArt(currentPosition);
             }
         }
     }
 
-    void loadAlbumArt(){
-        Uri uri = Uri.fromFile(new File(HiddenFileContentModel.getMediaVaultFile().get(currentPosition)
-                +"."+HiddenFileContentModel.getMediaExtension().get(currentPosition)));
+    void loadAlbumArt(int position){
+        Uri uri = Uri.fromFile(new File(vaultFileList.get(position)
+                +"."+fileExtensionList.get(position)));
         Glide.with(this).load(new AlbumArtModel(uri,this.getBaseContext()))
                 .placeholder(placeholder).error(placeholder).centerCrop().crossFade().skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.NONE).override(imageViewWidth,imageViewHeight)
                 .into(albumArtView);
     }
 
-    void setTitleText(int currentPosition){
-        titleText.setText(HiddenFileContentModel.getMediaOriginalName().get(currentPosition));
+    void setTitleText(int position){
+        titleText.setText(originalFileNameList.get(position));
     }
 
     void setDuration(int duration){
@@ -284,53 +401,35 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
         }
     }
 
-    void finishActivity(){
-        finish();
+    @Override
+    protected void onStop() {
+        super.onStop();
+        File currentFile = new File(vaultFileList.get(currentPosition)+"."+fileExtensionList.get(currentPosition));
+        if(currentFile.exists()){
+            currentFile.renameTo(new File(vaultFileList.get(currentPosition)));
+        }
+        uiHandler.removeCallbacks(audioSeekTask);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        audioPlayer.stop();
+        audioPlayer.release();
+        audioPlayer = null;
     }
 
-    static class AudioActivityMessenger extends Handler{
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        isConfigChanged = true;
+        currentAudioProgress = audioPlayer.getCurrentPosition();
+    }
 
-        WeakReference<VaultAudioPlayerActivity> activity;
-
-        AudioActivityMessenger(WeakReference<VaultAudioPlayerActivity> activity){
-            this.activity = activity;
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if(msg.what == AudioPlayerService.AUDIO_PLAYED_STATE){
-                    activity.get().currentPosition = msg.arg1;
-                    activity.get().audioSeekBar.setMax(msg.arg2);
-                    activity.get().setTitleText(msg.arg1);
-                    activity.get().setDuration(msg.arg2);
-                    activity.get().loadAlbumArt();
-                activity.get().playPauseButton.setImageResource(R.drawable.selector_audio_vault_pause);
-
-            }
-            if(msg.what == AudioPlayerService.AUDIO_STOPPED_STATE){
-                    activity.get().playPauseButton.setImageResource(R.drawable.selector_audio_vault_play);
-            }
-            if(msg.what == AudioPlayerService.PLAY_BUTTON_PLAY_STATE){
-                activity.get().playPauseButton.setImageResource(R.drawable.selector_audio_vault_pause);
-            }
-            if(msg.what == AudioPlayerService.PLAY_BUTTON_PAUSE_STATE){
-                activity.get().playPauseButton.setImageResource(R.drawable.selector_audio_vault_play);
-            }
-            if(msg.what == AudioPlayerService.PREVIOUS_NEXT_TRACK_PRESSED){
-                activity.get().currentPosition = msg.arg1;
-            }
-            if(msg.what == AudioPlayerService.CURRENT_SEEK_PROGRESS){
-                activity.get().audioSeekBar.setProgress(msg.arg1);
-                activity.get().setDuration(msg.arg1);
-            }
-            if(msg.what == AudioPlayerService.OLD_FILE_RENAMED){
-                activity.get().startAudioPlayer();
-            }
-            if(msg.what == AudioPlayerService.AUDIO_SERVICE_STOPPED){
-                activity.get().finish();
-            }
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(!isConfigChanged) {
+            HiddenFileContentModel.getMediaOriginalName().clear();
+            HiddenFileContentModel.getMediaVaultFile().clear();
+            HiddenFileContentModel.getMediaExtension().clear();
+            HiddenFileContentModel.getMediaId().clear();
         }
     }
 }

@@ -20,8 +20,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
+import com.smartfoxitsolutions.lockup.AppLoaderActivity;
 import com.smartfoxitsolutions.lockup.AppLockModel;
-import com.smartfoxitsolutions.lockup.DimensionConverter;
 import com.smartfoxitsolutions.lockup.R;
 
 /**
@@ -37,8 +37,6 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
     public static final String ALBUM_BUCKET_ID_KEY = "album_bucket_id";
     public static final String SELECTED_MEDIA_FILES_KEY = "selected_media_files";
     public static final String SELECTED_FILE_COUNT_KEY = "selected_file_count";
-    public static final String THUMBNAIL_WIDTH_KEY = "thumbnail_width_key";
-    public static final String THUMBNAIL_HEIGHT_KEY = "thumbnail_height_key";
 
     private RecyclerView mediaPickerBuckRecycler;
     private MediaAlbumPickerAdapter mediaAdapter;
@@ -64,6 +62,12 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
         getSupportActionBar().setTitle(R.string.vault_album_picker_select_album_toolbar);
         measureItemView();
         getSupportLoaderManager().initLoader(20,null,this);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
     }
 
     void setMediaType(String media){
@@ -76,16 +80,13 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
 
     void measureItemView(){
         Context ctxt = getBaseContext();
-        viewWidth = Math.round(DimensionConverter.convertDpToPixel(155,ctxt));
-        viewHeight = Math.round(DimensionConverter.convertDpToPixel(115,ctxt));
-        int itemWidth = Math.round(DimensionConverter.convertDpToPixel(165,ctxt));
+        SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
+        viewWidth = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_WIDTH_KEY,155);
+        viewHeight = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_HEIGHT_KEY,115);
+        int itemWidth = prefs.getInt(AppLoaderActivity.ALBUM_THUMBNAIL_WIDTH,165);
         DisplayMetrics metrics = ctxt.getResources().getDisplayMetrics();
         int displayWidth = metrics.widthPixels;
         noOfColumns = displayWidth/itemWidth;
-        SharedPreferences.Editor edit = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE).edit();
-        edit.putInt(THUMBNAIL_WIDTH_KEY,viewWidth);
-        edit.putInt(THUMBNAIL_HEIGHT_KEY,viewHeight);
-        edit.apply();
     }
 
 

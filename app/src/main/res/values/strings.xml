@@ -209,9 +209,11 @@
     <string name="vault_move_activity_move_out_text">Moving Out Of Vault</string>
     <string name="vault_move_activity_delete_files">Deleting from Vault</string>
     <string name="vault_move_activity_move_info_text">Please wait. This may take a while depending on the file size and number of files.</string>
-    <string name="vault_move_activity_move_button">Done</string>
+    <string name="vault_move_activity_move_button">Open Vault</string>
     <string name="vault_move_activity_cancel_notif">CANCEL</string>
     <string name="vault_move_activity_move_complete">Files successfully moved</string>
+    <string name="vault_move_activity_delete_complete">Files successfully deleted</string>
+    <string name="vault_move_activity_vault_redirect_message">Touch to open LockUp Vault</string>
     <string name="vault_move_activity_move_background">Move in background</string>
 
 
@@ -219,13 +221,17 @@
     <string name="vault_move_dialog_move_in_title_text">Move into Vault:</string>
     <string name="vault_move_dialog_move_out_title_text">Move out of Vault:</string>
     <string name="vault_move_dialog_delete_title_text">Delete selected files:</string>
+    <string name="vault_share_dialog_title_text">Unable to move files:</string>
     <string name="vault_move_dialog_move_in_sub_text">Move selected files into Vault?</string>
     <string name="vault_move_dialog_move_out_sub_text">Move selected files out of Vault?</string>
     <string name="vault_move_dialog_delete_sub_text">Permanently delete selected files? Note: This action cannot be undone</string>
+    <string name="vault_share_dialog_sub_text">Please wait while the ongoing operation is complete, before moving new files</string>
     <string name="vault_move_dialog_move_in_positive">MOVE IN</string>
     <string name="vault_move_dialog_move_out_positive">MOVE OUT</string>
     <string name="vault_move_dialog_delete_positive">DELETE</string>
     <string name="vault_move_dialog_move_negative">NOT NOW</string>
+    <string name="vault_share_dialog_negative">CLOSE</string>
+
 
 
 

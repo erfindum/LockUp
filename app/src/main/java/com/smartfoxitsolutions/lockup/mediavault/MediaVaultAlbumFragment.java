@@ -2,6 +2,7 @@ package com.smartfoxitsolutions.lockup.mediavault;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,7 +12,6 @@ import android.support.v4.content.Loader;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,8 +19,11 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.smartfoxitsolutions.lockup.DimensionConverter;
+import com.smartfoxitsolutions.lockup.AppLoaderActivity;
+import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.R;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by RAAJA on 01-10-2016.
@@ -85,9 +88,10 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
 
     void measureItemView(){
         Context ctxt = activity.getBaseContext();
-        viewWidth = Math.round(DimensionConverter.convertDpToPixel(155,ctxt));
-        viewHeight = Math.round(DimensionConverter.convertDpToPixel(115,ctxt));
-        int itemWidth = Math.round(DimensionConverter.convertDpToPixel(165,ctxt));
+        SharedPreferences prefs = activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
+        viewWidth = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_WIDTH_KEY,155);
+        viewHeight = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_HEIGHT_KEY,115);
+        int itemWidth = prefs.getInt(AppLoaderActivity.ALBUM_THUMBNAIL_WIDTH,165);
         DisplayMetrics metrics = ctxt.getResources().getDisplayMetrics();
         int displayWidth = metrics.widthPixels;
         noOfColumns = displayWidth/itemWidth;

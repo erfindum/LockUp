@@ -4,14 +4,20 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -19,6 +25,8 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.mediavault.dialogs.VideoPlayerDeleteDialog;
+import com.smartfoxitsolutions.lockup.mediavault.dialogs.VideoPlayerUnlockDialog;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -30,23 +38,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class VaultVideoPlayerActivity extends AppCompatActivity{
 
-    static final String CURRENT_VIDEO_FILE_POSITION = "current_video_file_position";
-    static final String CURRENT_VIDEO_SEEK_PROGRESS = "current_video_seek_progress";
-
-    RelativeLayout topBar;
-    RelativeLayout bottomBar;
-    AppCompatImageButton backButton, playPauseButton, playPreviousButton,playNextButton,deleteButton, unlockButton;
-    LinkedList<String> originalFileNameList, vaultFileList, fileExtensionList;
-    SeekBar videoSeekBar;
-    TextView titleText, durationText;
-    VideoView videoView;
-    Handler uiHandler;
-    int currentPosition, currentFileSeekProgress;
-    Runnable seekBarTask;
-    ValueAnimator displayTopBarAnim, displayBottomBarAnim, hideTopBarAnim, hideBottomBarAnim;
-    AnimatorSet displayTopBottomSet, hideTopBottomSet;
-    boolean isTopBottomVisible, isOrientationChange, isUserSeeking, isVideoViewStopped, isAnimationRunning;
-    AtomicInteger mediaControlDurationCount;
+    private RelativeLayout topBar;
+    private RelativeLayout bottomBar;
+    private AppCompatImageButton backButton, playPauseButton, playPreviousButton,playNextButton,deleteButton, unlockButton;
+    private LinkedList<String> originalFileNameList, vaultFileList, fileExtensionList;
+    private SeekBar videoSeekBar;
+    private TextView titleText, durationText;
+    private VideoView videoView;
+    private Handler uiHandler;
+    private static int currentPosition, currentSeekProgressState;
+    private int currentAudioProgress;
+    private Runnable seekBarTask;
+    private ValueAnimator displayTopBarAnim, displayBottomBarAnim, hideTopBarAnim, hideBottomBarAnim;
+    private AnimatorSet displayTopBottomSet, hideTopBottomSet;
+    boolean isTopBottomVisible, isOrientationChange, isUserSeeking, isVideoViewStopped, isAnimationRunning
+            ,isDeletePressed, isUnlockPressed;
+    private AtomicInteger mediaControlDurationCount;
+    private String videoBucketId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,6 +76,7 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
         vaultFileList = HiddenFileContentModel.getMediaVaultFile();
         fileExtensionList = HiddenFileContentModel.getMediaExtension();
         mediaControlDurationCount = new AtomicInteger(0);
+        videoBucketId = getIntent().getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY);
         uiHandler = new Handler(getMainLooper());
         if(savedInstanceState == null){
             currentPosition = getIntent().getIntExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,0);
@@ -75,6 +84,8 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
         setRunnable();
         setListeners();
         setAnimations();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        Log.d("VaultVideo","Called onCreate");
     }
 
     void setRunnable(){
@@ -82,29 +93,9 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
             @Override
             public void run() {
                 if(videoSeekBar.getVisibility()==View.VISIBLE){
-                    videoSeekBar.setProgress(videoView.getCurrentPosition());
-                    int duration = videoView.getCurrentPosition();
-                    int seconds = (duration/ 1000) % 60 ;
-                    int minutes = ((duration/ (1000*60)) % 60);
-                    int hours   = ((duration/ (1000*60*60)));
-                    String secondsString = ""+seconds;
-                    String minutesString = ""+minutes;
-                    String hoursString = ""+hours;
-                    if(hours<10){
-                        hoursString = "0"+hoursString;
-                    }
-                    if(minutes<10){
-                        minutesString = "0"+minutesString;
-                    }
-                    if(seconds<10){
-                        secondsString = "0"+secondsString;
-                    }
-                    if(hours==0) {
-                        durationText.setText(minutesString + ":" + secondsString);
-                    }
-                    if(hours>0){
-                        durationText.setText(hoursString + ":" + minutesString + ":" + secondsString);
-                    }
+                    int progress = videoView.getCurrentPosition();
+                    videoSeekBar.setProgress(progress);
+                    setDurationText(progress);
                     if(isTopBottomVisible && !isUserSeeking){
                         mediaControlDurationCount.set(mediaControlDurationCount.incrementAndGet());
                         if(mediaControlDurationCount.get()>3 && !isAnimationRunning){
@@ -120,11 +111,49 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
                     }
                 }
                 uiHandler.postDelayed(this,1000);
+                Log.d("VaultVideo","SeekTask Running");
             }
         };
     }
 
     void setListeners(){
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isDeletePressed) {
+                    isDeletePressed=true;
+                    DialogFragment deleteDialog = new VideoPlayerDeleteDialog();
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.addToBackStack("delete_video_dialog");
+                    deleteDialog.show(fragmentTransaction, "delete_video_dialog");
+                    videoView.pause();
+                }
+            }
+        });
+
+        unlockButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isUnlockPressed){
+                    isUnlockPressed = true;
+                    DialogFragment unlockDialog = new VideoPlayerUnlockDialog();
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.addToBackStack("unlock_video_dialog");
+                    unlockDialog.show(fragmentTransaction, "unlock_video_dialog");
+                    videoView.pause();
+                }
+            }
+        });
+
         playPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -192,27 +221,7 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     if(fromUser) {
                         seekBar.setProgress(progress);
-                        int seconds = (progress/ 1000) % 60 ;
-                        int minutes = ((progress/ (1000*60)) % 60);
-                        int hours   = ((progress/ (1000*60*60)));
-                        String secondsString = ""+seconds;
-                        String minutesString = ""+minutes;
-                        String hoursString = ""+hours;
-                        if(hours<10){
-                            hoursString = "0"+hoursString;
-                        }
-                        if(minutes<10){
-                            minutesString = "0"+minutesString;
-                        }
-                        if(seconds<10){
-                            secondsString = "0"+secondsString;
-                        }
-                        if(hours==0) {
-                            durationText.setText(minutesString + ":" + secondsString);
-                        }
-                        if(hours>0){
-                            durationText.setText(hoursString + ":" + minutesString + ":" + secondsString);
-                        }
+                        setDurationText(progress);
                         videoView.seekTo(progress);
                         if(playPauseButton.getVisibility()==View.VISIBLE){
                             playPauseButton.setImageResource(R.drawable.ic_video_pause);
@@ -237,16 +246,16 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-                videoSeekBar.setMax(videoView.getDuration());
                 if(!videoView.isPlaying()){
-                    if(isOrientationChange){
-                        videoSeekBar.setProgress(currentFileSeekProgress);
-                        videoView.seekTo(currentFileSeekProgress);
-                        isOrientationChange = false;
-                    }
+                    uiHandler.removeCallbacks(seekBarTask);
                     videoView.start();
+                    videoSeekBar.setMax(videoView.getDuration());
+                    videoSeekBar.setProgress(currentAudioProgress);
+                    videoView.seekTo(currentAudioProgress);
+                    currentAudioProgress = 0;
                     playPauseButton.setImageResource(R.drawable.ic_video_pause);
                     uiHandler.post(seekBarTask);
+                    isOrientationChange = false;
                     mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
                         @Override
                         public void onSeekComplete(MediaPlayer mp) {
@@ -366,7 +375,7 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
             }
         });
 
-       hideTopBottomSet = new AnimatorSet();
+        hideTopBottomSet = new AnimatorSet();
         hideTopBottomSet.playTogether(hideTopBarAnim,hideBottomBarAnim);
         hideTopBottomSet.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -380,12 +389,37 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
     }
 
     void displayTopBottomBars(){
+        Log.d("VaultVideo",mediaControlDurationCount.get() + " media control duration count");
+        mediaControlDurationCount.set(0);
         displayTopBottomSet.start();
     }
 
     void hideTopBottomBars(){
-
         hideTopBottomSet.start();
+    }
+
+    void setDurationText(int currentProgress){
+        int seconds = (currentProgress/ 1000) % 60 ;
+        int minutes = ((currentProgress/ (1000*60)) % 60);
+        int hours   = ((currentProgress/ (1000*60*60)));
+        String secondsString = ""+seconds;
+        String minutesString = ""+minutes;
+        String hoursString = ""+hours;
+        if(hours<10){
+            hoursString = "0"+hoursString;
+        }
+        if(minutes<10){
+            minutesString = "0"+minutesString;
+        }
+        if(seconds<10){
+            secondsString = "0"+secondsString;
+        }
+        if(hours==0) {
+            durationText.setText(minutesString + ":" + secondsString);
+        }
+        if(hours>0){
+            durationText.setText(hoursString + ":" + minutesString + ":" + secondsString);
+        }
     }
 
     @Override
@@ -401,16 +435,45 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
             displayBottomBarAnim.setIntValues(bottomBarBottomPosition,bottomBarTopPosition);
             hideBottomBarAnim.setIntValues(bottomBarTopPosition,bottomBarBottomPosition);
         }
+        Log.d("VaultVideo","Called Window Focus Change");
+    }
+
+    public void deleteVideo(){
+        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
+                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,videoBucketId)
+                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA)
+                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,
+                        new String[]{HiddenFileContentModel.getMediaId().get(currentPosition)})
+                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
+    }
+
+    public void unlockVideo(){
+       LinkedList<String> IdList =  HiddenFileContentModel.getMediaId();
+        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
+                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,videoBucketId)
+                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA)
+                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,
+                        new String[]{HiddenFileContentModel.getMediaId().get(currentPosition)})
+                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
+    }
+
+    public void deleteVideoCancelled(){
+        isDeletePressed = false;
+        videoView.seekTo(videoSeekBar.getProgress());
+    }
+
+    public void unlockVideoCancelled(){
+        isUnlockPressed = false;
+        videoView.seekTo(videoSeekBar.getProgress());
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if(savedInstanceState!=null){
-            isOrientationChange=true;
-            currentPosition= savedInstanceState.getInt(CURRENT_VIDEO_FILE_POSITION);
-            currentFileSeekProgress = savedInstanceState.getInt(CURRENT_VIDEO_SEEK_PROGRESS,0);
-        }
+        isOrientationChange = false;
+        Log.d("VaultVideo","Called onRestore");
     }
 
     @Override
@@ -420,31 +483,44 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
         if(currentFile.exists()){
             currentFile.renameTo(new File(vaultFileList.get(currentPosition)+"."+fileExtensionList.get(currentPosition)));
         }
+        currentAudioProgress = currentSeekProgressState;
         videoView.setVideoPath(vaultFileList.get(currentPosition)+"."+fileExtensionList.get(currentPosition));
         titleText.setText(originalFileNameList.get(currentPosition));
+        Log.d("VaultVideo","Called onResume");
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         File currentFile = new File(vaultFileList.get(currentPosition)+"."+fileExtensionList.get(currentPosition));
         if(currentFile.exists()){
             currentFile.renameTo(new File(vaultFileList.get(currentPosition)));
         }
+        uiHandler.removeCallbacks(seekBarTask);
+        videoView.stopPlayback();
+        Log.d("VaultVideo","Called onPause");
     }
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(CURRENT_VIDEO_FILE_POSITION,currentPosition);
-        outState.putInt(CURRENT_VIDEO_SEEK_PROGRESS,videoSeekBar.getProgress());
+        isOrientationChange = true;
+        currentSeekProgressState = videoView.getCurrentPosition();
+        Log.d("VaultVideo","Called onSave");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        HiddenFileContentModel.getMediaOriginalName().clear();
-        HiddenFileContentModel.getMediaVaultFile().clear();
-        HiddenFileContentModel.getMediaExtension().clear();
+        if(!isOrientationChange) {
+            currentSeekProgressState = 0;
+            HiddenFileContentModel.getMediaOriginalName().clear();
+            HiddenFileContentModel.getMediaVaultFile().clear();
+            HiddenFileContentModel.getMediaExtension().clear();
+            HiddenFileContentModel.getMediaId().clear();
+            Log.d("VaultVideo","Called Destroy Clear");
+        }
+        Log.d("VaultVideo","Called onDestroy");
     }
 }

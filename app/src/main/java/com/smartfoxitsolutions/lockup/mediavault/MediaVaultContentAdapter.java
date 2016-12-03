@@ -30,7 +30,7 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
     private ArrayList<MediaVaultContentHolder> holders;
     private ArrayList<String> selectedMediaIds;
     private MediaVaultContentActivity activity;
-    private LinkedList<String> vaultMediaPath, originalFileName, fileExtension, thumbnailPath;
+    private LinkedList<String> vaultMediaPath, originalFileName, fileExtension, thumbnailPath, vaultIdList;
     private boolean selectedAll,isSelectionStarted;
     private Drawable placeHolder;
     static boolean isLongPressed;
@@ -44,6 +44,7 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
         originalFileName = new LinkedList<>();
         fileExtension = new LinkedList<>();
         thumbnailPath = new LinkedList<>();
+        vaultIdList = new LinkedList<>();
         HiddenFileContentModel.getMediaExtension().clear();
         HiddenFileContentModel.getMediaOriginalName().clear();
         HiddenFileContentModel.getMediaVaultFile().clear();
@@ -118,7 +119,9 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
             int originalFileNameIndex = mediaCursor.getColumnIndex(MediaVaultModel.ORIGINAL_FILE_NAME);
             int fileExtensionIndex = mediaCursor.getColumnIndex(MediaVaultModel.FILE_EXTENSION);
             int thumbnailPathIndex = mediaCursor.getColumnIndex(MediaVaultModel.THUMBNAIL_PATH);
+            int vaultIdIndex = mediaCursor.getColumnIndex(MediaVaultModel.ID_COLUMN_NAME);
 
+            vaultIdList.add(mediaCursor.getString(vaultIdIndex));
             vaultMediaPath.add(mediaCursor.getString(vaultMediaPathIndex));
             originalFileName.add(mediaCursor.getString(originalFileNameIndex));
             fileExtension.add(mediaCursor.getString(fileExtensionIndex));
@@ -204,23 +207,28 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
                 HiddenFileContentModel.setMediaVaultFile(vaultMediaPath);
                 HiddenFileContentModel.setMediaOriginalName(originalFileName);
                 HiddenFileContentModel.setMediaExtension(fileExtension);
+                HiddenFileContentModel.setMediaId(vaultIdList);
                 activity.startActivity(new Intent(activity.getBaseContext(),VaultImageViewActivity.class)
-                            .putExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,mediaPosition));
+                            .putExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,mediaPosition)
+                            .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,activity.getBucketId()));
             }
             if(activity.getMediaType().equals(MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA)){
                 HiddenFileContentModel.setMediaVaultFile(vaultMediaPath);
                 HiddenFileContentModel.setMediaOriginalName(originalFileName);
                 HiddenFileContentModel.setMediaExtension(fileExtension);
+                HiddenFileContentModel.setMediaId(vaultIdList);
                 activity.startActivity(new Intent(activity.getBaseContext(),VaultVideoPlayerActivity.class)
-                            .putExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,mediaPosition));
+                            .putExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,mediaPosition)
+                            .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,activity.getBucketId()));
             }
             if(activity.getMediaType().equals(MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA)){
                 HiddenFileContentModel.setMediaVaultFile(vaultMediaPath);
                 HiddenFileContentModel.setMediaOriginalName(originalFileName);
                 HiddenFileContentModel.setMediaExtension(fileExtension);
-                HiddenFileContentModel.setIsAudioAlbumChanged(true);
+                HiddenFileContentModel.setMediaId(vaultIdList);
                 activity.startActivity(new Intent(activity.getBaseContext(),VaultAudioPlayerActivity.class)
-                        .putExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,mediaPosition));
+                        .putExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,mediaPosition)
+                        .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,activity.getBucketId()));
             }
 
         }
@@ -232,9 +240,7 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
                 isSelectionStarted = true;
                 activity.startBottomBarAnimation();
             }
-            mediaContentCursor.moveToPosition(mediaPosition);
-            int vaultIdColumnIndex = mediaContentCursor.getColumnIndex(MediaVaultModel.ID_COLUMN_NAME);
-            String vaultIdColumnName = mediaContentCursor.getString(vaultIdColumnIndex);
+            String vaultIdColumnName = vaultIdList.get(mediaPosition);
             if(!selectedMediaIds.contains(vaultIdColumnName)){
                 selectedMediaIds.add(vaultIdColumnName);
                 holder.getItemAnimator().start();

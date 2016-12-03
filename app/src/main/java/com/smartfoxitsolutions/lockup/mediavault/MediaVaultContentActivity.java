@@ -47,6 +47,7 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
     private RecyclerView mediaVaultContentRecycler;
     private int noOfColumns, itemSize;
     private String bucketId, mediaType;
+    private Toolbar toolbar;
     private MediaVaultContentAdapter mediaContentAdapter;
     private AppCompatImageButton selectAllButton,unlockButton, deleteButton;
     private ProgressBar loadingProgress;
@@ -69,7 +70,7 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
         deleteButton = (AppCompatImageButton) findViewById(R.id.vault_media_content_delete_button);
         loadingProgress = (ProgressBar) findViewById(R.id.vault_media_content_activity_progress);
         loadingText = (TextView) findViewById(R.id.vault_media_content_activity_load_text);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.vault_media_content_activity_tool_bar);
+        toolbar = (Toolbar) findViewById(R.id.vault_media_content_activity_tool_bar);
         setBucketId(getIntent().getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY));
         String albumName = getIntent().getStringExtra(MediaAlbumPickerActivity.ALBUM_NAME_KEY);
         setMediaType(getIntent().getStringExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY));
@@ -136,6 +137,13 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
                 if(mediaContentAdapter !=null){
                     mediaContentAdapter.selectedAllImages();
                 }
+            }
+        });
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
             }
         });
 

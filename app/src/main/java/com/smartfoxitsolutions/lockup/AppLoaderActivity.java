@@ -6,13 +6,10 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,8 +17,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Created by RAAJA on 07-09-2016.
@@ -30,6 +25,9 @@ public class AppLoaderActivity extends AppCompatActivity {
 
     private static final int REQUEST_START_ACTIVITY_FIRST_LOAD =2;
     private static final int REQUEST_START_LOCKUP_ACTIVITY = 3;
+    public static final String MEDIA_THUMBNAIL_WIDTH_KEY = "thumbnail_width_key";
+    public static final String MEDIA_THUMBNAIL_HEIGHT_KEY = "thumbnail_height_key";
+    public static final String ALBUM_THUMBNAIL_WIDTH = "album_thumbnail_width";
     private SharedPreferences prefs;
     private static boolean isFirstLoad;
     private ArrayList<String> recommendedAppList;
@@ -58,8 +56,21 @@ public class AppLoaderActivity extends AppCompatActivity {
             array1Resource = Arrays.asList(array1);
         }
         recommendedAppList = new ArrayList<>(array1Resource);
+        measureItemView();
         queryInstalledApps();
 
+    }
+
+    void measureItemView(){
+        Context ctxt = getBaseContext();
+        int viewWidth = Math.round(DimensionConverter.convertDpToPixel(155,ctxt));
+        int viewHeight = Math.round(DimensionConverter.convertDpToPixel(115,ctxt));
+        int itemWidth = Math.round(DimensionConverter.convertDpToPixel(165,ctxt));
+        SharedPreferences.Editor edit = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE).edit();
+        edit.putInt(MEDIA_THUMBNAIL_WIDTH_KEY,viewWidth);
+        edit.putInt(MEDIA_THUMBNAIL_HEIGHT_KEY,viewHeight);
+        edit.putInt(ALBUM_THUMBNAIL_WIDTH,itemWidth);
+        edit.apply();
     }
 
     void queryInstalledApps(){

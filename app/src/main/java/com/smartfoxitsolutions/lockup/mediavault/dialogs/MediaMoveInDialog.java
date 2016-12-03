@@ -41,6 +41,7 @@ public class MediaMoveInDialog extends DialogFragment {
         negativeButton.setText(R.string.vault_move_dialog_move_negative);
         getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        getDialog().setCanceledOnTouchOutside(false);
         return parent;
     }
 

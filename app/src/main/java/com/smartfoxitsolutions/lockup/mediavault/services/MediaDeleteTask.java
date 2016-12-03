@@ -114,6 +114,9 @@ public class MediaDeleteTask implements Runnable {
                     deleteFromVault(mediaCursor);
                 }catch (IOException e){
                     e.printStackTrace();
+                    mssg = uiHandler.obtainMessage();
+                    mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
+                    mssg.sendToTarget();
                 }
             }
         }
@@ -130,6 +133,9 @@ public class MediaDeleteTask implements Runnable {
                     deleteFromVault(mediaCursor);
                 }catch (IOException e){
                     e.printStackTrace();
+                    mssg = uiHandler.obtainMessage();
+                    mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
+                    mssg.sendToTarget();
                 }
 
             }

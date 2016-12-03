@@ -21,6 +21,7 @@ import com.smartfoxitsolutions.lockup.dialogs.OverlayPermissionDialog;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 import com.smartfoxitsolutions.lockup.mediavault.services.MediaMoveService;
 import com.smartfoxitsolutions.lockup.mediavault.MediaVaultAlbumActivity;
+import com.smartfoxitsolutions.lockup.mediavault.services.ShareMoveService;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
 
 /**
@@ -56,14 +57,18 @@ public class LockUpMainActivity extends AppCompatActivity {
         appLockActivityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-              checkAndSetUsagePermissions();
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) {
+                    checkAndSetUsagePermissions();
+                }else{
+                    startActivity(new Intent(getBaseContext(),AppLockActivity.class));
+                }
             }
         });
 
         vaultActivityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!MediaMoveService.SERVICE_STARTED) {
+                if(!MediaMoveService.SERVICE_STARTED && !ShareMoveService.SERVICE_STARTED) {
                     startActivity(new Intent(getBaseContext(), MediaVaultAlbumActivity.class));
                 }else{
                     startActivity(new Intent(getBaseContext(),MediaMoveActivity.class));
@@ -87,6 +92,8 @@ public class LockUpMainActivity extends AppCompatActivity {
                     == AppOpsManager.MODE_ALLOWED) {
                 if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
                         checkAndSetOverlayPermission();
+                }else{
+                    startActivity(new Intent(getBaseContext(),AppLockActivity.class));
                 }
                 Log.d(AppLockingService.TAG,String.valueOf(opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS
                         , Process.myUid(), getPackageName())

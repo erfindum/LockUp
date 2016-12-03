@@ -35,7 +35,6 @@ import java.util.concurrent.Executors;
 public class MediaVaultAlbumActivity extends AppCompatActivity {
 
     private static final int REQUEST_READ_WRITE_EXTERNAL_PERMISSION= 3;
-    private static final String MEDIA_VAULT_FIRST_LOAD_PREF_KEY = "media_vault_first_load";
     public static final int TYPE_IMAGE_MEDIA = 5;
     public static final int TYPE_AUDIO_MEDIA = 8;
     public static final int TYPE_VIDEO_MEDIA = 14;
@@ -43,10 +42,11 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
     private Toolbar toolBar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
-    FloatingActionButton mediaVaultFab;
+    private FloatingActionButton mediaVaultFab;
     private String[] tabTitle;
-    ExecutorService vaultExecutor;
-    SetVaultTask vaultTask;
+    private ExecutorService vaultExecutor;
+    private SetVaultTask vaultTask;
+    private String mediaType;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,6 +56,7 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         tabLayout = (TabLayout) findViewById(R.id.media_vault_activity_tab_layout);
         viewPager = (ViewPager) findViewById(R.id.media_vault_activity_viewPager);
         mediaVaultFab = (FloatingActionButton) findViewById(R.id.media_vault_activity_fab);
+        mediaType = getIntent().getStringExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY);
         setSupportActionBar(toolBar);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -64,7 +65,11 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.M){
         setPermission();
         }else{
-            displayVaultScreens();
+            if(mediaType!=null){
+            displayVaultScreens(mediaType);
+            }else{
+            displayVaultScreens(MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA);
+            }
         }
             setupVaultFolder();
 
@@ -75,6 +80,12 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startMediaFetcherActivity();
+            }
+        });
+        toolBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
             }
         });
     }
@@ -113,7 +124,11 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
                 }
 
             }else{
-                displayVaultScreens();
+                if(mediaType!=null){
+                    displayVaultScreens(mediaType);
+                }else{
+                    displayVaultScreens(MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA);
+                }
             }
         }
     }
@@ -128,7 +143,7 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if(requestCode == REQUEST_READ_WRITE_EXTERNAL_PERMISSION){
             if(grantResults.length>=0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                displayVaultScreens();
+                displayVaultScreens(MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA);
             }
             else{
                 permissionDenied();
@@ -136,15 +151,27 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         }
     }
 
-    void displayVaultScreens(){
+    void displayVaultScreens(String mediaType){
         viewPager.setAdapter(new MediaVaultAlbumPagerAdapter(getSupportFragmentManager(),tabTitle));
         viewPager.setOffscreenPageLimit(2);
-        viewPager.setCurrentItem(1);
+        viewPager.setCurrentItem(getCurrentVaultScreen(mediaType));
         tabLayout.setupWithViewPager(viewPager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle(R.string.media_vault_toolbar_title);
         setFabListener();
+    }
+
+    int getCurrentVaultScreen(String mediaType){
+        switch (mediaType){
+            case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
+                return 1;
+            case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
+                return 2;
+            case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
+                return 0;
+        }
+        return 1;
     }
 
     void setupVaultFolder(){
@@ -200,7 +227,7 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if(vaultExecutor!=null && !vaultExecutor.isShutdown()){
-            vaultExecutor.shutdown();;
+            vaultExecutor.shutdown();
         }
         if(vaultTask!=null){
             vaultTask = null;

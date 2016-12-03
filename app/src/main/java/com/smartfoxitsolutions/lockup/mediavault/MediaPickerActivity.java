@@ -54,6 +54,7 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
     private ValueAnimator bottomBarAnimator;
     private boolean isLockPressed;
     private DialogFragment moveInDialog;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,7 +66,7 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
         lockButton = (AppCompatImageButton) findViewById(R.id.vault_media_picker_lock);
         loadingText = (TextView) findViewById(R.id.vault_media_picker_activity_load_text);
         loadingProgress = (ProgressBar) findViewById(R.id.vault_media_picker_activity_progress);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.vault_media_picker_activity_tool_bar);
+        toolbar = (Toolbar) findViewById(R.id.vault_media_picker_activity_tool_bar);
         setBucketId(getIntent().getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY));
         String albumName = getIntent().getStringExtra(MediaAlbumPickerActivity.ALBUM_NAME_KEY);
         setMediaType(getIntent().getStringExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY));
@@ -126,6 +127,12 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
     }
 
     void setListeners(){
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
         selectAllButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
