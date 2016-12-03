@@ -205,12 +205,14 @@ public class ShareMoveTask implements Runnable {
         }
         Cursor mediaCursor = resolver.query(uri,getProjection(mediaType),null,null,null);
         if(mediaCursor!=null && mediaCursor.getCount()>0) {
+            mediaCursor.moveToFirst();
             int dataIndex = mediaCursor.getColumnIndex(getDataIndex(mediaType));
             int bucketNameIndex = mediaCursor.getColumnIndex(getBucketNameIndex(mediaType));
             String dataPath = mediaCursor.getString(dataIndex);
             String uniqueBucketName = mediaCursor.getString(bucketNameIndex);
             String uniqueBucketId = "";
             if (mediaType.equals(ShareMoveService.TYPE_AUDIO_MEDIA)) {
+                uniqueBucketName = getAudioBucketName(dataPath);
                 uniqueBucketId = getBucketId(uniqueBucketName);
             } else {
                 uniqueBucketId = getBucketId(dataPath.substring(0, dataPath.lastIndexOf(File.separator)));
