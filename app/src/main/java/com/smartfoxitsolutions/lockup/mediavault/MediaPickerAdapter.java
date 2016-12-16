@@ -24,11 +24,10 @@ import java.util.ArrayList;
 public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements MediaPickerHolder.OnMediaPickedListener {
 
     private ArrayList<MediaPickerHolder> holder;
-    private ArrayList<String> selectedMediaIds;
+    private ArrayList<String> selectedMediaIds, mediaIdList;
     private MediaPickerActivity activity;
      Cursor mediaCursor;
     private boolean selectedAll,isSelectionStarted;
-    private StringBuilder mediaIdString;
     private int itemSize;
     private Drawable placeHolder;
 
@@ -37,20 +36,31 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
          this.mediaCursor = cursor;
         holder = new ArrayList<>();
         selectedMediaIds = new ArrayList<>();
-        mediaIdString = new StringBuilder();
+         mediaIdList = new ArrayList<>();
         loadPlaceHolderImages();
+         loadCursorData();
     }
 
     void swapCursor(Cursor cursor){
         if(cursor!=null){
             this.mediaCursor = cursor;
-            activity.loadingComplete();
-            notifyDataSetChanged();
+            loadCursorData();
         }
         else{
             this.mediaCursor = null;
             notifyDataSetChanged();
         }
+    }
+
+    void loadCursorData(){
+        mediaCursor.moveToFirst();
+        do {
+            int idIndex = mediaCursor.getColumnIndex(getIdIndex());
+            mediaIdList.add(mediaCursor.getString(idIndex));
+
+        }while(mediaCursor.moveToNext());
+        notifyDataSetChanged();
+        activity.loadingComplete();
     }
 
     void selectedAllImages(){
@@ -149,13 +159,9 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        mediaIdString.delete(0, mediaIdString.length());
         MediaPickerHolder mediaHolder = (MediaPickerHolder) holder;
-        mediaCursor.moveToPosition(position);
-        int mediaIdIndex = mediaCursor.getColumnIndex(getIdIndex());
-        mediaIdString.append(mediaCursor.getString(mediaIdIndex));
         Uri uri;
-        uri = Uri.parse(getExternalMediaUri()+"/"+ mediaIdString.toString());
+        uri = Uri.parse(getExternalMediaUri()+"/"+mediaIdList.get(position) );
 
         switch (activity.getMediaType()){
             case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
@@ -178,15 +184,18 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                         .into(mediaHolder.getThumbnailView());
         }
-        if(!selectedAll) {
-                    if (!selectedMediaIds.contains(mediaIdString.toString())) {
-                        mediaHolder.setItemDeselected();
-                    } else if (selectedMediaIds.contains(mediaIdString.toString())) {
-                        mediaHolder.setItemSelected();
-                    }
-        }else{
+
+        if (!selectedMediaIds.contains(mediaIdList.get(position))) {
+            mediaHolder.setItemDeselected();
+        } else if (selectedMediaIds.contains(mediaIdList.get(position))) {
             mediaHolder.setItemSelected();
         }
+
+      /*  if(!selectedAll) {
+
+        }else{
+            mediaHolder.setItemSelected();
+        } */
     }
 
     @Override
@@ -206,6 +215,7 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             for(MediaPickerHolder imageHolder:holder){
                 imageHolder.setItemSelected();
             }
+            selectedMediaIds.addAll(mediaIdList);
         }else{
             for(MediaPickerHolder imageHolder:holder){
                 imageHolder.setItemDeselected();
@@ -220,14 +230,11 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             isSelectionStarted = true;
             activity.startBottomBarAnimation();
         }
-        mediaCursor.moveToPosition(mediaPosition);
-        int mediaIdIndex = mediaCursor.getColumnIndex(getIdIndex());
-        String mediaId = mediaCursor.getString(mediaIdIndex);
-        if(!selectedMediaIds.contains(mediaId)){
-            selectedMediaIds.add(mediaId);
+        if(!selectedMediaIds.contains(mediaIdList.get(mediaPosition))){
+            selectedMediaIds.add(mediaIdList.get(mediaPosition));
             holder.getItemAnimator().start();
         }else{
-            selectedMediaIds.remove(mediaId);
+            selectedMediaIds.remove(mediaIdList.get(mediaPosition));
             holder.setItemDeselected();
         }
     }

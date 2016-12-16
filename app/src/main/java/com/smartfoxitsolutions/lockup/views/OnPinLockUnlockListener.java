@@ -5,7 +5,7 @@ package com.smartfoxitsolutions.lockup.views;
  */
 
 public interface OnPinLockUnlockListener {
-    void onPinUnlocked(String packageName);
+    void onPinUnlocked();
 
-    void onPinLocked();
+    void onPinLocked(String packageName);
 }

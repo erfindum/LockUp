@@ -1,5 +1,9 @@
 package com.smartfoxitsolutions.lockup.mediavault.dialogs;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -10,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.R;
@@ -47,24 +52,56 @@ public class AudioPlayerDeleteDialog extends DialogFragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onStart() {
+        super.onStart();
+
+        final View dialogView = getDialog().getWindow().getDecorView();
         final VaultAudioPlayerActivity activity = (VaultAudioPlayerActivity) getActivity();
+
+        ObjectAnimator displayAnimator = ObjectAnimator.ofPropertyValuesHolder(
+                dialogView,
+                PropertyValuesHolder.ofFloat("scaleX",0.0f,1.1f),
+                PropertyValuesHolder.ofFloat("scaleY",0.0f,1.1f),
+                PropertyValuesHolder.ofFloat("alpha",0.0f,1.0f));
+        displayAnimator.setDuration(400).setInterpolator(new AccelerateDecelerateInterpolator());
+        displayAnimator.start();
+
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.deleteAudio();
-                dismiss();
+                ObjectAnimator dismissAnimator = ObjectAnimator.ofPropertyValuesHolder(
+                        dialogView,
+                        PropertyValuesHolder.ofFloat("alpha",1.0f,0.0f));
+                dismissAnimator.setDuration(200).setInterpolator(new AccelerateDecelerateInterpolator());
+                dismissAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        activity.deleteAudio();
+                        dismiss();
+                    }
+                });
+                dismissAnimator.start();
             }
         });
 
         negativeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.deleteAudioCancelled();
-                dismiss();
+                ObjectAnimator dismissAnimator = ObjectAnimator.ofPropertyValuesHolder(
+                        dialogView,
+                        PropertyValuesHolder.ofFloat("alpha",1.0f,0.0f));
+                dismissAnimator.setDuration(200).setInterpolator(new AccelerateDecelerateInterpolator());
+                dismissAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        activity.deleteAudioCancelled();
+                        dismiss();
+                    }
+                });
+                dismissAnimator.start();
             }
         });
     }
-
 }

@@ -24,7 +24,9 @@ public class AppLockModel {
     public static final String NOTIFICATION_CHECKED_APPS_SHARED_PREF_KEY = "notificationAppsMap";
     public static final String RECOMMENDED_APPS_SHARED_PREF_KEY = "recommendedInstallerLock";
     public static final String CHECKED_APPS_COLOR_SHARED_PREF_KEY = "checkedAppsColorMap";
+
     public static final String USER_SET_LOCK_PASS_CODE = "userLockPasscode";
+    public static final String DEFAULT_APP_BACKGROUND_COLOR_KEY = "defaultAppBackgroundColor";
 
     static final String NOTIFICATION_ACTIVITY_CHECKED_APPS_NAME_KEY = "notificationCheckedAppsName";
     static final String NOTIFICATION_ACTIVITY_CHECKED_APPS_PACKAGE_KEY = "notificationCheckedAppsPackage";

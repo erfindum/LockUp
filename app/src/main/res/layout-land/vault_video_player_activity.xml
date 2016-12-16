@@ -38,6 +38,7 @@
             android:layout_toEndOf="@+id/vault_video_player_activity_back_button"
             android:layout_centerVertical="true"
             android:maxLines="1"
+            android:ellipsize="end"
             android:textColor="@color/white"
             android:textSize="@dimen/twentySpDimension"
             android:layout_marginRight="@dimen/tenDpDimension"

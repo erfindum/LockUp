@@ -30,7 +30,7 @@ import java.util.ArrayList;
 public class PatternLockView extends View {
 
     private float nodeRectSize,nodeCornerSize, nodeSelectedCornerSize, patternLineWidth;
-    private int patternViewDimension;
+    private int patternViewDimension,linePaintAlpha;
     private String[] nodeColor,nodeSelectedColor;
     private int nodeDefaultColor, nodeDefaultSelectedColor,patternLineColor;
     private boolean patternError, drawPattern;
@@ -66,6 +66,7 @@ public class PatternLockView extends View {
         int nodeSelectedDefaultColorID=attributeArray.getColor(R.styleable.PatternLockView_nodeSelectedDefaultColor,Color.RED);
         int nodeColorResourceID = attributeArray.getResourceId(R.styleable.PatternLockView_nodeColor,0);
         int nodeSelectedColorResourceID = attributeArray.getResourceId(R.styleable.PatternLockView_nodeSelectedColor,0);
+        int linePaintAlphaID = attributeArray.getResourceId(R.styleable.PatternLockView_linePaintTransparency,125);
         attributeArray.recycle();
 
         setNodeCornerSize(nodeCornerSizePixel);
@@ -75,6 +76,7 @@ public class PatternLockView extends View {
         setNodeDefaultColor(nodeDefaultColorID);
         setPatternLineColor(patternLineColorID);
         setNodeDefaultSelectedColor(nodeSelectedDefaultColorID);
+        setLinePaintTransparency(linePaintAlphaID);
         if(nodeColorResourceID !=0){
            String[] colorResource =  getResources().getStringArray(nodeColorResourceID);
             setNodeColor(colorResource);
@@ -175,6 +177,11 @@ public class PatternLockView extends View {
         this.patternListener = patternListener;
     }
 
+    public void setLinePaintTransparency(int transparency){
+        this.linePaintAlpha = transparency;
+        setLinePaint();
+    }
+
     public void setNodePaint(){
         this.nodePaint = new Paint();
         nodePaint.setStyle(Paint.Style.FILL);
@@ -187,34 +194,34 @@ public class PatternLockView extends View {
         linePaint.setFlags(Paint.ANTI_ALIAS_FLAG);
         linePaint.setStrokeWidth(getPatternLineWidth());
         linePaint.setColor(getPatternLineColor());
-        linePaint.setAlpha(125);
+        linePaint.setAlpha(getLinePaintTransparency());
     }
 
     private void setPathMeasure(){
         this.pathMeasure = new PathMeasure(getPatternPath(),false);
     }
 
-    public float getNodeRectSize(){
+    private float getNodeRectSize(){
         return this.nodeRectSize;
     }
 
-    public  float getNodeCornerSize(){
+    private  float getNodeCornerSize(){
         return this.nodeCornerSize;
     }
 
-    public float getNodeSelectedCornerSize(){
+    private float getNodeSelectedCornerSize(){
         return this.nodeSelectedCornerSize;
     }
 
-    public float getPatternLineWidth(){
+    private float getPatternLineWidth(){
         return this.patternLineWidth;
     }
 
-    public int getPatternViewDimension(){
+    private int getPatternViewDimension(){
         return this.patternViewDimension;
     }
 
-    public Path getPatternPath(){
+    private Path getPatternPath(){
         if(patternPath==null){
             return new Path();
         }else{
@@ -222,39 +229,39 @@ public class PatternLockView extends View {
         }
     }
 
-    public String[] getNodeColor(){
+    private String[] getNodeColor(){
         return this.nodeColor;
     }
 
-    public String[] getNodeSelectedColor(){
+    private String[] getNodeSelectedColor(){
         return this.nodeSelectedColor;
     }
 
-    public int getPatternLineColor(){
+    private int getPatternLineColor(){
         return this.patternLineColor;
     }
 
-    public int getNodeDefaultColor(){
+    private int getNodeDefaultColor(){
         return this.nodeDefaultColor;
     }
 
-    public int getNodeDefaultSelectedColor(){
+    private int getNodeDefaultSelectedColor(){
         return this.nodeDefaultSelectedColor;
     }
 
-    public float getPrevNodeX(){
+    private float getPrevNodeX(){
         return this.prevNodeX;
     }
 
-    public float getPrevNodeY(){
+    private float getPrevNodeY(){
         return this.prevNodeY;
     }
 
-    public float getCurrentMovementX(){
+    private float getCurrentMovementX(){
         return this.currentMovementX;
     }
 
-    public float getCurrentMovementY(){
+    private float getCurrentMovementY(){
         return this.currentMovementY;
     }
 
@@ -272,12 +279,16 @@ public class PatternLockView extends View {
         return this.patternListener;
     }
 
-    public Paint getNodePaint(){
+    private Paint getNodePaint(){
         return this.nodePaint;
     }
 
-    public Paint getLinePaint(){
+    private Paint getLinePaint(){
         return this.linePaint;
+    }
+
+    private int getLinePaintTransparency(){
+        return this.linePaintAlpha;
     }
 
     private PathMeasure getPathMeasure(){
@@ -303,6 +314,12 @@ public class PatternLockView extends View {
          * @param patternCompleted The boolean value notifying the pattern completion
          */
         void onPatternCompleted(boolean patternCompleted);
+
+        /**
+         * Called when in error state.Used to stop Error Animation if running and reset pattern view.
+         */
+
+        void onErrorStop();
     }
 
     /**
@@ -460,11 +477,11 @@ public class PatternLockView extends View {
 
    public void resetPatternView(){
         resetIsNodeSelected();
-        setPatternError(false);
-        setDrawPattern(false);
         getPatternPath().rewind();
        getLinePaint().setColor(getPatternLineColor());
-       getLinePaint().setAlpha(125);
+       getLinePaint().setAlpha(getLinePaintTransparency());
+       setPatternError(false);
+       setDrawPattern(false);
         invalidate();
     }
 
@@ -580,6 +597,10 @@ public class PatternLockView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
+        if(isPatternError() && getOnPatternChangedListener() != null){
+            getOnPatternChangedListener().onErrorStop();
+            return true;
+        }
         if(!isPatternError() && getOnPatternChangedListener()!=null){
             return handlePatternGesture(event);
         }

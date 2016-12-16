@@ -35,6 +35,7 @@
             android:layout_toEndOf="@+id/vault_audio_player_activity_back_button"
             android:layout_centerVertical="true"
             android:maxLines="1"
+            android:ellipsize="end"
             android:textColor="#BBDEFB"
             android:textSize="@dimen/twentySpDimension"
             android:layout_marginRight="@dimen/tenDpDimension"

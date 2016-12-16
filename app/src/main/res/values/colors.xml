@@ -8,6 +8,7 @@
 
     <color name="textSecondaryColor">#42A5F5</color>
     <color name="textPrimaryColor">#536E7A</color>
+    <color name="textSettingsSecondary">#90CAF9</color>
     <color name="dividerColor">#BDBDBD</color>
     <color name="textDarkGrey">#536E7A</color>
     <color name="viewPagerTabBlue">#90CAF9</color>

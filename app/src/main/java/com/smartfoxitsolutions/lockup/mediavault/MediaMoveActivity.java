@@ -1,7 +1,6 @@
 package com.smartfoxitsolutions.lockup.mediavault;
 
 import android.app.NotificationManager;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,11 +11,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -26,7 +22,6 @@ import com.smartfoxitsolutions.lockup.mediavault.dialogs.ShareAlertDialog;
 import com.smartfoxitsolutions.lockup.mediavault.services.MediaMoveService;
 import com.smartfoxitsolutions.lockup.mediavault.services.ShareMoveService;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
@@ -42,11 +37,6 @@ public class MediaMoveActivity extends AppCompatActivity {
     public static final int MOVE_TYPE_OUT_OF_VAULT = 6;
     public static final int MOVE_TYPE_DELETE_FROM_VAULT = 7;
 
-    public static final String MEDIA_FILE_NAMES_KEY = "media_file_names";
-
-    public static final String MEDIA_SELECTION_TYPE = "media_selection_type";
-    public static final int MEDIA_SELECTION_TYPE_ALL = 8;
-    public static final int MEDIA_SELECTION_TYPE_UNIQUE = 9;
 
     public static final String SHARE_MEDIA_FILE_LIST_KEY = "share_file_list";
 
@@ -56,9 +46,8 @@ public class MediaMoveActivity extends AppCompatActivity {
     ProgressBar countProgress;
     Button doneButton;
     TextView moveText, moveInfoText;
-    int moveType, mediaSelectionType, selectedFileCount;
+    int moveType;
     String albumBucketId, mediaType;
-    String[] selectedMediaId,fileNames;
     AtomicLong timestamp;
     boolean isOperationComplete,hasMoveStarted,shouldDisplayShareAlert;
 
@@ -100,16 +89,9 @@ public class MediaMoveActivity extends AppCompatActivity {
         setMoveBackgroundButton();
         registerListeners();
         moveType = intent.getIntExtra(VAULT_TYPE_KEY,0);
-        mediaSelectionType = intent.getIntExtra(MEDIA_SELECTION_TYPE,0);
         albumBucketId = intent.getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY);
         mediaType = intent.getStringExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY);
-        if(mediaSelectionType==MEDIA_SELECTION_TYPE_UNIQUE) {
-            selectedMediaId = intent.getStringArrayExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY);
-        }
-        if(moveType == MOVE_TYPE_INTO_VAULT) {
-            selectedFileCount = intent.getIntExtra(MediaAlbumPickerActivity.SELECTED_FILE_COUNT_KEY,0);
-            setFileNames();
-        }
+        setFileNames();
         setMoveText();
         startMoveService();
     }
@@ -162,12 +144,13 @@ public class MediaMoveActivity extends AppCompatActivity {
         return 0;
     }
 
-    private boolean setFileNames(){
-        fileNames = new String[selectedFileCount];
-        for(int i =0;i<fileNames.length;i++){
-            fileNames[i] = String.valueOf(getFileTimeStamp());
+    private void setFileNames(){
+        SelectedMediaModel selectedMediaModel = SelectedMediaModel.getInstance();
+        ArrayList<String> fileNamesList = new ArrayList<>(selectedMediaModel.getSelectedMediaIdList().size());
+        for(int i =0; i<selectedMediaModel.getSelectedMediaIdList().size();i++){
+            fileNamesList.add(String.valueOf(getFileTimeStamp()));
         }
-        return true;
+        selectedMediaModel.setSelectedMediaFileNameList(fileNamesList);
     }
 
     private void displayShareAlertDialog(){
@@ -210,69 +193,32 @@ public class MediaMoveActivity extends AppCompatActivity {
         Messenger messenger = new Messenger(new MoveHandler(getWeakReference()));
         Intent serviceIntent;
         if(moveType==MOVE_TYPE_INTO_VAULT) {
-            if(mediaSelectionType == MEDIA_SELECTION_TYPE_ALL) {
-                serviceIntent = new Intent(this, MediaMoveService.class);
-                serviceIntent.putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
-                        .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY, albumBucketId)
-                        .putExtra(MEDIA_FILE_NAMES_KEY,fileNames)
-                        .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY, mediaType)
-                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY, MediaMoveActivity.MOVE_TYPE_INTO_VAULT)
-                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
+            serviceIntent = new Intent(this, MediaMoveService.class);
+            serviceIntent
+                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,albumBucketId)
+                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,mediaType)
+                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT)
+                    .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
                 startService(serviceIntent);
-            }
-            if(mediaSelectionType == MEDIA_SELECTION_TYPE_UNIQUE){
-                serviceIntent = new Intent(this, MediaMoveService.class);
-                serviceIntent.putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
-                        .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,albumBucketId)
-                        .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,mediaType)
-                        .putExtra(MEDIA_FILE_NAMES_KEY,fileNames)
-                        .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,selectedMediaId)
-                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT)
-                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
-                startService(serviceIntent);
-            }
+
         }
         if(moveType == MOVE_TYPE_OUT_OF_VAULT){
-            if(mediaSelectionType == MEDIA_SELECTION_TYPE_ALL) {
-                serviceIntent = new Intent(this, MediaMoveService.class);
-                serviceIntent.putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
-                        .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY, albumBucketId)
-                        .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY, mediaType)
-                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY, MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT)
-                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
+            serviceIntent = new Intent(this, MediaMoveService.class);
+            serviceIntent
+                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,albumBucketId)
+                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,mediaType)
+                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT)
+                    .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
                 startService(serviceIntent);
-            }
-            if(mediaSelectionType == MEDIA_SELECTION_TYPE_UNIQUE){
-                serviceIntent = new Intent(this, MediaMoveService.class);
-                serviceIntent.putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
-                        .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,albumBucketId)
-                        .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,mediaType)
-                        .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,selectedMediaId)
-                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT)
-                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
-                startService(serviceIntent);
-            }
         }
         if(moveType == MOVE_TYPE_DELETE_FROM_VAULT){
-            if(mediaSelectionType == MEDIA_SELECTION_TYPE_ALL) {
-                serviceIntent = new Intent(this, MediaMoveService.class);
-                serviceIntent.putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
-                        .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY, albumBucketId)
-                        .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY, mediaType)
-                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY, MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT)
-                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
-                startService(serviceIntent);
-            }
-            if(mediaSelectionType == MEDIA_SELECTION_TYPE_UNIQUE){
-                serviceIntent = new Intent(this, MediaMoveService.class);
-                serviceIntent.putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
-                        .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,albumBucketId)
-                        .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,mediaType)
-                        .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,selectedMediaId)
-                        .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT)
-                        .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
-                startService(serviceIntent);
-            }
+            serviceIntent = new Intent(this, MediaMoveService.class);
+            serviceIntent
+                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,albumBucketId)
+                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,mediaType)
+                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT)
+                    .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger);
+            startService(serviceIntent);
         }
     }
 

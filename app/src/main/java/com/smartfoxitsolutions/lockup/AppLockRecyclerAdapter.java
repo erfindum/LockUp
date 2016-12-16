@@ -33,6 +33,7 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     public static int HEADER_MARGIN_SIZE_TEN;
     public static int HEADER_MARGIN_SIZE_FIFTEEN;
+    public  static int HEADER_MARGIN_SIZE_MINUS_SEVEN;
 
 
     private static final int ITEM_POSITION_RANGE_HEADER_ONE = 3;
@@ -276,6 +277,14 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                             HEADER_MARGIN_SIZE_FIFTEEN,
                             HEADER_MARGIN_SIZE_TEN, 0);
                     headerView.getHeaderView().setLayoutParams(layoutParams);
+                }else{
+                    headerView.getHeaderText().setText(R.string.appLock_activity_installed_apps_header);
+                    CardView.LayoutParams layoutParams = new FrameLayout.LayoutParams(headerView.getHeaderView().getLayoutParams());
+
+                    layoutParams.setMargins(HEADER_MARGIN_SIZE_TEN,
+                            HEADER_MARGIN_SIZE_FIFTEEN,
+                            HEADER_MARGIN_SIZE_TEN,HEADER_MARGIN_SIZE_MINUS_SEVEN );
+                    headerView.getHeaderView().setLayoutParams(layoutParams);
                 }
                 headerView.getHeaderText().setText(R.string.appLock_activity_installed_apps_header);
             }
@@ -381,6 +390,7 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                             activity.startActivity(new Intent(activity.getBaseContext(), NotificationLockActivity.class)
                                     .putExtra(AppLockModel.NOTIFICATION_ACTIVITY_CHECKED_APPS_NAME_KEY, getCheckedAppsNames())
                                     .putExtra(AppLockModel.NOTIFICATION_ACTIVITY_CHECKED_APPS_PACKAGE_KEY, getCheckedAppsPackages()));
+                            activity.shouldTrackUserPresence = false;
                         return;
                     }else{
                         activity.startNotificationPermissionDialog();
@@ -496,11 +506,6 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         appLockModel.updateAppPackages(checkedAppsMap,AppLockModel.CHECKED_APPS_PACKAGE);
         appLockModel.updateRecommendedAppPackages(recommendedAppsMap);
         appLockModel.updateAppPackages(notificationAppsMap,AppLockModel.NOTIFICATION_CHECKED_APPS_PACKAGE);
-
-        appLockModel.loadAppPackages(AppLockModel.INSTALLED_APPS_PACKAGE);
-        appLockModel.loadAppPackages(AppLockModel.CHECKED_APPS_PACKAGE);
-        appLockModel.loadAppPackages(AppLockModel.RECOMMENDED_APPS_PACKAGE);
-        appLockModel.loadAppPackages(AppLockModel.NOTIFICATION_CHECKED_APPS_PACKAGE);
     }
 
     void closeAppLockRecyclerAdapter(){

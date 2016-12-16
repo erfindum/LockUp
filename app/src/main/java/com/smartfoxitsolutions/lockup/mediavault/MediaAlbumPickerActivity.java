@@ -19,7 +19,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-
 import com.smartfoxitsolutions.lockup.AppLoaderActivity;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.R;
@@ -44,13 +43,14 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
     private ProgressBar loadingProgress;
     int viewWidth, viewHeight,noOfColumns;
     private String mediaType;
-    private Toolbar toolbar;
+    private boolean shouldTrackUserPresence, shouldCloseAffinity;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.vault_album_picker_activity);
-        toolbar = (Toolbar) findViewById(R.id.vault_album_picker_activity_tool_bar);
+        shouldTrackUserPresence = true;
+        Toolbar toolbar = (Toolbar) findViewById(R.id.vault_album_picker_activity_tool_bar);
         mediaPickerBuckRecycler = (RecyclerView)findViewById(R.id.vault_album_picker_activity_recycler);
         loadingProgress = (ProgressBar)findViewById(R.id.vault_album_picker_activity_progress);
         loadingText = (TextView)findViewById(R.id.vault_album_picker_activity_load_text);
@@ -170,17 +170,41 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,albumId)
                 .putExtra(MediaAlbumPickerActivity.ALBUM_NAME_KEY,albumName)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType()));
+        shouldTrackUserPresence = false;
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onRestart() {
+        super.onRestart();
+        shouldTrackUserPresence = true;
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        if(shouldTrackUserPresence){
+            shouldCloseAffinity = true;
+        }else{
+            shouldCloseAffinity = false;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(shouldCloseAffinity){
+            if(mediaAdapter!=null){
+                mediaAdapter.closeResources();
+                mediaAdapter = null;
+            }
+            finishAffinity();
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mediaAdapter !=null){
+        if(!shouldCloseAffinity && mediaAdapter !=null){
             mediaAdapter.closeResources();
             mediaAdapter = null;
         }

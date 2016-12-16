@@ -89,8 +89,8 @@ public class ShareMoveService extends Service implements Handler.Callback{
         }
         else{
             Context ctxt = getBaseContext();
-            viewWidth = Math.round(DimensionConverter.convertDpToPixel(155,ctxt));
-            viewHeight = Math.round(DimensionConverter.convertDpToPixel(115,ctxt));
+            viewWidth = Math.round(DimensionConverter.convertDpToPixel(165,ctxt));
+            viewHeight = Math.round(DimensionConverter.convertDpToPixel(120,ctxt));
             itemWidth = Math.round(DimensionConverter.convertDpToPixel(165,ctxt));
             SharedPreferences.Editor edit = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE).edit();
             edit.putInt(AppLoaderActivity.MEDIA_THUMBNAIL_WIDTH_KEY,viewWidth);

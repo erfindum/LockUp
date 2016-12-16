@@ -32,6 +32,15 @@
         android:textColor="@color/white"
         android:textAlignment="center"
         />
+    <ProgressBar
+        android:id="@+id/media_move_activity_move_count_progress"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_below="@+id/media_move_activity_move_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/tenDpDimension"
+        android:visibility="invisible"
+        />
 
     <TextView
         android:id="@+id/media_move_activity_move_info"

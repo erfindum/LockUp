@@ -19,7 +19,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ProgressBar;
@@ -57,14 +56,15 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
     private ValueAnimator bottomBarAnimator;
     private boolean isLockPressed,isDeletePressed;
     private DialogFragment moveOutDialog, deleteFilesDialog;
+    boolean shouldTrackUserPresence, shouldCloseAffinity;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        shouldTrackUserPresence = true;
         setContentView(R.layout.vault_media_content_activity);
         mediaVaultContentRecycler = (RecyclerView) findViewById(R.id.vault_media_content_recycler);
         bottomBar = (RelativeLayout) findViewById(R.id.vault_media_content_bottom_bar);
-        bottomBar.setVisibility(View.GONE);
         selectAllButton = (AppCompatImageButton) findViewById(R.id.vault_media_content_select_all);
         unlockButton = (AppCompatImageButton) findViewById(R.id.vault_media_content_unlock);
         deleteButton = (AppCompatImageButton) findViewById(R.id.vault_media_content_delete_button);
@@ -174,10 +174,6 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
                     return;
                 }
                 if (mediaContentAdapter !=null && !isDeletePressed){
-                    Log.d("VaultMedia",mediaContentAdapter.getSelectedMediaIds().size() + " selected size");
-                    for(String id : mediaContentAdapter.getSelectedMediaIds()){
-                        Log.d("VaultMedia",id + " selected file");
-                    }
                     isDeletePressed = true;
                     deleteFilesDialog = new MediaDeleteDialog();
                     FragmentManager fragmentManager = getSupportFragmentManager();
@@ -192,47 +188,25 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
     }
 
     public void moveMediaFiles(){
-        if(mediaContentAdapter.getSelectedAll()){
-            startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                    .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
-                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
-                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
-                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
-        }
-
-        if(!mediaContentAdapter.getSelectedAll() && !mediaContentAdapter.getSelectedMediaIds().isEmpty()){
-            selectedMediaId = mediaContentAdapter.getSelectedMediaIds();
-            String[] mediaIdArray = new String[selectedMediaId.size()];
-            String[] mediaId =selectedMediaId.toArray(mediaIdArray);
-            startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                    .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
-                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
-                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
-                    .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,mediaId)
-                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
-        }
+        SelectedMediaModel selectedMediaModel = SelectedMediaModel.getInstance();
+        selectedMediaModel.setSelectedMediaIdList(mediaContentAdapter.getSelectedMediaIds());
+        MediaVaultContentAdapter.isLongPressed=false;
+        startActivity(new Intent(this,MediaMoveActivity.class)
+                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
+                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
+                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
+        shouldTrackUserPresence = false;
     }
 
     public void deleteMediaFiles(){
-        if(mediaContentAdapter.getSelectedAll()){
-            startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                    .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
-                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
-                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
-                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
-        }
-
-        if(!mediaContentAdapter.getSelectedAll() && !mediaContentAdapter.getSelectedMediaIds().isEmpty()){
-            selectedMediaId = mediaContentAdapter.getSelectedMediaIds();
-            String[] mediaIdArray = new String[selectedMediaId.size()];
-            String[] mediaId =selectedMediaId.toArray(mediaIdArray);
-            startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                    .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
-                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
-                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
-                    .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,mediaId)
-                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
-        }
+        SelectedMediaModel selectedMediaModel = SelectedMediaModel.getInstance();
+        selectedMediaModel.setSelectedMediaIdList(mediaContentAdapter.getSelectedMediaIds());
+        MediaVaultContentAdapter.isLongPressed=false;
+        startActivity(new Intent(this,MediaMoveActivity.class)
+                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
+                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
+                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
+        shouldTrackUserPresence = false;
     }
 
     public void moveMediaCancelled(){
@@ -243,14 +217,21 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
         isDeletePressed = false;
     }
 
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if(hasFocus) {
+            bottomBarAnimator.setIntValues(bottomBar.getBottom(), bottomBar.getTop());
+        }
+    }
+
     void setBottomBarAnimation(){
-        bottomBarAnimator = ValueAnimator.ofInt(0,1);
-        bottomBarAnimator.setDuration(500).setInterpolator(new AccelerateDecelerateInterpolator());
+        bottomBarAnimator = new ValueAnimator();
+        bottomBarAnimator.setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator());
         bottomBarAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
-                bottomBar.setScaleY(0);
                 bottomBar.setVisibility(View.VISIBLE);
             }
 
@@ -263,8 +244,7 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
         bottomBarAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                Log.d("Vault",animation.getAnimatedValue() + "");
-                bottomBar.setScaleY((int) animation.getAnimatedValue());
+                bottomBar.setTop((int) animation.getAnimatedValue());
             }
         });
     }
@@ -359,6 +339,22 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        shouldTrackUserPresence = true;
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        if(shouldTrackUserPresence){
+            shouldCloseAffinity = true;
+        }else{
+            shouldCloseAffinity = false;
+        }
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         if(mediaContentAdapter!=null){
@@ -367,9 +363,20 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        if(shouldCloseAffinity){
+            if(mediaContentAdapter !=null){
+                mediaContentAdapter.closeAdapter();
+            }
+            finishAffinity();
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mediaContentAdapter !=null){
+        if(!shouldCloseAffinity && mediaContentAdapter !=null){
             mediaContentAdapter.closeAdapter();
         }
     }

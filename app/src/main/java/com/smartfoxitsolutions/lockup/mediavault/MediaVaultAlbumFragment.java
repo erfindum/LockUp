@@ -13,6 +13,7 @@ import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -211,6 +212,7 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,albumId)
                 .putExtra(MediaAlbumPickerActivity.ALBUM_NAME_KEY,albumName)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType()));
+        activity.shouldTrackUserPresence = false;
     }
 
     @Override
@@ -228,9 +230,25 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        if(activity.shouldCloseAffinity) {
+            closeFragment();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
-        closeFragment();
+        Log.d("VaultMain",String.valueOf(activity!=null));
+        if(activity!=null && !activity.shouldCloseAffinity){
+            closeFragment();
+        }
     }
 
     void closeFragment(){

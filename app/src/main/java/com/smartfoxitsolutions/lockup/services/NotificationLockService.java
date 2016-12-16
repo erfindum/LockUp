@@ -150,7 +150,7 @@ public class NotificationLockService extends NotificationListenerService impleme
         Log.d("NotificationLock",String.valueOf(notif.priority == Notification.PRIORITY_HIGH) + " priority High");
         Log.d("NotificationLock",String.valueOf(notif.priority == Notification.PRIORITY_MAX) + " priority Max");
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            if(!AppLockingService.recentlyUnlockedApp.equals(sbn.getPackageName())) {
+            if(!AppLockingService.recentlyLockedApp.equals(sbn.getPackageName())) {
                 int notificationId = sbn.getId();
                 if (notificationIdMap.get(notificationId) == null) {
                     notificationIdMap.put(notificationId, 1);
@@ -191,7 +191,6 @@ public class NotificationLockService extends NotificationListenerService impleme
                 }
                 if ((notif.priority == Notification.PRIORITY_HIGH || notif.priority == Notification.PRIORITY_MAX)) {
                     builder.setPriority(Notification.PRIORITY_MAX);
-                    //
                 }
                 builder.build();
 
@@ -203,7 +202,7 @@ public class NotificationLockService extends NotificationListenerService impleme
             }
         }
         else if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2 && Build.VERSION.SDK_INT<Build.VERSION_CODES.LOLLIPOP){
-            if(!AppLockingService.recentlyUnlockedApp.equals(sbn.getPackageName())) {
+            if(!AppLockingService.recentlyLockedApp.equals(sbn.getPackageName())) {
                 int notificationId = sbn.getId();
                 if (notificationIdMap.get(notificationId) == null) {
                     notificationIdMap.put(notificationId, 1);

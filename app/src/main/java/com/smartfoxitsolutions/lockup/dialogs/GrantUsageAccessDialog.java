@@ -1,5 +1,9 @@
 package com.smartfoxitsolutions.lockup.dialogs;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -10,8 +14,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.TextView;
-
 
 import com.smartfoxitsolutions.lockup.LockUpMainActivity;
 import com.smartfoxitsolutions.lockup.R;
@@ -40,26 +44,59 @@ public class GrantUsageAccessDialog extends DialogFragment {
         negativeButton.setText(R.string.appLock_activity_usage_dialog_cancel_text);
         getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        getDialog().setCanceledOnTouchOutside(false);
         return parent;
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onStart() {
+        super.onStart();
+
+        final View dialogView = getDialog().getWindow().getDecorView();
         final LockUpMainActivity activity = (LockUpMainActivity) getActivity();
+        ObjectAnimator displayAnimator = ObjectAnimator.ofPropertyValuesHolder(
+                dialogView,
+                PropertyValuesHolder.ofFloat("scaleX",0.0f,1.1f),
+                PropertyValuesHolder.ofFloat("scaleY",0.0f,1.1f),
+                PropertyValuesHolder.ofFloat("alpha",0.0f,1.0f));
+        displayAnimator.setDuration(400).setInterpolator(new AccelerateDecelerateInterpolator());
+        displayAnimator.start();
+
         positiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.startUsageAccessSettingActivity();
+                ObjectAnimator dismissAnimator = ObjectAnimator.ofPropertyValuesHolder(
+                        dialogView,
+                        PropertyValuesHolder.ofFloat("alpha",1.0f,0.0f));
+                dismissAnimator.setDuration(200).setInterpolator(new AccelerateDecelerateInterpolator());
+                dismissAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        activity.startUsageAccessSettingActivity();
+                        dismiss();
+                    }
+                });
+                dismissAnimator.start();
             }
         });
 
         negativeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    dismiss();
+                ObjectAnimator dismissAnimator = ObjectAnimator.ofPropertyValuesHolder(
+                        dialogView,
+                        PropertyValuesHolder.ofFloat("alpha",1.0f,0.0f));
+                dismissAnimator.setDuration(200).setInterpolator(new AccelerateDecelerateInterpolator());
+                dismissAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        dismiss();
+                    }
+                });
+                dismissAnimator.start();
             }
         });
     }
-
 }

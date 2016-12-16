@@ -10,6 +10,8 @@ import com.google.gson.reflect.TypeToken;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.TreeMap;
 
 /**
@@ -23,13 +25,18 @@ public class AppLockRemovePackageReceiver extends BroadcastReceiver {
             String packageName = intent.getData().getEncodedSchemeSpecificPart();
             Gson gson = new Gson();
             Type appToken = new TypeToken<TreeMap<String,String>>(){}.getType();
+            Type recommendMapToken = new TypeToken<LinkedHashMap<String,HashMap<String,Boolean>>>(){}.getType();
+
             SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
             String checkedAppString = prefs.getString(AppLockModel.CHECKED_APPS_SHARED_PREF_KEY,null);
             String installedAppString = prefs.getString(AppLockModel.INSTALLED_APPS_SHARED_PREF_KEY,null);
             String notificationAppString = prefs.getString(AppLockModel.NOTIFICATION_CHECKED_APPS_SHARED_PREF_KEY,null);
+            String recommendedAppString = prefs.getString(AppLockModel.RECOMMENDED_APPS_SHARED_PREF_KEY,null);
             TreeMap<String,String> checkedAppsMap = gson.fromJson(checkedAppString,appToken);
             TreeMap<String,String> installedAppsMap = gson.fromJson(installedAppString,appToken);
             TreeMap<String,String> notificationAppsMap = gson.fromJson(notificationAppString,appToken);
+            LinkedHashMap<String,HashMap<String,Boolean>> recommendedAppsMap = gson.fromJson(recommendedAppString,
+                                                recommendMapToken);
 
             if(checkedAppsMap!=null && checkedAppsMap.containsKey(packageName)){
                 SharedPreferences.Editor edit = prefs.edit();
@@ -43,6 +50,13 @@ public class AppLockRemovePackageReceiver extends BroadcastReceiver {
                 installedAppsMap.remove(packageName);
                 installedAppString = gson.toJson(installedAppsMap,appToken);
                 edit.putString(AppLockModel.INSTALLED_APPS_SHARED_PREF_KEY,installedAppString);
+                edit.apply();
+            }
+            if(recommendedAppsMap !=null && recommendedAppsMap.containsKey(packageName)){
+                SharedPreferences.Editor edit = prefs.edit();
+                recommendedAppsMap.remove(packageName);
+                recommendedAppString = gson.toJson(recommendedAppsMap,recommendMapToken);
+                edit.putString(AppLockModel.RECOMMENDED_APPS_SHARED_PREF_KEY,recommendedAppString);
                 edit.apply();
             }
             if(notificationAppsMap != null && notificationAppsMap.containsKey(packageName)){

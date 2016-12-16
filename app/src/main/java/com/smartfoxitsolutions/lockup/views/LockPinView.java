@@ -32,8 +32,13 @@ import com.mopub.nativeads.NativeErrorCode;
 import com.mopub.nativeads.ViewBinder;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.DimensionConverter;
+import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by RAAJA on 06-10-2016.
@@ -50,16 +55,13 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
     private Vibrator pinDigitVibrator;
     private RelativeLayout pinViewParent;
 
-    private String selectedPin;
+    private String selectedPin, pinPassCode,salt;
     private int pinDigitCount;
-    private boolean isVibratorEnabled, isErrorConfirmed;
+    private boolean isVibratorEnabled, isErrorConfirmed,shouldHidePinTouch;
 
     ValueAnimator digitOneAnimator,digitTwoAnimator, digitThreeAnimator, digitFourAnimator,digitFiveAnimator, digitSixAnimator
             ,digitSevenAnimator,digitEightAnimator,digitNineAnimator,digitZeroAnimator;
     ValueAnimator triggerAnimator;
-
-    private String packageName;
-    long pinPassCode;
 
     private OnPinLockUnlockListener pinLockListener;
 
@@ -67,7 +69,6 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
         super(context);
         this.context = context;
         setPinLockUnlockListener(pinLockListener);
-        pinLockListener.onPinLocked();
         LayoutInflater.from(context).inflate(R.layout.pin_lock_activity,this,true);
         pinViewParent = (RelativeLayout) findViewById(R.id.pin_lock_activity_parent);
         pinDigitVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
@@ -81,7 +82,7 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
 
 
     public void setPackageName(String packageName){
-        this.packageName = packageName;
+        pinLockListener.onPinLocked(packageName);
         setAppIcon(packageName);
     }
 
@@ -99,9 +100,11 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
 
     void initializeLockView(){
         SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
-        isVibratorEnabled = prefs.getBoolean(AppLockModel.VIBRATOR_ENABLED_PREF_KEY,true);
+        isVibratorEnabled = prefs.getBoolean(LockUpSettingsActivity.VIBRATOR_ENABLED_PREFERENCE_KEY,true);
+        shouldHidePinTouch = prefs.getBoolean(LockUpSettingsActivity.HIDE_PIN_TOUCH_PREFERENCE_KEY,false);
         selectedPin = "";
-        pinPassCode = prefs.getLong(AppLockModel.USER_SET_LOCK_PASS_CODE,0);
+        pinPassCode = prefs.getString(AppLockModel.USER_SET_LOCK_PASS_CODE,"noPin");
+        salt = prefs.getString(AppLockModel.DEFAULT_APP_BACKGROUND_COLOR_KEY,"noColor");
         String adAppId = getResources().getString(R.string.pin_lock_activity_ad_app_id);
         digitTypFace = Typeface.createFromAsset(context.getAssets(),"fonts/arquitectabook.ttf");
         appIconView = (ImageView) findViewById(R.id.pin_lock_activity_app_icon_view);
@@ -618,18 +621,21 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
                 pinDigitCount += 1;
                 selectedPin += digit;
                 getTrigger(pinDigitCount).setBackgroundResource(R.drawable.img_pin_trigger_selected);
-                getDigitAnimators(digit).start();
+                if(!shouldHidePinTouch) {
+                    getDigitAnimators(digit).start();
+                }
             } else if (pinDigitCount == 3) {
                 selectedPin += digit;
                 pinDigitCount += 1;
                 getTrigger(pinDigitCount).setBackgroundResource(R.drawable.img_pin_trigger_selected);
-                getDigitAnimators(digit).start();
-                long confirmedPin = Long.parseLong(selectedPin)*55439;
-                if (!selectedPin.equals("") && pinPassCode == confirmedPin) {
-                    Log.d("AppLock", "Passcode is " + selectedPin + "  " + pinPassCode);
+                if(!shouldHidePinTouch) {
+                    getDigitAnimators(digit).start();
+                }
+                if (!selectedPin.equals("") && pinPassCode.equals(validatePassword(selectedPin))) {
+                    Log.d("AppLock", "Passcode is " + selectedPin + "  " );
                     resetPinView();
-                    postPinCompleted(packageName);
-                } else if (pinPassCode != confirmedPin) {
+                    postPinCompleted();
+                } else  {
                     triggerAnimator.start();
                     if(isVibratorEnabled){
                         pinDigitVibrator.vibrate(30);
@@ -639,6 +645,21 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
                 }
             }
         }
+    }
+
+    private String validatePassword(String userPass){
+        StringBuilder builder = new StringBuilder();
+        try {
+            byte[] usePassByte = (userPass+salt).getBytes("UTF-8");
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            byte[] messageDigest = digest.digest(usePassByte);
+            for (int i = 0; i < messageDigest.length; ++i) {
+                builder.append(Integer.toHexString((messageDigest[i] & 0xFF) | 0x100).substring(1,3));
+            }
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return builder.toString();
     }
 
     void resetPinView(){
@@ -682,7 +703,7 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
                         public void onClick(View view) {
                             Toast.makeText(context,"Native ad clicked",Toast.LENGTH_LONG)
                                     .show();
-                            postPinCompleted(packageName);
+                            postPinCompleted();
                         }
                     });
                 }
@@ -720,8 +741,8 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
         this.addView(adView,parms);
     }
 
-    private void postPinCompleted(String packageUnlockedName){
-        pinLockListener.onPinUnlocked(packageUnlockedName);
+    private void postPinCompleted(){
+        pinLockListener.onPinUnlocked();
     }
 
     void startHome(){

@@ -3,8 +3,9 @@ package com.smartfoxitsolutions.lockup.receivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import com.smartfoxitsolutions.lockup.services.AppLockingService;
 import android.util.Log;
+
+import com.smartfoxitsolutions.lockup.services.AppLockingService;
 
 /**
  * Created by RAAJA on 22-09-2016.

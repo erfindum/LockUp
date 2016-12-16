@@ -1,9 +1,7 @@
 package com.smartfoxitsolutions.lockup;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageView;
@@ -28,10 +26,13 @@ public class NotificationLockActivity extends AppCompatActivity {
     AppCompatImageView imageView;
     TextView infoText;
 
+    private boolean shouldTrackUserPresence, shouldCloseAffinity;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
             setContentView(R.layout.notification_lock_activity);
+        shouldTrackUserPresence = true;
         appLockModel = new AppLockModel(this.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE));
         notificationRecycler = (RecyclerView) findViewById(R.id.notification_lock_activity_recycler);
         imageView = (AppCompatImageView) findViewById(R.id.notification_lock_activity_empty_image);
@@ -41,6 +42,7 @@ public class NotificationLockActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
         if(getSupportActionBar()!=null) {
             getSupportActionBar().setTitle(R.string.notification_lock_activity_title);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         displayRecyclerView();
     }
@@ -67,10 +69,30 @@ public class NotificationLockActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (notificationAdapter!=null){
-            notificationAdapter.closeAppLockRecyclerAdapter();
+    protected void onStart() {
+        super.onStart();
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        shouldTrackUserPresence = true;
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        if(shouldTrackUserPresence){
+            shouldCloseAffinity = true;
+        }
+        else{
+            shouldCloseAffinity = false;
         }
     }
 
@@ -79,6 +101,11 @@ public class NotificationLockActivity extends AppCompatActivity {
         super.onStop();
         if(notificationAdapter != null){
             notificationAdapter.updateAppModel();
+            notificationAdapter.closeAppLockRecyclerAdapter();
+        }
+        if(shouldCloseAffinity){
+            finishAffinity();
         }
     }
+
 }

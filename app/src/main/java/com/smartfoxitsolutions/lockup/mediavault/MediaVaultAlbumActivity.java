@@ -2,7 +2,6 @@ package com.smartfoxitsolutions.lockup.mediavault;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,7 +20,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
-import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.R;
 
 import java.io.File;
@@ -47,11 +45,13 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
     private ExecutorService vaultExecutor;
     private SetVaultTask vaultTask;
     private String mediaType;
+    boolean shouldTrackUserPresence, shouldCloseAffinity;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.vault_album_activity);
+        shouldTrackUserPresence = true;
         toolBar = (Toolbar) findViewById(R.id.media_vault_activity_tool_bar);
         tabLayout = (TabLayout) findViewById(R.id.media_vault_activity_tab_layout);
         viewPager = (ViewPager) findViewById(R.id.media_vault_activity_viewPager);
@@ -95,14 +95,17 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
             case 0:
                 startActivity(new Intent(this,MediaAlbumPickerActivity.class)
                         .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA));
+                shouldTrackUserPresence = false;
                 break;
             case 1:
                 startActivity(new Intent(this,MediaAlbumPickerActivity.class)
                         .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA));
+                shouldTrackUserPresence = false;
                 break;
             case 2:
                 startActivity(new Intent(this,MediaAlbumPickerActivity.class)
                         .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA));
+                shouldTrackUserPresence = false;
                 break;
         }
     }
@@ -224,6 +227,22 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        shouldTrackUserPresence = true;
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        if(shouldTrackUserPresence){
+            shouldCloseAffinity = true;
+        }else{
+            shouldCloseAffinity = false;
+        }
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         if(vaultExecutor!=null && !vaultExecutor.isShutdown()){
@@ -235,8 +254,10 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
+    protected void onStop() {
+        super.onStop();
+        if(shouldCloseAffinity){
+            finishAffinity();
+        }
     }
 }

@@ -18,6 +18,7 @@ import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.MediaAlbumPickerActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaVaultAlbumActivity;
+import com.smartfoxitsolutions.lockup.mediavault.SelectedMediaModel;
 import com.smartfoxitsolutions.lockup.services.AppLockForegroundService;
 
 import java.util.concurrent.ExecutorService;
@@ -33,12 +34,11 @@ public class MediaMoveService extends Service implements Handler.Callback{
 
     public static final int MEDIA_SUCCESSFULLY_MOVED = 4;
     public static final int MEDIA_MOVE_COMPLETED = 5;
+
     private static String MEDIA_TYPE = MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA;
 
-
-    int moveType, mediaSelectionType;
+    int moveType;
     String albumBucketId, mediaType;
-    String[] selectedMediaId,fileNames;
     ExecutorService mediaMoveService;
     MediaMoveInTask moveInTask;
     MediaMoveOutTask moveOutTask;
@@ -67,7 +67,6 @@ public class MediaMoveService extends Service implements Handler.Callback{
         startService(new Intent(getBaseContext(), AppLockForegroundService.class)
                         .putExtra(AppLockForegroundService.FOREGROUND_SERVICE_TYPE
                                 ,AppLockForegroundService.MEDIA_MOVE_SERVICE));
-        moveType = intent.getIntExtra(MediaMoveActivity.VAULT_TYPE_KEY,2);
             setMoveInfo(intent);
             startMediaMoveTask();
         SERVICE_STARTED = true;
@@ -75,17 +74,11 @@ public class MediaMoveService extends Service implements Handler.Callback{
     }
 
     void setMoveInfo(Intent intent){
-            mediaSelectionType = intent.getIntExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE,2);
-            albumBucketId = intent.getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY);
+        moveType = intent.getIntExtra(MediaMoveActivity.VAULT_TYPE_KEY,2);
+        albumBucketId = intent.getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY);
             mediaType = intent.getStringExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY);
             Messenger messenger = intent.getParcelableExtra(MediaMoveActivity.MEDIA_MOVE_MESSENGER_KEY);
             updateMoveMessenger(messenger);
-            if(mediaSelectionType==MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE) {
-                selectedMediaId = intent.getStringArrayExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY);
-            }
-            if(moveType == MediaMoveActivity.MOVE_TYPE_INTO_VAULT) {
-                fileNames = intent.getStringArrayExtra(MediaMoveActivity.MEDIA_FILE_NAMES_KEY);
-            }
     }
 
     public static void updateMoveMessenger(Messenger messenger){
@@ -95,18 +88,18 @@ public class MediaMoveService extends Service implements Handler.Callback{
     void startMediaMoveTask(){
         if(moveType == MediaMoveActivity.MOVE_TYPE_INTO_VAULT) {
             moveInTask = new MediaMoveInTask(getBaseContext(), this);
-            moveInTask.setTaskRequirements(mediaSelectionType, albumBucketId, mediaType, selectedMediaId, fileNames);
+            moveInTask.setTaskRequirements(albumBucketId, mediaType);
             mediaMoveService.submit(moveInTask);
         }
         if(moveType == MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT){
             moveOutTask = new MediaMoveOutTask(getBaseContext(), this);
-            moveOutTask.setTaskRequirements(mediaSelectionType,albumBucketId,mediaType,selectedMediaId);
+            moveOutTask.setTaskRequirements(albumBucketId,mediaType);
             mediaMoveService.submit(moveOutTask);
 
         }
         if(moveType == MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT){
             mediaDeleteTask = new MediaDeleteTask(getBaseContext(), this);
-            mediaDeleteTask.setTaskRequirements(mediaSelectionType,albumBucketId,mediaType,selectedMediaId);
+            mediaDeleteTask.setTaskRequirements(albumBucketId,mediaType);
             mediaMoveService.submit(mediaDeleteTask);
         }
         notifManager.notify(3542124, getNotifBuilder().build());
@@ -128,7 +121,7 @@ public class MediaMoveService extends Service implements Handler.Callback{
         notifBuilder = new NotificationCompat.Builder(getBaseContext());
         if(moveType == MediaMoveActivity.MOVE_TYPE_INTO_VAULT) {
             notifBuilder.setContentTitle(getResources().getString(R.string.vault_move_activity_move_in_text))
-            .setProgress(fileNames.length,0,false);
+            .setProgress(SelectedMediaModel.getInstance().getSelectedMediaFileNameList().size(),0,false);
         }
         if(moveType == MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT){
             notifBuilder.setContentTitle(getResources().getString(R.string.vault_move_activity_move_out_text))
@@ -204,7 +197,7 @@ public class MediaMoveService extends Service implements Handler.Callback{
                                     , MediaVaultAlbumActivity.class)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY, MEDIA_TYPE)
+                                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY, MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA)
                             ,PendingIntent.FLAG_UPDATE_CURRENT))
                     .setOnlyAlertOnce(true)
                     .setColor(Color.parseColor("#2874F0"));

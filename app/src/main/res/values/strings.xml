@@ -34,27 +34,32 @@
     <string name="reset_fragment_reset_text">Reset Password</string>
     <string name="reset_fragment_password_reset_info">Enter new password for</string>
 
-    <!-- PreferenceFragment -->
-    <string name="preference_fragment_general_settings_title">GENERAL SETTINGS</string>
-    <string name="preference_fragment_change_password_title">CHANGE PASSWORD</string>
-    <string name="preference_fragment_vault_settings_title">VAULT SETTINGS</string>
-    <string name="preference_fragment_user_settings_title">USER SETTINGS</string>
-    <string name="preference_fragment_activate_locker_title">Activate App Lock</string>
-    <string name="preference_fragment_activate_locker_summery">Activate or deactivate app locker</string>
-    <string name="preference_fragment_vibrate_title">Vibrate</string>
-    <string name="preference_fragment_vibrate_summery">Vibrate when entering pin</string>
-    <string name="preference_fragment_uninstall_prevention_title">Lock Installer</string>
-    <string name="preference_fragment_uninstall_prevention_summery">Lock package installer from uninstalling apps</string>
-    <string name="preference_fragment_lock_settings_title">Lock Settings</string>
-    <string name="preference_fragment_lock_settings_summery">Lock settings from erasing app data</string>
-    <string name="preference_fragment_change_user_pin_title">Change Pin</string>
-    <string name="preference_fragment_change_user_pin_summery">Change your app lock pin</string>
-    <string name="preference_fragment_change_user_password_title">Change Password</string>
-    <string name="preference_fragment_change_user_password_summery">Change your account password</string>
-    <string name="preference_fragment_change_vault_title">Change Vault Location</string>
-    <string name="preference_fragment_change_user_image_title">Change Profile Picture</string>
-    <string name="preference_fragment_change_security_question_title">Reset Security Question</string>
-    <string name="preference_fragment_logout_user_account_title">Logout</string>
+    <!-- SettingsActivity -->
+    <string name="settings_activity_toolbar_title">Settings</string>
+    <string name="settings_activity_applock_title">APP LOCK</string>
+    <string name="settings_activity_activate_locker_title">Activate App Lock</string>
+    <string name="settings_activity_activate_locker_enabled">App lock enabled</string>
+    <string name="settings_activity_activate_locker_disabled">App lock disabled</string>
+    <string name="settings_activity_vibrate_title">Vibrate</string>
+    <string name="settings_activity_vibrate_summery">Vibrate pin/pattern touch</string>
+    <string name="settings_activity_change_pin_title">Change Pin/Pattern</string>
+    <string name="settings_activity_change_pin_enabled">PIN enabled</string>
+    <string name="settings_activity_change_pattern_enabled">Pattern enabled</string>
+    <string name="settings_activity_fingerprint_title">Fingerprint Lock</string>
+    <string name="settings_activity_pin_hide_title">Hide Pin Touches</string>
+    <string name="settings_activity_pattern_hide_title">Hide Pattern Lines</string>
+    <string name="settings_activity_relock_title">Lock on screen on</string>
+    <string name="settings_activity_relock_summery">Re-lock apps when screen locked</string>
+    <string name="settings_activity_change_pin_summery">PIN enabled</string>
+    <string name="settings_activity_change_pattern_summery">Pattern enabled</string>
+
+
+    <!-- SettingsActivityDialog -->
+    <string name="settings_dialog_finger_negative_header">Unable to switch on</string>
+    <string name="settings_dialog_finger_no_sensor">Fingerprint sensor not available in your device</string>
+    <string name="settings_dialog_finger_not_supported">Your version of Android is not supported for this feature</string>
+    <string name="settings_dialog_finger_no_fingerprint">Fingerprint not enrolled. Kindly enroll at-least one fingerprint from Android settings</string>
+    <string name="settings_dialog_finger_negative_text">GOT IT</string>
 
     <!-- UserProfileFragment-->
     <string name="user_profile_fragment_email_icon_description">E-Mail</string>
@@ -84,6 +89,38 @@
     <string name="faq_question_fragment_question_7_text">How to change vault location ?</string>
     <string name="faq_question_fragment_question_8_text">How can I save my media files into vault ?</string>
 
+    <!-- Set Email Activity -->
+    <string name="set_email_activity_info">LockUp recommends you to add recovery email, to reset the pin/pattern when you forget it.
+                                            Note: Only recovery email is sent to the email address you provide</string>
+    <string name="set_email_activity_header">Set Up Recovery Email</string>
+    <string name="set_email_activity_add_email">Add Email</string>
+    <string name="set_email_activity_choose_email">Choose From Device</string>
+    <string name="set_email_activity_add_email_hint">Enter your email</string>
+    <string name="set_email_activity_or_text">-  Or  -</string>
+    <string name="set_email_activity_choose_email_help">Choose an Email/enter one</string>
+    <string name="set_email_activity_empty_email">Email cannot be empty</string>
+    <string name="set_email_activity_valid_email">Enter a valid email</string>
+
+    <!-- Recover Pin Pattern activity -->
+    <string name="reset_pin_pattern_step_one_info">STEP 1: Send recovery code to security email</string>
+    <string name="reset_pin_pattern_step_two_info">STEP 2: Enter recovery code to reset PIN/Pattern</string>
+    <string name="reset_pin_pattern_send_text">SEND RECOVERY CODE</string>
+    <string name="reset_pin_pattern_reset_text">RESET PIN/PATTERN</string>
+    <string name="reset_pin_pattern_reset_hint">Enter Recovery Code</string>
+    <string name="reset_pin_pattern_toolbar_title">Forgot PIN/Pattern</string>
+    <string name="reset_pin_pattern_network_failed_header">Operation Failed</string>
+    <string name="reset_pin_pattern_network_failed">Network Connection Unavailable</string>
+    <string name="reset_pin_pattern_response_failed">Try again after some time</string>
+    <string name="reset_pin_pattern_network_failed_negative">DISMISS</string>
+    <string name="reset_pin_pattern_network_success_negative">OK</string>
+    <string name="reset_pin_pattern_network_success_header">Operation Success</string>
+    <string name="reset_pin_pattern_network_success_message">Recovery code is sent to your email</string>
+    <string name="reset_pin_pattern_network_loading_header">Please Wait</string>
+    <string name="reset_pin_pattern_network_loading_message">Sending recovery Code</string>
+    <string name="reset_pin_pattern_pause_request">Please wait for </string>
+    <string name="reset_pin_pattern_reset_code_invalid">Invalid Recovery Code</string>
+
+
     <!-- MainScreenActivity -->
     <string name="main_screen_activity_lock_button_text">App Lock</string>
     <string name="main_screen_activity_vault_button_text">Vault</string>
@@ -91,6 +128,7 @@
     <string name="main_screen_activity_user_profile_button_text">My Profile</string>
     <string name="main_screen_activity_faq_button_text">FAQ</string>
     <string name="main_screen_activity_ad_unit_id">ca-app-pub-4739007494599063/2472603036</string>
+    <string name="main_lock_activity_forgot_button">FORGOT PASSWORD</string>
 
     <!-- Set Pattern Screen -->
     <string name="set_pattern_fragment_title_text">Set Pattern</string>
@@ -134,7 +172,7 @@
     </string>
 
     <string name="appLock_activity_should_start_dialog_info">
-        App Lock is disabled would you like to start again ?
+        App Lock is disabled would you like to enable app lock ?
     </string>
     <string name="appLock_activity_should_start_dialog_permit">START</string>
     <string name="appLock_activity_should_start_dialog_cancel">NOT NOW</string>

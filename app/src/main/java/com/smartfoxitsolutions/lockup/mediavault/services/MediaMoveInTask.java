@@ -24,10 +24,9 @@ import android.util.Log;
 import com.smartfoxitsolutions.lockup.AppLoaderActivity;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.mediavault.MediaAlbumPickerActivity;
-import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaVaultModel;
+import com.smartfoxitsolutions.lockup.mediavault.SelectedMediaModel;
 import com.smartfoxitsolutions.lockup.mediavault.VaultDbHelper;
-
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -38,6 +37,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Collections;
 
 /**
@@ -48,9 +48,8 @@ public class MediaMoveInTask implements Runnable {
 
    private Context context;
    private ContentResolver contentResolver;
-   private int mediaSelectionType;
    private String albumBucketId, mediaType;
-   private String[] selectedMediaId, fileNames;
+   private ArrayList<String> selectedMediaId, fileNames;
    private int viewWidth, viewHeight;
    private VaultDbHelper vaultDatabaseHelper;
    private SQLiteDatabase vaultDb;
@@ -64,12 +63,11 @@ public class MediaMoveInTask implements Runnable {
         insertValues = new ContentValues();
     }
 
-    void setTaskRequirements(int selectionType, String bucketId, String media,String[] selectedMediaId, String[] fileNames){
-        this.mediaSelectionType = selectionType;
+    void setTaskRequirements(String bucketId, String media){
         this.albumBucketId=bucketId;
         this.mediaType = media;
-        this.selectedMediaId = selectedMediaId;
-        this.fileNames = fileNames;
+        this.selectedMediaId = SelectedMediaModel.getInstance().getSelectedMediaIdList();
+        this.fileNames = SelectedMediaModel.getInstance().getSelectedMediaFileNameList();
         this.contentResolver = context.getContentResolver();
         SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
         this.viewWidth = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_WIDTH_KEY,155);
@@ -114,53 +112,28 @@ public class MediaMoveInTask implements Runnable {
     private String getSelection(String mediaType){
         switch(mediaType){
             case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
-                return MediaStore.Images.Media.BUCKET_ID+"=?";
-            case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
-                return MediaStore.Video.Media.BUCKET_ID+"=?";
-            case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                return MediaStore.Audio.Media.ALBUM_ID+"=?";
-        }
-        return null;
-
-    }
-
-    private String getUniqueSelection(String mediaType){
-        switch(mediaType){
-            case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
                 return MediaStore.Images.Media._ID+" IN ("
-                        + TextUtils.join(",", Collections.nCopies(selectedMediaId.length,"?"))+")"
+                        + TextUtils.join(",", Collections.nCopies(selectedMediaId.size(),"?"))+")"
                         + " AND "+ MediaStore.Images.Media.BUCKET_ID+"=?";
             case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
                 return MediaStore.Video.Media._ID+" IN ("
-                        + TextUtils.join(",", Collections.nCopies(selectedMediaId.length,"?"))+")"
+                        + TextUtils.join(",", Collections.nCopies(selectedMediaId.size(),"?"))+")"
                         + " AND "+ MediaStore.Video.Media.BUCKET_ID+"=?";
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
                 return MediaStore.Audio.Media._ID+" IN ("
-                        + TextUtils.join(",", Collections.nCopies(selectedMediaId.length,"?"))+")"
+                        + TextUtils.join(",", Collections.nCopies(selectedMediaId.size(),"?"))+")"
                         + " AND "+ MediaStore.Audio.Media.ALBUM_ID+"=?";
         }
         return null;
     }
 
-    private String[] getUniqueSelectionArgs(){
-        String[] selectionArgs = new String[selectedMediaId.length+1];
-        for(int i=0;i<selectedMediaId.length;i++){
-            selectionArgs[i] = selectedMediaId[i];
+    private String[] getSelectionArgs(){
+        String[] selectionArgs = new String[selectedMediaId.size()+1];
+        for(int i=0;i<selectedMediaId.size();i++){
+            selectionArgs[i] = selectedMediaId.get(i);
         }
         selectionArgs[selectionArgs.length-1] = albumBucketId;
         return selectionArgs;
-    }
-
-    private String getBucketIndex(String mediaType){
-        switch(mediaType){
-            case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
-                return MediaStore.Images.Media.BUCKET_ID;
-            case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
-                return MediaStore.Video.Media.BUCKET_ID;
-            case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                return MediaStore.Audio.Media.ALBUM_ID;
-        }
-        return null;
     }
 
     private String getBucketNameIndex(String mediaType){
@@ -212,12 +185,11 @@ public class MediaMoveInTask implements Runnable {
     }
 
     private String getBucketId(String path){
-        StringBuffer pathBucketId = new StringBuffer();
+        StringBuilder pathBucketId = new StringBuilder();
         try {
             byte[] pathBucketByte = path.getBytes("UTF-8");
             MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] pathDigest = md.digest(pathBucketByte);
-            pathBucketId = new StringBuffer();
             for (int i = 0; i < pathDigest.length; ++i) {
                 pathBucketId.append(Integer.toHexString((pathDigest[i] & 0xFF) | 0x100).substring(1,3));
             }
@@ -231,43 +203,23 @@ public class MediaMoveInTask implements Runnable {
     public void run() {
         Cursor mediaCursor;
         String[] projection = getProjection(mediaType);
-        if(mediaSelectionType == MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL){
-            String[] selectionArgs = {albumBucketId};
-            mediaCursor = contentResolver.query(getExternalUri(mediaType),projection,getSelection(mediaType)
-                                ,selectionArgs,getOrderBy(mediaType));
-            if(mediaCursor !=null && mediaCursor.getCount()>0){
+        mediaCursor = contentResolver.query(getExternalUri(mediaType),projection,getSelection(mediaType)
+                ,getSelectionArgs(),getOrderBy(mediaType));
+        if(mediaCursor !=null && mediaCursor.getCount()>0){
+            mssg = uiHandler.obtainMessage();
+            mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
+            mssg.arg1 = 0;
+            mssg.arg2 = mediaCursor.getCount();
+            mssg.sendToTarget();
+            try {
+                moveMediaToVault(mediaCursor);
+            }catch (IOException e){
+                e.printStackTrace();
+                SelectedMediaModel.getInstance().getSelectedMediaIdList().clear();
+                SelectedMediaModel.getInstance().getSelectedMediaFileNameList().clear();
                 mssg = uiHandler.obtainMessage();
-                mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
-                mssg.arg1 = 0;
-                mssg.arg2 = mediaCursor.getCount();
+                mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
                 mssg.sendToTarget();
-                try {
-                    moveMediaToVault(mediaCursor);
-                }catch (IOException e){
-                    e.printStackTrace();
-                    mssg = uiHandler.obtainMessage();
-                    mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
-                    mssg.sendToTarget();
-                }
-            }
-        }
-        if(mediaSelectionType == MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE){
-            mediaCursor = contentResolver.query(getExternalUri(mediaType),projection,getUniqueSelection(mediaType)
-                                                ,getUniqueSelectionArgs(),getOrderBy(mediaType));
-            if(mediaCursor !=null && mediaCursor.getCount()>0){
-                mssg = uiHandler.obtainMessage();
-                mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
-                mssg.arg1 = 0;
-                mssg.arg2 = mediaCursor.getCount();
-                mssg.sendToTarget();
-                try {
-                    moveMediaToVault(mediaCursor);
-                }catch (IOException e){
-                    e.printStackTrace();
-                    mssg = uiHandler.obtainMessage();
-                    mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
-                    mssg.sendToTarget();
-                }
             }
         }
     }
@@ -276,7 +228,6 @@ public class MediaMoveInTask implements Runnable {
         cursor.moveToFirst();
            do {
                int dataIndex = cursor.getColumnIndex(getDataIndex(mediaType));
-              // int bucketIdIndex = cursor.getColumnIndex(getBucketIndex(mediaType));
                int bucketNameIndex = cursor.getColumnIndex(getBucketNameIndex(mediaType));
                String dataPath = cursor.getString(dataIndex);
                String uniqueBucketName = cursor.getString(bucketNameIndex);
@@ -293,7 +244,7 @@ public class MediaMoveInTask implements Runnable {
                        + uniqueBucketId + File.separator + originalFileName + "." + extension;
                String destPath = Environment.getExternalStorageDirectory() + File.separator
                        + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
-                       + uniqueBucketId + File.separator + fileNames[cursor.getPosition()];
+                       + uniqueBucketId + File.separator + fileNames.get(cursor.getPosition());
                String thumbnailPathDummy = Environment.getExternalStorageDirectory() + File.separator
                        + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
                        + uniqueBucketId + File.separator + ".thumbs" + File.separator + uniqueBucketId
@@ -301,7 +252,7 @@ public class MediaMoveInTask implements Runnable {
                String thumbnailPath = Environment.getExternalStorageDirectory() + File.separator
                        + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
                        + uniqueBucketId + File.separator + ".thumbs" + File.separator + uniqueBucketId
-                       + File.separator + fileNames[cursor.getPosition()];
+                       + File.separator + fileNames.get(cursor.getPosition());
 
                boolean mediaCopied = false;
                mediaCopied = copyMediaFile(dataPath, destPathDummy);
@@ -332,6 +283,11 @@ public class MediaMoveInTask implements Runnable {
                    Log.d("VaultMedia", " ThumbnailCreated");
                }  else
                {
+                   mssg = uiHandler.obtainMessage();
+                   mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
+                   mssg.arg1 = cursor.getPosition() + 1;
+                   mssg.arg2 = cursor.getCount();
+                   mssg.sendToTarget();
                    continue;
                }
                if (thumbnailCopied) {
@@ -347,12 +303,12 @@ public class MediaMoveInTask implements Runnable {
                        insertValues.put(MediaVaultModel.ORIGINAL_MEDIA_PATH, dataPath);
                        insertValues.put(MediaVaultModel.VAULT_MEDIA_PATH, destPath);
                        insertValues.put(MediaVaultModel.ORIGINAL_FILE_NAME, originalFileName);
-                       insertValues.put(MediaVaultModel.VAULT_FILE_NAME, fileNames[cursor.getPosition()]);
+                       insertValues.put(MediaVaultModel.VAULT_FILE_NAME, fileNames.get(cursor.getPosition()));
                        insertValues.put(MediaVaultModel.VAULT_BUCKET_ID, uniqueBucketId);
                        insertValues.put(MediaVaultModel.VAULT_BUCKET_NAME, uniqueBucketName);
                        insertValues.put(MediaVaultModel.FILE_EXTENSION, extension);
                        insertValues.put(MediaVaultModel.MEDIA_TYPE, getVaultMediaType(mediaType));
-                       insertValues.put(MediaVaultModel.TIME_STAMP, fileNames[cursor.getPosition()]);
+                       insertValues.put(MediaVaultModel.TIME_STAMP, fileNames.get(cursor.getPosition()));
                        insertValues.put(MediaVaultModel.THUMBNAIL_PATH, thumbnailPath);
                        long insertedRow = 0;
                        if (vaultDb != null) {
@@ -377,14 +333,22 @@ public class MediaMoveInTask implements Runnable {
                    mssg.arg2 = cursor.getCount();
                    mssg.sendToTarget();
                }else{
+                   mssg = uiHandler.obtainMessage();
+                   mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
+                   mssg.arg1 = cursor.getPosition() + 1;
+                   mssg.arg2 = cursor.getCount();
+                   mssg.sendToTarget();
                    continue;
                }
                Log.d("VaultMedia", String.valueOf(uiHandler == null) + " uiHandler null?");
            } while (cursor.moveToNext());
-           mssg = uiHandler.obtainMessage();
+       SelectedMediaModel.getInstance().getSelectedMediaIdList().clear();
+       SelectedMediaModel.getInstance().getSelectedMediaFileNameList().clear();
+       mssg = uiHandler.obtainMessage();
            mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
            mssg.sendToTarget();
-            cursor.close();
+
+
     }
 
     private boolean copyMediaFile(String mediaPath, String destPath) throws IOException{

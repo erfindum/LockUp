@@ -29,6 +29,7 @@ import com.smartfoxitsolutions.lockup.mediavault.dialogs.VideoPlayerDeleteDialog
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.VideoPlayerUnlockDialog;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -41,12 +42,12 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
     private RelativeLayout topBar;
     private RelativeLayout bottomBar;
     private AppCompatImageButton backButton, playPauseButton, playPreviousButton,playNextButton,deleteButton, unlockButton;
-    private LinkedList<String> originalFileNameList, vaultFileList, fileExtensionList;
+    private static LinkedList<String> originalFileNameList, vaultFileList, fileExtensionList, vaultIdList;
     private SeekBar videoSeekBar;
     private TextView titleText, durationText;
     private VideoView videoView;
     private Handler uiHandler;
-    private static int currentPosition, currentSeekProgressState;
+    private static int currentPosition = -1, currentSeekProgressState;
     private int currentAudioProgress;
     private Runnable seekBarTask;
     private ValueAnimator displayTopBarAnim, displayBottomBarAnim, hideTopBarAnim, hideBottomBarAnim;
@@ -55,6 +56,7 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
             ,isDeletePressed, isUnlockPressed;
     private AtomicInteger mediaControlDurationCount;
     private String videoBucketId;
+    private boolean shouldCloseAffinity;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,13 +74,10 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
         titleText = (TextView) findViewById(R.id.vault_video_player_activity_original_name);
         durationText = (TextView) findViewById(R.id.vault_video_player_activity_duration_text);
         videoView = (VideoView) findViewById(R.id.vault_video_player_activity_player);
-        originalFileNameList = HiddenFileContentModel.getMediaOriginalName();
-        vaultFileList = HiddenFileContentModel.getMediaVaultFile();
-        fileExtensionList = HiddenFileContentModel.getMediaExtension();
         mediaControlDurationCount = new AtomicInteger(0);
         videoBucketId = getIntent().getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY);
         uiHandler = new Handler(getMainLooper());
-        if(savedInstanceState == null){
+        if(currentPosition == -1){
             currentPosition = getIntent().getIntExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,0);
         }
         setRunnable();
@@ -86,6 +85,26 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
         setAnimations();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         Log.d("VaultVideo","Called onCreate");
+    }
+
+    static void setOriginalFileNameList(LinkedList<String> originalNameList){
+        originalFileNameList = new LinkedList<>();
+        originalFileNameList.addAll(originalNameList);
+    }
+
+    static void setVaultFileList(LinkedList<String> vaultFilePathList){
+        vaultFileList = new LinkedList<>();
+        vaultFileList.addAll(vaultFilePathList);
+    }
+
+    static void setVaultIdList(LinkedList<String> vaultFileIdList){
+        vaultIdList = new LinkedList<>();
+        vaultIdList.addAll(vaultFileIdList);
+    }
+
+    static void setFileExtensionList(LinkedList<String> extensionList){
+        fileExtensionList = new LinkedList<>();
+        fileExtensionList.addAll(extensionList);
     }
 
     void setRunnable(){
@@ -439,24 +458,26 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
     }
 
     public void deleteVideo(){
-        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+        ArrayList<String> selectedId = new ArrayList<>();
+        selectedId.add(vaultIdList.get(currentPosition));
+        SelectedMediaModel selectedMediaModel = SelectedMediaModel.getInstance();
+        selectedMediaModel.setSelectedMediaIdList(selectedId);
+        startActivity(new Intent(this,MediaMoveActivity.class)
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,videoBucketId)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA)
-                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,
-                        new String[]{HiddenFileContentModel.getMediaId().get(currentPosition)})
                 .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
     }
 
     public void unlockVideo(){
-       LinkedList<String> IdList =  HiddenFileContentModel.getMediaId();
-        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+        ArrayList<String> selectedId = new ArrayList<>();
+        selectedId.add(vaultIdList.get(currentPosition));
+        SelectedMediaModel selectedMediaModel = SelectedMediaModel.getInstance();
+        selectedMediaModel.setSelectedMediaIdList(selectedId);
+        startActivity(new Intent(this,MediaMoveActivity.class)
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,videoBucketId)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA)
-                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,
-                        new String[]{HiddenFileContentModel.getMediaId().get(currentPosition)})
                 .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
+
     }
 
     public void deleteVideoCancelled(){
@@ -490,6 +511,12 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
     }
 
     @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        shouldCloseAffinity = true;
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         File currentFile = new File(vaultFileList.get(currentPosition)+"."+fileExtensionList.get(currentPosition));
@@ -498,6 +525,19 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
         }
         uiHandler.removeCallbacks(seekBarTask);
         videoView.stopPlayback();
+        if(shouldCloseAffinity){
+            currentPosition = -1;
+            currentSeekProgressState = 0;
+            vaultFileList.clear();
+            originalFileNameList.clear();
+            vaultIdList.clear();
+            fileExtensionList.clear();
+            vaultFileList = null;
+            originalFileNameList = null;
+            vaultIdList = null;
+            fileExtensionList = null;
+            finishAffinity();
+        }
         Log.d("VaultVideo","Called onPause");
     }
 
@@ -513,12 +553,17 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(!isOrientationChange) {
+        if(!shouldCloseAffinity && !isOrientationChange) {
+            currentPosition = -1;
             currentSeekProgressState = 0;
-            HiddenFileContentModel.getMediaOriginalName().clear();
-            HiddenFileContentModel.getMediaVaultFile().clear();
-            HiddenFileContentModel.getMediaExtension().clear();
-            HiddenFileContentModel.getMediaId().clear();
+            vaultFileList.clear();
+            originalFileNameList.clear();
+            vaultIdList.clear();
+            fileExtensionList.clear();
+            vaultFileList = null;
+            originalFileNameList = null;
+            vaultIdList = null;
+            fileExtensionList = null;
             Log.d("VaultVideo","Called Destroy Clear");
         }
         Log.d("VaultVideo","Called onDestroy");

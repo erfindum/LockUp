@@ -24,6 +24,9 @@ import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.ImageViewDeleteDialog;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.ImageViewUnlockDialog;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+
 /**
  * Created by RAAJA on 14-11-2016.
  */
@@ -32,16 +35,19 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
 
     static final String IMAGE_VIEW_STATE = "image_view_state";
 
-    ViewPager imageViewPager;
-    RelativeLayout topBar,bottomBar;
-    AppCompatImageButton backButton, deleteButton, unlockButton;
+    private ViewPager imageViewPager;
+    private RelativeLayout topBar,bottomBar;
+    private  AppCompatImageButton backButton, deleteButton, unlockButton;
     TextView originalFileName;
-    VaultImageViewPagerAdapter imageAdapter;
+    private VaultImageViewPagerAdapter imageAdapter;
     ImageViewState viewState;
-    ValueAnimator displayTopBarAnim, hideTopBarAnim, displayBottomBarAnim,hideBottomBarAnim;
-    AnimatorSet displayBarAnimSet,hideBarAnimSet;
-    boolean isTopBottomVisible,isDeletePressed, isUnlockPressed;;
+    private ValueAnimator displayTopBarAnim, hideTopBarAnim, displayBottomBarAnim,hideBottomBarAnim;
+    private AnimatorSet displayBarAnimSet,hideBarAnimSet;
+    static LinkedList<String> originalFileNameList, vaultFileList,vaultIdList, fileExtensionList;
+    boolean isTopBottomVisible,isDeletePressed, isUnlockPressed;
+    private static boolean isConfigChanged;
     private String imageBucketId;
+    private boolean shouldCloseAffinity;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,6 +66,26 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
         }
         setListeners();
         setAnimators();
+    }
+
+    static void setOriginalFileNameList(LinkedList<String> originalNameList){
+        originalFileNameList = new LinkedList<>();
+        originalFileNameList.addAll(originalNameList);
+    }
+
+    static void setVaultFileList(LinkedList<String> vaultFilePathList){
+        vaultFileList = new LinkedList<>();
+        vaultFileList.addAll(vaultFilePathList);
+    }
+
+    static void setVaultIdList(LinkedList<String> vaultFileIdList){
+        vaultIdList = new LinkedList<>();
+        vaultIdList.addAll(vaultFileIdList);
+    }
+
+    static void setFileExtensionList(LinkedList<String> extensionList){
+        fileExtensionList = new LinkedList<>();
+        fileExtensionList.addAll(extensionList);
     }
 
     @Override
@@ -217,22 +243,24 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
     }
 
     public void deleteImage(){
-        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+        ArrayList<String> selectedId = new ArrayList<>();
+        selectedId.add(vaultIdList.get(imageViewPager.getCurrentItem()));
+        SelectedMediaModel selectedMediaModel = SelectedMediaModel.getInstance();
+        selectedMediaModel.setSelectedMediaIdList(selectedId);
+        startActivity(new Intent(this,MediaMoveActivity.class)
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,imageBucketId)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA)
-                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,
-                        new String[]{HiddenFileContentModel.getMediaId().get(imageViewPager.getCurrentItem())})
                 .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
     }
 
     public void unlockImage(){
-        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+        ArrayList<String> selectedId = new ArrayList<>();
+        selectedId.add(vaultIdList.get(imageViewPager.getCurrentItem()));
+        SelectedMediaModel selectedMediaModel = SelectedMediaModel.getInstance();
+        selectedMediaModel.setSelectedMediaIdList(selectedId);
+        startActivity(new Intent(this,MediaMoveActivity.class)
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,imageBucketId)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA)
-                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,
-                        new String[]{HiddenFileContentModel.getMediaId().get(imageViewPager.getCurrentItem())})
                 .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
     }
 
@@ -263,12 +291,24 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
     }
 
     @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        isConfigChanged = false;
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
             if(viewState!=null){
                 outState.putSerializable(IMAGE_VIEW_STATE,viewState);
             }
+            isConfigChanged = true;
+    }
 
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        shouldCloseAffinity = true;
     }
 
     @Override
@@ -277,18 +317,39 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
         if(imageAdapter!=null){
             imageAdapter.renameCurrentFile(imageViewPager.getCurrentItem());
         }
+        if(shouldCloseAffinity){
+            if(imageAdapter!=null){
+                imageAdapter.closeAdapter();
+                imageViewPager.removeOnPageChangeListener(this);
+            }
+            originalFileNameList.clear();
+            vaultFileList.clear();
+            vaultIdList.clear();
+            fileExtensionList.clear();
+            originalFileNameList = null;
+            vaultFileList = null;
+            vaultIdList = null;
+            fileExtensionList = null;
+            finishAffinity();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(imageAdapter!=null){
-            imageAdapter.closeAdapter();
-            imageViewPager.removeOnPageChangeListener(this);
+        if(!shouldCloseAffinity && !isConfigChanged){
+             if(imageAdapter!=null){
+                 imageAdapter.closeAdapter();
+                 imageViewPager.removeOnPageChangeListener(this);
+            }
+            originalFileNameList.clear();
+            vaultFileList.clear();
+            vaultIdList.clear();
+            fileExtensionList.clear();
+            originalFileNameList = null;
+            vaultFileList = null;
+            vaultIdList = null;
+            fileExtensionList = null;
         }
-        HiddenFileContentModel.getMediaOriginalName().clear();
-        HiddenFileContentModel.getMediaVaultFile().clear();
-        HiddenFileContentModel.getMediaExtension().clear();
-        HiddenFileContentModel.getMediaId().clear();
     }
 }

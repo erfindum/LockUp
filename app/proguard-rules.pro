@@ -29,5 +29,15 @@
 -keep class com.mopub.mobileads.** {*;}
 -dontwarn com.facebook.ads.internal.**
 
+# Platform calls Class.forName on types which do not exist on Android to determine platform.
+-dontnote retrofit2.Platform
+# Platform used when running on Java 8 VMs. Will not be used at runtime.
+-dontwarn retrofit2.Platform$Java8
+# Retain declared checked exceptions for use by a Proxy instance.
+-keepattributes Exceptions
+-dontwarn java.nio.file.*
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+
+-keep class com.smartfoxitsolutions.lockup.ResetPasswordResponse {*;}
 
 

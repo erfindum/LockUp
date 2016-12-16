@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.smartfoxitsolutions.lockup">
 
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission tools:ignore="ProtectedPermissions"
         android:name="android.permission.PACKAGE_USAGE_STATS"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -39,6 +40,13 @@
         <activity android:name=".LockUpMainActivity"
             android:excludeFromRecents="true"
             />
+        <activity android:name=".MainLockActivity"
+            android:excludeFromRecents="true"/>
+        <activity android:name=".ResetPasswordActivity"
+            android:excludeFromRecents="true"/>
+        <activity android:name=".SetEmailActivity"
+            android:excludeFromRecents="true"
+            />
         <activity android:name=".LockUpSettingsActivity"
             android:excludeFromRecents="true"
             />
@@ -53,15 +61,12 @@
             />
         <activity android:name=".mediavault.MediaVaultAlbumActivity"
             android:excludeFromRecents="true"
-            android:theme="@style/DarkActivityTheme"
             />
         <activity android:name=".mediavault.MediaAlbumPickerActivity"
             android:excludeFromRecents="true"
-            android:theme="@style/DarkActivityTheme"
             />
         <activity android:name=".mediavault.MediaPickerActivity"
             android:excludeFromRecents="true"
-            android:theme="@style/DarkActivityTheme"
             />
         <activity android:name=".mediavault.MediaMoveActivity"
             android:excludeFromRecents="true"
@@ -83,7 +88,6 @@
             </activity>
         <activity android:name=".mediavault.MediaVaultContentActivity"
             android:excludeFromRecents="true"
-            android:theme="@style/DarkActivityTheme"
             />
         <activity android:name=".mediavault.VaultImageViewActivity"
             android:excludeFromRecents="true"

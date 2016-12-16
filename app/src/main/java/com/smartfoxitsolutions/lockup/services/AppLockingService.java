@@ -1,8 +1,6 @@
 package com.smartfoxitsolutions.lockup.services;
 
 import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,14 +27,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.FingerPrintActivity;
+import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
-import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 import com.smartfoxitsolutions.lockup.receivers.AppLockServiceRestartReceiver;
 import com.smartfoxitsolutions.lockup.views.LockPatternView;
 import com.smartfoxitsolutions.lockup.views.LockPatternViewFinger;
 import com.smartfoxitsolutions.lockup.views.LockPinView;
 import com.smartfoxitsolutions.lockup.views.LockPinViewFinger;
-import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.views.OnFingerScannerCancelListener;
 import com.smartfoxitsolutions.lockup.views.OnPinLockUnlockListener;
 
@@ -63,8 +60,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     public static final int RECENT_APP_INFO_V21_DOWN =2;
     public static final int RECENT_APP_INFO_V21_UP =4;
 
-    public static String recentlyUnlockedApp = "NIL";
-    private static boolean isAppScreenDisplayed = false;
+    public static String recentlyLockedApp = "NIL";
     public static final String NIL_APPS_LOCKED = "NIL";
 
     private ScheduledExecutorService appLockService;
@@ -82,8 +78,8 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     private LockPinViewFinger lockPinViewFinger;
     private LockPatternView patternLockView;
     private LockPatternViewFinger patternLockViewFinger;
-    private boolean isFingerPrintLockActive;
-    private boolean stopAppLock = false;
+    private boolean isFingerPrintLockActive,isScreenOn ;
+    private boolean stopAppLock, shouldLockOnScreenOn;
     int displayHeight;
 
     @Nullable
@@ -114,6 +110,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         appLockFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         appLockFilter.addAction(Intent.ACTION_SCREEN_OFF);
         appLockFilter.addAction(Intent.ACTION_SCREEN_ON);
+        appLockFilter.addAction(Intent.ACTION_USER_PRESENT);
         appLockFilter.addAction(AppLockingService.STOP_APP_LOCK_SERVICE);
         registerReceiver(appLockReceiver,appLockFilter);
     }
@@ -124,9 +121,9 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         params.height = WindowManager.LayoutParams.MATCH_PARENT;
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.gravity = Gravity.TOP| Gravity.START;
-        DisplayMetrics metrices = new DisplayMetrics();
-        windowManager.getDefaultDisplay().getMetrics(metrices);
-         displayHeight = metrices.heightPixels;
+        DisplayMetrics metrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(metrics);
+         displayHeight = metrics.heightPixels;
     }
 
     private void loadLaunchers(){
@@ -155,6 +152,8 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                 .getInt(AppLockModel.APP_LOCK_LOCKMODE,54);
         SharedPreferences prefs = getBaseContext().getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
         isFingerPrintLockActive = prefs.getBoolean(LockUpSettingsActivity.FINGER_PRINT_LOCK_SELECTION_PREFERENCE_KEY,false);
+        shouldLockOnScreenOn = prefs.getBoolean(LockUpSettingsActivity.LOCK_SCREEN_ON_PREFERENCE_KEY,false);
+        isScreenOn = false;
         String checkedAppsColorJSONString = prefs.getString(AppLockModel.CHECKED_APPS_COLOR_SHARED_PREF_KEY,null);
         String checkedAppsJSONString = prefs.getString(AppLockModel.CHECKED_APPS_SHARED_PREF_KEY,null);
         String recommendedAppsJSONString = prefs.getString(AppLockModel.RECOMMENDED_APPS_SHARED_PREF_KEY,null);
@@ -183,10 +182,6 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                 stopSelf();
             }
         }
-
-        for(Map.Entry<String,Integer> color : checkedAppColorMap.entrySet() ){
-            Log.d("AppLock",color.getValue() + " ");
-        }
         return START_STICKY;
     }
 
@@ -206,96 +201,106 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     public boolean handleMessage(Message msg) {
         if(msg.what == RECENT_APP_INFO_V21_UP){
             String[] checkedAppPackage = (String[]) msg.obj;
-            if(checkedAppsList.contains(checkedAppPackage[0]) || recommendedAppsList.contains(checkedAppPackage[0])){
-                synchronized (this) {
-                    if (!checkedAppPackage[0].equals(recentlyUnlockedApp) && !isAppScreenDisplayed) {
-                        Log.d("AppLockService", checkedAppPackage[0] + " " +System.currentTimeMillis());
-                        isAppScreenDisplayed = true;
-                           if (appLockMode == AppLockModel.APP_LOCK_MODE_PATTERN) {
-                               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                   if (Settings.canDrawOverlays(getBaseContext())) {
-                                       FingerPrintActivity.updateService(this);
-                                       patternLockViewFinger = new LockPatternViewFinger(getBaseContext(),this, this,isFingerPrintLockActive);
-                                       patternLockViewFinger.setPackageName(checkedAppPackage[0]);
-                                       patternLockViewFinger.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
-                                       windowManager.addView(patternLockViewFinger, params);
-                                       startActivity(new Intent(getBaseContext(),FingerPrintActivity.class)
-                                               .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                                   } else {
-                                       String permissionMessage = getResources().getString(R.string.appLock_activity_usage_dialog_overlay_permission_request);
-                                       Toast.makeText(getBaseContext(), permissionMessage, Toast.LENGTH_LONG).show();
-                                       return true;
-                                   }
-                               } else {
-                                   patternLockView = new LockPatternView(getBaseContext(), this);
-                                   patternLockView.setPackageName(checkedAppPackage[0]);
-                                   patternLockView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
-                                   windowManager.addView(patternLockView, params);
-                               }
-
-                           } else {
-                               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                   if (Settings.canDrawOverlays(getBaseContext())) {
-                                       FingerPrintActivity.updateService(this);
-                                       lockPinViewFinger = new LockPinViewFinger(getBaseContext(), this,this,isFingerPrintLockActive );
-                                       lockPinViewFinger.setPackageName(checkedAppPackage[0]);
-                                       lockPinViewFinger.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
-                                       windowManager.addView(lockPinViewFinger, params);
-                                       startActivity(new Intent(getBaseContext(),FingerPrintActivity.class)
-                                               .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
-                                   } else {
-                                       String permissionMessage = getResources().getString(R.string.appLock_activity_usage_dialog_overlay_permission_request);
-                                       Toast.makeText(getBaseContext(), permissionMessage, Toast.LENGTH_LONG).show();
-                                       return true;
-                                   }
-                               } else {
-                                   lockPinView = new LockPinView(getBaseContext(), this);
-                                   lockPinView.setPackageName(checkedAppPackage[0]);
-                                   lockPinView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
-                                   windowManager.addView(lockPinView, params);
-                               }
-                               Log.d("AppLockService", checkedAppPackage[0] + " " + System.currentTimeMillis());
-                           }
+            synchronized (this) {
+                if(isScreenOn && checkedAppPackage[0]!=null){
+                    if(!checkedAppsList.contains(checkedAppPackage[0]) && !recommendedAppsList.contains(checkedAppPackage[0])){
+                        recentlyLockedApp = NIL_APPS_LOCKED;
+                        isScreenOn = false;
+                        return true;
                     }
                 }
-            }
-            else if(launcherAppsList.contains(checkedAppPackage[0]) || systemUIApp.equals(checkedAppPackage[0])
-                                                || recentlyUnlockedApp.equals(checkedAppPackage[1])){
-                recentlyUnlockedApp = NIL_APPS_LOCKED;
-                isAppScreenDisplayed = false;
-                removeView();
+                if (checkedAppsList.contains(checkedAppPackage[0]) || recommendedAppsList.contains(checkedAppPackage[0])) {
+                    if (!checkedAppPackage[0].equals(recentlyLockedApp)) {
+                        removeView();
+                        recentlyLockedApp = checkedAppPackage[0];
+                        if (appLockMode == AppLockModel.APP_LOCK_MODE_PATTERN) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                if (Settings.canDrawOverlays(getBaseContext())) {
+                                    FingerPrintActivity.updateService(this);
+                                    patternLockViewFinger = new LockPatternViewFinger(getBaseContext(), this, this, isFingerPrintLockActive);
+                                    patternLockViewFinger.setPackageName(checkedAppPackage[0]);
+                                    patternLockViewFinger.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
+                                    windowManager.addView(patternLockViewFinger, params);
+                                    startActivity(new Intent(getBaseContext(), FingerPrintActivity.class)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                                } else {
+                                    String permissionMessage = getResources().getString(R.string.appLock_activity_usage_dialog_overlay_permission_request);
+                                    Toast.makeText(getBaseContext(), permissionMessage, Toast.LENGTH_LONG).show();
+                                    return true;
+                                }
+                            } else {
+                                patternLockView = new LockPatternView(getBaseContext(), this);
+                                patternLockView.setPackageName(checkedAppPackage[0]);
+                                patternLockView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
+                                windowManager.addView(patternLockView, params);
+                            }
+
+                        } else {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                if (Settings.canDrawOverlays(getBaseContext())) {
+                                    FingerPrintActivity.updateService(this);
+                                    lockPinViewFinger = new LockPinViewFinger(getBaseContext(), this, this, isFingerPrintLockActive);
+                                    lockPinViewFinger.setPackageName(checkedAppPackage[0]);
+                                    lockPinViewFinger.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
+                                    windowManager.addView(lockPinViewFinger, params);
+                                    startActivity(new Intent(getBaseContext(), FingerPrintActivity.class)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                                } else {
+                                    String permissionMessage = getResources().getString(R.string.appLock_activity_usage_dialog_overlay_permission_request);
+                                    Toast.makeText(getBaseContext(), permissionMessage, Toast.LENGTH_LONG).show();
+                                    return true;
+                                }
+                            } else {
+                                lockPinView = new LockPinView(getBaseContext(), this);
+                                lockPinView.setPackageName(checkedAppPackage[0]);
+                                lockPinView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
+                                windowManager.addView(lockPinView, params);
+                            }
+                        }
+                    }
+                } else if (launcherAppsList.contains(checkedAppPackage[0]) || systemUIApp.equals(checkedAppPackage[0])
+                        || recentlyLockedApp.equals(checkedAppPackage[1])) {
+                    if(checkedAppPackage[0]!=null) {
+                        if (checkedAppPackage[0].equals(getPackageName())) {
+                            return true;
+                        }
+                        recentlyLockedApp = NIL_APPS_LOCKED;
+                        removeView();
+                    }
+                }
             }
             return true;
         }
         if(msg.what == RECENT_APP_INFO_V21_DOWN){
             String checkedAppPackage = (String) msg.obj;
-            if(checkedAppsList.contains(checkedAppPackage) || recommendedAppsList.contains(checkedAppPackage)){
-                synchronized (this) {
-                    if (!checkedAppPackage.equals(recentlyUnlockedApp) && !isAppScreenDisplayed) {
-                        Log.d("AppLockService", checkedAppPackage + " " +System.currentTimeMillis());
-                        isAppScreenDisplayed = true;
+            synchronized (this) {
+                if (checkedAppsList.contains(checkedAppPackage) || recommendedAppsList.contains(checkedAppPackage)) {
+                    if (!checkedAppPackage.equals(recentlyLockedApp)) {
+                        recentlyLockedApp = checkedAppPackage;
                         if (appLockMode == AppLockModel.APP_LOCK_MODE_PATTERN) {
-
+                            if(patternLockView!=null){
+                                removeView();
+                            }
                             patternLockView = new LockPatternView(getBaseContext(), this);
                             patternLockView.setPackageName(checkedAppPackage);
-                                patternLockView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage),displayHeight);
-                                windowManager.addView(patternLockView, params);
+                            patternLockView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage), displayHeight);
+                            windowManager.addView(patternLockView, params);
 
                         } else {
+                            if(lockPinView!=null){
+                                removeView();
+                            }
                             lockPinView = new LockPinView(getBaseContext(), this);
                             lockPinView.setPackageName(checkedAppPackage);
-                                lockPinView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage),displayHeight);
-                                windowManager.addView(lockPinView, params);
-
+                            lockPinView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage), displayHeight);
+                            windowManager.addView(lockPinView, params);
                         }
-                         Log.d("AppLockService", checkedAppPackage + " " +System.currentTimeMillis());
                     }
+
+                } else {
+                    recentlyLockedApp = NIL_APPS_LOCKED;
+                    removeView();
                 }
-            }
-            else{
-                recentlyUnlockedApp = NIL_APPS_LOCKED;
-                isAppScreenDisplayed = false;
-                removeView();
             }
             return true;
         }
@@ -303,15 +308,13 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     }
 
     @Override
-    public void onPinUnlocked(String packageName) {
-        recentlyUnlockedApp = packageName;
-        isAppScreenDisplayed = false;
+    public void onPinUnlocked() {
         removeView();
     }
 
     @Override
-    public void onPinLocked() {
-        isAppScreenDisplayed = true;
+    public void onPinLocked(String packageName) {
+        recentlyLockedApp = packageName;
     }
 
     void removeView(){
@@ -337,8 +340,6 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
             patternLockViewFinger.removeView();
             patternLockViewFinger = null;
         }
-
-
     }
 
     @Override
@@ -360,15 +361,20 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                 }
             }
             if(action.equals(Intent.ACTION_SCREEN_ON)){
+                if(!shouldLockOnScreenOn) {
+                    isScreenOn = true;
+                }
                 scheduleAppQuery();
-                updateFingerScanner();
-                Log.d("AppLockService", " Got Receiver");
+            }
+            if(action.equals(Intent.ACTION_USER_PRESENT)){
+                if(shouldLockOnScreenOn){
+                    recentlyLockedApp = NIL_APPS_LOCKED;
+                }
             }
             if(action.equals(AppLockingService.STOP_APP_LOCK_SERVICE)){
                 stopAppLock = true;
                 stopForeground(true);
-               stopSelf();
-                Log.d("AppLockService", " Got Receiver");
+                stopSelf();
             }
         }
     }

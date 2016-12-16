@@ -1,16 +1,12 @@
 package com.smartfoxitsolutions.lockup;
 
-import android.annotation.TargetApi;
-import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -23,14 +19,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
 
-import com.smartfoxitsolutions.lockup.dialogs.GrantUsageAccessDialog;
 import com.smartfoxitsolutions.lockup.dialogs.NotificationPermissionDialog;
-import com.smartfoxitsolutions.lockup.dialogs.OverlayPermissionDialog;
 import com.smartfoxitsolutions.lockup.dialogs.RecommendedAppsAlertDialog;
 import com.smartfoxitsolutions.lockup.dialogs.StartAppLockDialog;
-import com.smartfoxitsolutions.lockup.services.AppLockForegroundService;
-import com.smartfoxitsolutions.lockup.services.AppLockingService;
 import com.smartfoxitsolutions.lockup.services.GetPaletteColorService;
 import com.smartfoxitsolutions.lockup.services.NotificationLockService;
 
@@ -49,20 +42,21 @@ public class AppLockActivity extends AppCompatActivity {
     public static final String APP_LOCK_FIRST_START_PREFERENCE_KEY = "app_lock_first_start";
 
     public static boolean shouldStartAppLock;
+    boolean shouldCloseAffinity;
+    boolean shouldTrackUserPresence;
 
     Toolbar appLockActivityToolbar;
     RecyclerView appLockRecyclerView;
     AppLockRecyclerAdapter appLockRecyclerAdapter;
     private AppLockModel appLockModel;
-    private static boolean usagePermissionGranted,overlayPermissionGranted;
     private DialogFragment notificationPermissionDialog;
-    private SharedPreferences prefs;
     private NotificationMapUpdateReceiver notifUpdateReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.app_lock_activity);
+        shouldTrackUserPresence = true;
         appLockModel = new AppLockModel(this.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE));
         appLockRecyclerView = (RecyclerView) findViewById(R.id.app_lock_activity_recycler_view);
         appLockActivityToolbar = (Toolbar) findViewById(R.id.app_lock_activity_tool_bar);
@@ -71,15 +65,17 @@ public class AppLockActivity extends AppCompatActivity {
         appLockActivityToolbar.setTitleTextColor(Color.WHITE);
         if(getSupportActionBar()!=null) {
             getSupportActionBar().setTitle(R.string.appLock_activity_title);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         calculateMarginHeader();
         displayRecyclerView();
-        prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, MODE_PRIVATE);
         boolean isAppLockFirstStart = prefs.getBoolean(APP_LOCK_FIRST_START_PREFERENCE_KEY,true);
         if(isAppLockFirstStart){
             shouldStartAppLock = true;
             SharedPreferences.Editor edit = prefs.edit();
             edit.putBoolean(APP_LOCK_FIRST_START_PREFERENCE_KEY,false);
+            edit.putBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,true);
             edit.apply();
         }
         else{
@@ -98,7 +94,7 @@ public class AppLockActivity extends AppCompatActivity {
        DisplayMetrics metrices =  getResources().getDisplayMetrics();
         AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_TEN = 10 * (metrices.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
         AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_FIFTEEN = 15 * (metrices.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
-
+        AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_MINUS_SEVEN = -7 * (metrices.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
     }
 
 
@@ -138,13 +134,14 @@ public class AppLockActivity extends AppCompatActivity {
 
     public void requestNotificationPermission(){
         startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS),NOTIFICATION_PERMISSION_REQUEST);
+        shouldTrackUserPresence = false;
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == NOTIFICATION_PERMISSION_REQUEST){
-            notificationPermissionDialog.dismiss();
+            shouldTrackUserPresence = true;
             return;
         }
     }
@@ -156,9 +153,31 @@ public class AppLockActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        shouldTrackUserPresence = true;
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        if(shouldTrackUserPresence) {
+            shouldCloseAffinity = true;
+        }else{
+            shouldCloseAffinity = false;
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         Log.d(TAG,"Called onStart");
+        appLockActivityToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
         IntentFilter filter = new IntentFilter(NotificationLockService.UPDATE_LOCK_PACKAGES);
         LocalBroadcastManager.getInstance(this).registerReceiver(notifUpdateReceiver,filter);
     }
@@ -167,26 +186,25 @@ public class AppLockActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         if (appLockRecyclerAdapter!=null) {
-            appLockRecyclerAdapter.notifyDataSetChanged();
             appLockRecyclerAdapter.updateAppModel();
-            Log.d(TAG,"");
         }
-        startService(new Intent(this,AppLockingService.class));
-        startService(new Intent(this,GetPaletteColorService.class));
+        if(shouldStartAppLock) {
+            startService(new Intent(this, GetPaletteColorService.class));
+        }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(notifUpdateReceiver);
         Log.d(TAG,"Called onStop");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d(TAG,"Called onPause");
+        if(shouldCloseAffinity){
+            if (appLockRecyclerAdapter!=null){
+                appLockRecyclerAdapter.closeAppLockRecyclerAdapter();
+            }
+            finishAffinity();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (appLockRecyclerAdapter!=null){
+        if(!shouldCloseAffinity && appLockRecyclerAdapter!=null){
             appLockRecyclerAdapter.closeAppLockRecyclerAdapter();
         }
         Log.d(TAG,"Called onDestroy");

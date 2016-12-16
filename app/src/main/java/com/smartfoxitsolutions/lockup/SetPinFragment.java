@@ -7,12 +7,9 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +19,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 
 /**
  * Created by RAAJA on 7-09-2016.
@@ -290,20 +292,13 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
                    pinHead.setText(R.string.set_pin_fragment_confirm_text);
                    changeLock.setText(R.string.set_pattern_fragment_reset_text);
                    isPinSetCompleted = false;
-
                    pinCompleteAnimator.start();
                } else if (pinSetFirstAttempt.equals(selectedPin)) {
                    pinConfirmed = selectedPin;
-                   pinHead.setText(R.string.set_pin_fragment_title_text);
-                   changeLock.setText(R.string.set_pin_fragment_change_lock_text);
+                   //pinHead.setText(R.string.set_pin_fragment_title_text);
+                   //changeLock.setText(R.string.set_pin_fragment_change_lock_text);
                    isPinSetCompleted = true;
-                   SharedPreferences prefs = pinPatternActivity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, Context.MODE_PRIVATE);
-                   long userPassCode = Long.parseLong(pinConfirmed) * 55439;
-                   SharedPreferences.Editor edit = prefs.edit();
-                   edit.putLong(AppLockModel.USER_SET_LOCK_PASS_CODE, userPassCode);
-                   edit.putInt(AppLockModel.APP_LOCK_LOCKMODE, AppLockModel.APP_LOCK_MODE_PIN);
-                   edit.putBoolean(AppLockModel.LOCK_UP_FIRST_LOAD_PREF_KEY, false);
-                   edit.apply();
+                   persistUserPin(pinConfirmed);
                    pinPatternActivity.startLockUpMainActivity();
                    pinCompleteAnimator.start();
 
@@ -315,9 +310,33 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
        }
     }
 
-
-
     /**
+     * Saves the hashed Pin to preference
+     * @param pin pin confirmed by user
+     */
+
+    void persistUserPin(String pin) {
+        String salt = String.valueOf(System.currentTimeMillis());
+        try {
+            byte[] usePassByte = (pin+salt).getBytes("UTF-8");
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            byte[] messageDigest = digest.digest(usePassByte);
+            StringBuilder sb1 = new StringBuilder();
+            for (int i = 0; i < messageDigest.length; ++i) {
+                sb1.append(Integer.toHexString((messageDigest[i] & 0xFF) | 0x100).substring(1,3));
+            }
+            SharedPreferences prefs = pinPatternActivity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, Context.MODE_PRIVATE);
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putString(AppLockModel.USER_SET_LOCK_PASS_CODE, sb1.toString());
+            edit.putString(AppLockModel.DEFAULT_APP_BACKGROUND_COLOR_KEY,salt);
+            edit.putInt(AppLockModel.APP_LOCK_LOCKMODE, AppLockModel.APP_LOCK_MODE_PIN);
+            edit.apply();
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+        /**
      *  Resets the Pin View partially or completely from the flag passed
      * @param reset Flag for resetting the view. Either RESET_PIN_VIEW_PARTIAL or RESET_PIN_VIEW_COMPLETE
      */

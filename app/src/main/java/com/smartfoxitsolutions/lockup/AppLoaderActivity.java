@@ -6,15 +6,19 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -56,15 +60,15 @@ public class AppLoaderActivity extends AppCompatActivity {
             array1Resource = Arrays.asList(array1);
         }
         recommendedAppList = new ArrayList<>(array1Resource);
-        measureItemView();
+        measureVaultItemView();
         queryInstalledApps();
 
     }
 
-    void measureItemView(){
+    void measureVaultItemView(){
         Context ctxt = getBaseContext();
-        int viewWidth = Math.round(DimensionConverter.convertDpToPixel(155,ctxt));
-        int viewHeight = Math.round(DimensionConverter.convertDpToPixel(115,ctxt));
+        int viewWidth = Math.round(DimensionConverter.convertDpToPixel(165,ctxt));
+        int viewHeight = Math.round(DimensionConverter.convertDpToPixel(120,ctxt));
         int itemWidth = Math.round(DimensionConverter.convertDpToPixel(165,ctxt));
         SharedPreferences.Editor edit = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE).edit();
         edit.putInt(MEDIA_THUMBNAIL_WIDTH_KEY,viewWidth);
@@ -74,6 +78,8 @@ public class AppLoaderActivity extends AppCompatActivity {
     }
 
     void queryInstalledApps(){
+        PackageManager pkgManager = getPackageManager();
+        LinkedList<String> recommendedAddedList = new LinkedList<>();
         installedAppMap = appLockModel.getInstalledAppsMap();
         checkedAppMap = appLockModel.getCheckedAppsMap();
         recommendedAppMap = appLockModel.getRecommendedAppsMap();
@@ -100,12 +106,58 @@ public class AppLoaderActivity extends AppCompatActivity {
                 }
             }
         }
-        if(!recommendedAppMap.containsKey("com.android.packageinstaller")){
+        List<ResolveInfo> installerPackages = pkgManager.queryIntentActivities(new Intent(Intent.ACTION_INSTALL_PACKAGE)
+                                                                                    .setData(Uri.parse("file://"))
+                                                                                ,PackageManager.GET_META_DATA);
+        if(installerPackages!=null && !installerPackages.isEmpty()){
+            ResolveInfo installerInfo = installerPackages.get(0);
+            String installerPackage = installerInfo.activityInfo.packageName;
             HashMap<String,Boolean> stringMap = new HashMap<>();
                 stringMap.put("Install/Uninstall Apps",true);
-                recommendedAppMap.put("com.android.packageinstaller",stringMap);
+                recommendedAppMap.put(installerPackage,stringMap);
+            recommendedAddedList.add(installerPackage);
+            Log.d("AppLoader","Added Installer " + installerPackage);
         }
-        PackageManager pkgManager = getPackageManager();
+
+        List<ResolveInfo> settingsPackages = pkgManager.queryIntentActivities(new Intent(Settings.ACTION_DATE_SETTINGS)
+                                                                            ,PackageManager.GET_META_DATA);
+        if(settingsPackages!=null && !settingsPackages.isEmpty()){
+            try{
+                ResolveInfo settingsInfo = settingsPackages.get(0);
+                    String settingsPackage = settingsInfo.activityInfo.packageName;
+                    ApplicationInfo appNameInfo = pkgManager.getApplicationInfo(settingsPackage, PackageManager.GET_META_DATA);
+                    String settingsAppName = pkgManager.getApplicationLabel(appNameInfo).toString();
+                    HashMap<String,Boolean> recomendTemp = new HashMap<>();
+                    recomendTemp.put(settingsAppName,true);
+                    recommendedAppMap.put(settingsPackage,recomendTemp);
+                recommendedAddedList.add(settingsPackage);
+                    Log.d("AppLoader","Added Settings " + settingsPackage);
+                }catch (PackageManager.NameNotFoundException e){
+                    e.printStackTrace();
+                }
+
+        }
+
+        Intent marketIntent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id="));
+
+        List<ResolveInfo> marketPackages = pkgManager.queryIntentActivities(marketIntent,PackageManager.GET_META_DATA);
+        if(marketPackages!=null && !marketPackages.isEmpty()){
+            for(ResolveInfo marketInfo : marketPackages){
+                try{
+                    String marketPackage = marketInfo.activityInfo.packageName;
+                    ApplicationInfo appNameInfo = pkgManager.getApplicationInfo(marketPackage, PackageManager.GET_META_DATA);
+                    String marketAppName = pkgManager.getApplicationLabel(appNameInfo).toString();
+                    HashMap<String,Boolean> recomendTemp = new HashMap<>();
+                    recomendTemp.put(marketAppName,false);
+                    recommendedAppMap.put(marketPackage,recomendTemp);
+                    recommendedAddedList.add(marketPackage);
+                    Log.d("AppLoader","Added Installer " + marketPackage);
+                }catch (PackageManager.NameNotFoundException e){
+                    e.printStackTrace();
+                }
+            }
+        }
+
         List<ResolveInfo> mainPackages = pkgManager.queryIntentActivities(new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_LAUNCHER),PackageManager.GET_META_DATA);
         for (ResolveInfo appInfo : mainPackages){
@@ -113,31 +165,7 @@ public class AppLoaderActivity extends AppCompatActivity {
             if(!installedAppMap.containsKey(packageName) &&
                     !checkedAppMap.containsKey(packageName)){
 
-                    if(packageName.equalsIgnoreCase("com.android.settings") && !recommendedAppMap.containsKey(packageName)){
-                        try {
-                        ApplicationInfo appNameInfo = pkgManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                        String appName = (String) pkgManager.getApplicationLabel(appNameInfo);
-                        HashMap<String,Boolean> recommendTemp = new HashMap<>();
-                        recommendTemp.put(appName,true);
-                        recommendedAppMap.put(packageName,recommendTemp);
-                        }catch (PackageManager.NameNotFoundException e){
-                            e.printStackTrace();
-                        }
-                        continue;
-                    }
-                    if(packageName.equalsIgnoreCase("com.android.vending") && !recommendedAppMap.containsKey(packageName)){
-                        try {
-                        ApplicationInfo appNameInfo = pkgManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                        String appName = (String) pkgManager.getApplicationLabel(appNameInfo);
-                        HashMap<String,Boolean> recomendTemp = new HashMap<>();
-                        recomendTemp.put(appName,false);
-                        recommendedAppMap.put(packageName,recomendTemp);
-                        }catch (PackageManager.NameNotFoundException e){
-                            e.printStackTrace();
-                        }
-                        continue;
-                    }
-                    if(packageName.equalsIgnoreCase("com.android.vending") || packageName.equalsIgnoreCase("com.android.settings") ){
+                    if(recommendedAddedList.contains(packageName)){
                         continue;
                     }
                         try {
@@ -164,20 +192,10 @@ public class AppLoaderActivity extends AppCompatActivity {
                     .putExtra(SetPinPatternActivity.INTENT_PIN_PATTERN_START_TYPE_KEY,SetPinPatternActivity.INTENT_APP_LOADER)
                     ,REQUEST_START_ACTIVITY_FIRST_LOAD);
         }else{
-            startActivityForResult(new Intent(this,LockUpMainActivity.class),REQUEST_START_LOCKUP_ACTIVITY);
+            startActivityForResult(new Intent(this,MainLockActivity.class),REQUEST_START_LOCKUP_ACTIVITY);
         }
 
     }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(isLockUpFirstLoad()){
-            SharedPreferences.Editor edit = prefs.edit();
-            edit.putBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,true);
-            edit.apply();
-        }
-    }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

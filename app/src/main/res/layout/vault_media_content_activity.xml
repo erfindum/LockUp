@@ -29,7 +29,7 @@
         android:layout_height="@dimen/fiftyDpDimension"
         android:background="@color/white"
         android:layout_alignParentBottom="true"
-
+        android:visibility="invisible"
         >
         <View
             android:id="@+id/vault_media_content_divider"

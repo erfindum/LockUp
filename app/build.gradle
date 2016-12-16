@@ -40,6 +40,8 @@ dependencies {
     compile('com.mopub:mopub-sdk-native-static:4.9.0@aar') {
         transitive = true
     }
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

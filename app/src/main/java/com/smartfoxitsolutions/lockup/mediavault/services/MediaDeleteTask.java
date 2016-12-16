@@ -3,7 +3,6 @@ package com.smartfoxitsolutions.lockup.mediavault.services;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -12,14 +11,14 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.smartfoxitsolutions.lockup.mediavault.MediaAlbumPickerActivity;
-import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaVaultModel;
+import com.smartfoxitsolutions.lockup.mediavault.SelectedMediaModel;
 import com.smartfoxitsolutions.lockup.mediavault.VaultDbHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 
 /**
  * Created by RAAJA on 18-11-2016.
@@ -29,9 +28,8 @@ public class MediaDeleteTask implements Runnable {
 
     private Context context;
     private Handler uiHandler;
-    private int mediaSelectionType;
     private String albumBucketId, mediaType;
-    private String[] selectedMediaId;
+    private ArrayList<String> selectedMediaId;
     private VaultDbHelper vaultDatabaseHelper;
     private SQLiteDatabase vaultDb;
     private Message mssg;
@@ -41,11 +39,10 @@ public class MediaDeleteTask implements Runnable {
         this.uiHandler = new Handler(Looper.getMainLooper(),callback);
     }
 
-    void setTaskRequirements(int selectionType, String bucketId, String media,String[] selectedMediaId){
-        this.mediaSelectionType = selectionType;
+    void setTaskRequirements(String bucketId, String media){
         this.albumBucketId = bucketId;
         this.mediaType = media;
-        this.selectedMediaId = selectedMediaId;
+        this.selectedMediaId = SelectedMediaModel.getInstance().getSelectedMediaIdList();
         String databasePath = Environment.getExternalStorageDirectory()+ File.separator
                 +".lockup"+File.separator+"vault_db";
         vaultDatabaseHelper = new VaultDbHelper(context.getApplicationContext(),databasePath,null,1);
@@ -73,24 +70,16 @@ public class MediaDeleteTask implements Runnable {
     }
 
     private String getSelection(){
-        return MediaVaultModel.MEDIA_TYPE+"=?"+" AND "+MediaVaultModel.VAULT_BUCKET_ID+"=?";
-    }
-
-    private String[] getSelectionArgs(String mediaType){
-        return new String[]{getMediaCursorType(mediaType),albumBucketId};
-    }
-
-    private String getUniqueSelection(){
         return MediaVaultModel.ID_COLUMN_NAME+ " IN (" +
-                TextUtils.join(",", Collections.nCopies(selectedMediaId.length,"?"))+")"
+                TextUtils.join(",", Collections.nCopies(selectedMediaId.size(),"?"))+")"
                 + " AND " + MediaVaultModel.MEDIA_TYPE+"=?"+" AND "
                 + MediaVaultModel.VAULT_BUCKET_ID+"=?";
     }
 
-    private String[] getUniqueSelectionArgs(){
-        String[] selectionArgs = new String[selectedMediaId.length+2];
-        for(int i=0;i<selectedMediaId.length;i++){
-            selectionArgs[i] = selectedMediaId[i];
+    private String[] getSelectionArgs(){
+        String[] selectionArgs = new String[selectedMediaId.size()+2];
+        for(int i=0;i<selectedMediaId.size();i++){
+            selectionArgs[i] = selectedMediaId.get(i);
         }
         selectionArgs[selectionArgs.length-2] = getMediaCursorType(mediaType);
         selectionArgs[selectionArgs.length-1] = albumBucketId;
@@ -101,44 +90,24 @@ public class MediaDeleteTask implements Runnable {
     public void run() {
         Cursor mediaCursor;
         String[] projection = getProjection();
-        if(mediaSelectionType == MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL){
-            mediaCursor = vaultDb.query(MediaVaultModel.TABLE_NAME,projection,getSelection()
-                    ,getSelectionArgs(mediaType),null,null,null);
-            if(mediaCursor !=null && mediaCursor.getCount()>0){
+        mediaCursor = vaultDb.query(MediaVaultModel.TABLE_NAME,projection,getSelection()
+                ,getSelectionArgs(),null,null,null);
+        if(mediaCursor !=null && mediaCursor.getCount()>0){
+            mssg = uiHandler.obtainMessage();
+            mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
+            mssg.arg1 = 0;
+            mssg.arg2 = mediaCursor.getCount();
+            mssg.sendToTarget();
+            try {
+                deleteFromVault(mediaCursor);
+            }catch (IOException e){
+                e.printStackTrace();
+                SelectedMediaModel.getInstance().getSelectedMediaIdList().clear();
                 mssg = uiHandler.obtainMessage();
-                mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
-                mssg.arg1 = 0;
-                mssg.arg2 = mediaCursor.getCount();
+                mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
                 mssg.sendToTarget();
-                try {
-                    deleteFromVault(mediaCursor);
-                }catch (IOException e){
-                    e.printStackTrace();
-                    mssg = uiHandler.obtainMessage();
-                    mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
-                    mssg.sendToTarget();
-                }
             }
-        }
-        if(mediaSelectionType == MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE){
-            mediaCursor = vaultDb.query(MediaVaultModel.TABLE_NAME,projection,getUniqueSelection()
-                    ,getUniqueSelectionArgs(),null,null,null);
-            if(mediaCursor !=null && mediaCursor.getCount()>0){
-                mssg = uiHandler.obtainMessage();
-                mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
-                mssg.arg1 = 0;
-                mssg.arg2 = mediaCursor.getCount();
-                mssg.sendToTarget();
-                try {
-                    deleteFromVault(mediaCursor);
-                }catch (IOException e){
-                    e.printStackTrace();
-                    mssg = uiHandler.obtainMessage();
-                    mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
-                    mssg.sendToTarget();
-                }
 
-            }
         }
     }
 
@@ -196,6 +165,7 @@ public class MediaDeleteTask implements Runnable {
                 }
                 Log.d("VaultMedia"," Inserted and deleted " + deleteCount);
             } while (cursor.moveToNext());
+            SelectedMediaModel.getInstance().getSelectedMediaIdList().clear();
             mssg = uiHandler.obtainMessage();
             mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
             mssg.sendToTarget();

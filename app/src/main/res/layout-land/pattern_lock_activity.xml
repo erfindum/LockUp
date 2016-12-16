@@ -6,13 +6,6 @@
         android:layout_height="match_parent"
         android:id="@+id/pattern_lock_activity_parent_view"
         >
-        <include
-            android:id="@+id/pattern_lock_activity_native_image_view"
-            android:layout_width="270dp"
-            android:layout_height="190dp"
-            android:layout_centerHorizontal="true"
-            layout="@layout/native_ad_sample"
-            />
 
            <ImageView
                android:id="@+id/pattern_lock_activity_app_icon_view"

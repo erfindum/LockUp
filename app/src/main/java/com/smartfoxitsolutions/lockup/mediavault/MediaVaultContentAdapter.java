@@ -45,9 +45,6 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
         fileExtension = new LinkedList<>();
         thumbnailPath = new LinkedList<>();
         vaultIdList = new LinkedList<>();
-        HiddenFileContentModel.getMediaExtension().clear();
-        HiddenFileContentModel.getMediaOriginalName().clear();
-        HiddenFileContentModel.getMediaVaultFile().clear();
         loadPlaceHolderImages();
         setupContent(mediaContentCursor);
     }
@@ -136,6 +133,7 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
             for(MediaVaultContentHolder mediaHolder:holders){
                 mediaHolder.setItemSelected();
             }
+            selectedMediaIds.addAll(vaultIdList);
             MediaVaultContentAdapter.isLongPressed=true;
         }else{
             for(MediaVaultContentHolder mediaHolder:holders){
@@ -172,13 +170,9 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
                     .into(mediaHolder.getThumbnailView());
         }
         if(isLongPressed){
-            if(!selectedAll) {
-                if (!selectedMediaIds.contains(mediaContentCursor.getString(vaultFileNameIndex))) {
-                    mediaHolder.setItemDeselected();
-                } else if (selectedMediaIds.contains(mediaContentCursor.getString(vaultFileNameIndex))) {
-                    mediaHolder.setItemSelected();
-                }
-            }else{
+            if (!selectedMediaIds.contains(mediaContentCursor.getString(vaultFileNameIndex))) {
+                mediaHolder.setItemDeselected();
+            } else if (selectedMediaIds.contains(mediaContentCursor.getString(vaultFileNameIndex))) {
                 mediaHolder.setItemSelected();
             }
         }
@@ -204,31 +198,34 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
     public void onMediaClicked(boolean isLongPressed, int mediaPosition, MediaVaultContentHolder holder) {
         if(!isLongPressed){
             if(activity.getMediaType().equals(MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA)){
-                HiddenFileContentModel.setMediaVaultFile(vaultMediaPath);
-                HiddenFileContentModel.setMediaOriginalName(originalFileName);
-                HiddenFileContentModel.setMediaExtension(fileExtension);
-                HiddenFileContentModel.setMediaId(vaultIdList);
+                VaultImageViewActivity.setOriginalFileNameList(originalFileName);
+                VaultImageViewActivity.setVaultFileList(vaultMediaPath);
+                VaultImageViewActivity.setVaultIdList(vaultIdList);
+                VaultImageViewActivity.setFileExtensionList(fileExtension);
                 activity.startActivity(new Intent(activity.getBaseContext(),VaultImageViewActivity.class)
                             .putExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,mediaPosition)
                             .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,activity.getBucketId()));
+                activity.shouldTrackUserPresence = false;
             }
             if(activity.getMediaType().equals(MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA)){
-                HiddenFileContentModel.setMediaVaultFile(vaultMediaPath);
-                HiddenFileContentModel.setMediaOriginalName(originalFileName);
-                HiddenFileContentModel.setMediaExtension(fileExtension);
-                HiddenFileContentModel.setMediaId(vaultIdList);
+                VaultVideoPlayerActivity.setOriginalFileNameList(originalFileName);
+                VaultVideoPlayerActivity.setVaultFileList(vaultMediaPath);
+                VaultVideoPlayerActivity.setVaultIdList(vaultIdList);
+                VaultVideoPlayerActivity.setFileExtensionList(fileExtension);
                 activity.startActivity(new Intent(activity.getBaseContext(),VaultVideoPlayerActivity.class)
                             .putExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,mediaPosition)
                             .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,activity.getBucketId()));
+                activity.shouldTrackUserPresence = false;
             }
             if(activity.getMediaType().equals(MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA)){
-                HiddenFileContentModel.setMediaVaultFile(vaultMediaPath);
-                HiddenFileContentModel.setMediaOriginalName(originalFileName);
-                HiddenFileContentModel.setMediaExtension(fileExtension);
-                HiddenFileContentModel.setMediaId(vaultIdList);
+                VaultAudioPlayerActivity.setOriginalFileNameList(originalFileName);
+                VaultAudioPlayerActivity.setVaultFileList(vaultMediaPath);
+                VaultAudioPlayerActivity.setVaultIdList(vaultIdList);
+                VaultAudioPlayerActivity.setFileExtensionList(fileExtension);
                 activity.startActivity(new Intent(activity.getBaseContext(),VaultAudioPlayerActivity.class)
                         .putExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,mediaPosition)
                         .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,activity.getBucketId()));
+                activity.shouldTrackUserPresence = false;
             }
 
         }
@@ -240,19 +237,18 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
                 isSelectionStarted = true;
                 activity.startBottomBarAnimation();
             }
-            String vaultIdColumnName = vaultIdList.get(mediaPosition);
-            if(!selectedMediaIds.contains(vaultIdColumnName)){
-                selectedMediaIds.add(vaultIdColumnName);
+            String vaultIdString = vaultIdList.get(mediaPosition);
+            if(!selectedMediaIds.contains(vaultIdString)){
+                selectedMediaIds.add(vaultIdString);
                 holder.getItemAnimator().start();
-                Log.d("VaultRename",mediaPosition + " position ...... "+ originalFileName.get(mediaPosition)+ "   filename Added");
+               // Log.d("VaultRename",mediaPosition + " position ...... "+ originalFileName.get(mediaPosition)+ "   filename Added");
             }else{
-                selectedMediaIds.remove(vaultIdColumnName);
+                selectedMediaIds.remove(vaultIdString);
                 if(selectedMediaIds.isEmpty()) {
                     MediaVaultContentAdapter.isLongPressed = false;
                 }
                 holder.setItemDeselected();
-                Log.d("VaultRename",mediaPosition + " position ...... "+ originalFileName.get(mediaPosition)+ "   filename Removed");
-
+               // Log.d("VaultRename",mediaPosition + " position ...... "+ originalFileName.get(mediaPosition)+ "   filename Removed");
             }
         }
     }

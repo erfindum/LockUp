@@ -5,12 +5,14 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v7.graphics.Palette;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -23,10 +25,10 @@ public class GetPaletteColorTask implements Runnable {
     private ArrayList<String> checkedAppList;
     private Context ctxt;
     private Handler uiHandler;
-    private List<String> recommendedAppsList;
+    private LinkedList<String> recommendedAppsList;
     private TreeMap<String,Integer> checkedAppColorMap;
 
-    public GetPaletteColorTask(ArrayList<String> checkedAppList,List<String> recommendedApps
+    public GetPaletteColorTask(ArrayList<String> checkedAppList,LinkedList<String> recommendedApps
             ,TreeMap<String,Integer> checkedAppColorMap, Context context, Handler.Callback callback) {
         this.checkedAppList = checkedAppList;
         this.recommendedAppsList = recommendedApps;
@@ -42,6 +44,20 @@ public class GetPaletteColorTask implements Runnable {
             if(!checkedAppColorMap.containsKey(recommendedPackage)) {
                 Message msg = uiHandler.obtainMessage();
                 msg.what = GetPaletteColorService.UPDATE_APP_COLOR;
+                if(Build.VERSION.SDK_INT<Build.VERSION_CODES.JELLY_BEAN_MR2
+                        && recommendedAppsList.get(1).equals(recommendedPackage)){
+                    msg.arg1 = Color.parseColor("#2874F0");
+                    msg.obj = recommendedPackage;
+                    msg.sendToTarget();
+                    continue;
+                }
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2
+                        && recommendedAppsList.get(2).equals(recommendedPackage)){
+                    msg.arg1 = Color.parseColor("#2874F0");
+                    msg.obj = recommendedPackage;
+                    msg.sendToTarget();
+                    continue;
+                }
                 try {
                     Drawable appIcon = packageManager.getApplicationIcon(recommendedPackage);
                     BitmapDrawable appBitmapDrawable = (BitmapDrawable) appIcon;

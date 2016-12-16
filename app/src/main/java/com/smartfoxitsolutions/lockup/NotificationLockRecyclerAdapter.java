@@ -12,11 +12,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.smartfoxitsolutions.lockup.services.NotificationLockService;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-
-import com.smartfoxitsolutions.lockup.services.NotificationLockService;
 
 /**
  * Created by RAAJA on 20-10-2016.

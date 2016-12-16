@@ -8,6 +8,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,7 +25,7 @@ import com.smartfoxitsolutions.lockup.R;
  * Created by RAAJA on 19-10-2016.
  */
 
-public class TickerHider extends FrameLayout implements View.OnTouchListener {
+public class TickerHider extends FrameLayout  {
 
     Context context;
     OnTickerHiderActiveListener tickerHiderListener;
@@ -32,18 +33,19 @@ public class TickerHider extends FrameLayout implements View.OnTouchListener {
     AnimatorSet animatorSet;
     ImageView appIcon;
     TextView subText,textTitle;
+    RelativeLayout tickerHiderParent;
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        if(v instanceof RelativeLayout){
-            if(tickerHiderListener !=null){
+   /* @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if(ev.getActionMasked() == KeyEvent.ACTION_UP) {
+            if (tickerHiderListener != null) {
                 cancelAnimation();
                 tickerHiderListener.onTickerHidden();
+                return true;
             }
-            return true;
         }
-        return false;
-    }
+        return super.onInterceptTouchEvent(ev);
+    } */
 
     public interface OnTickerHiderActiveListener{
         void onTickerHidden();
@@ -53,6 +55,7 @@ public class TickerHider extends FrameLayout implements View.OnTouchListener {
         super(context);
         this.context = context;
         LayoutInflater.from(context).inflate(R.layout.ticker_hider,this,true);
+        tickerHiderParent = (RelativeLayout) findViewById(R.id.ticker_hider_parent);
         textTitle = (TextView) findViewById(R.id.ticker_hider_app_text);
         subText = (TextView) findViewById(R.id.ticker_hider_app_sub_text);
         appIcon = (ImageView) findViewById(R.id.ticker_hider_app_icon);
@@ -81,6 +84,15 @@ public class TickerHider extends FrameLayout implements View.OnTouchListener {
 
     public void setOnTickerHiderActiveListener(OnTickerHiderActiveListener listener){
         this.tickerHiderListener = listener;
+        tickerHiderParent.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (tickerHiderListener != null) {
+                    cancelAnimation();
+                    tickerHiderListener.onTickerHidden();
+                }
+            }
+        });
     }
 
     public void setAnimation(){

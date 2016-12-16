@@ -16,6 +16,9 @@ import com.smartfoxitsolutions.lockup.AppLockModel;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,18 +39,25 @@ public class GetPaletteColorService extends Service implements Handler.Callback 
     private TreeMap<String,Integer> checkedAppColorMap;
     private ExecutorService getColorService;
     private GetPaletteColorTask getColorTask;
-    private List<String> recommendedAppsList;
+    private LinkedList<String> recommendedAppsList;
 
     @Override
     public void onCreate() {
         super.onCreate();
         gson = new Gson();
         checkedAppsList = new ArrayList<>();
+        recommendedAppsList = new LinkedList<>();
         checkedAppsMapToken = new TypeToken<TreeMap<String,String>>(){}.getType();
         checkedAppsColorMapToken = new TypeToken<TreeMap<String,Integer>>(){}.getType();
+        Type recommendedAppsMapToken = new TypeToken<LinkedHashMap<String,HashMap<String,Boolean>>>(){}.getType();
         checkedAppColorMap = new TreeMap<>();
-        String[] recommendAppTemp = new String[]{"com.android.packageinstaller","com.android.settings","com.android.vending"};
-        recommendedAppsList = Arrays.asList(recommendAppTemp);
+        SharedPreferences preferences = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
+        String recommendedAppsMapString = preferences.getString(AppLockModel.RECOMMENDED_APPS_SHARED_PREF_KEY,null);
+        LinkedHashMap<String,HashMap<String,Boolean>> recommendedAppsMap =
+                new Gson().fromJson(recommendedAppsMapString,recommendedAppsMapToken);
+        if(recommendedAppsMap!=null && !recommendedAppsMap.isEmpty()){
+         recommendedAppsList.addAll(recommendedAppsMap.keySet());
+        }
     }
 
     @Nullable

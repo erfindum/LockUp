@@ -18,7 +18,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
@@ -33,6 +32,7 @@ import com.smartfoxitsolutions.lockup.mediavault.dialogs.AudioPlayerUnlockDialog
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -46,16 +46,16 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
     private AppCompatImageButton backButton, playPauseButton, playPreviousButton,playNextButton,deleteButton, unlockButton;
     private SeekBar audioSeekBar;
     private TextView titleText, durationText;
-    private LinkedList<String> originalFileNameList, vaultFileList, fileExtensionList;
+    private static LinkedList<String> originalFileNameList, vaultFileList, fileExtensionList, vaultIdList;
     private MediaPlayer audioPlayer;
     private Handler uiHandler;
     private Runnable audioSeekTask;
-    private  static int currentPosition,currentAudioProgress;
+    private  static int currentPosition = -1,currentAudioProgress;
     private int imageViewWidth,imageViewHeight;
     private Drawable placeholder;
     boolean isAlbumArtLoaded,isAudioStopped,isConfigChanged;
     private String audioBucketId;
-    private boolean isDeletePressed,isUnlockPressed;
+    private boolean isDeletePressed,isUnlockPressed, shouldCloseAffinity;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,15 +72,34 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
         audioSeekBar = (SeekBar) findViewById(R.id.vault_audio_player_activity_seek_bar);
         titleText = (TextView) findViewById(R.id.vault_audio_player_activity_original_name);
         durationText = (TextView) findViewById(R.id.vault_audio_player_activity_duration_text);
-        currentPosition = getIntent().getIntExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY,0);
+        if(currentPosition == -1) {
+            currentPosition = getIntent().getIntExtra(MediaVaultContentActivity.SELECTED_MEDIA_FILE_KEY, 0);
+        }
         uiHandler = new Handler(getMainLooper());
-        originalFileNameList = HiddenFileContentModel.getMediaOriginalName();
-        vaultFileList = HiddenFileContentModel.getMediaVaultFile();
-        fileExtensionList = HiddenFileContentModel.getMediaExtension();
         audioBucketId = getIntent().getStringExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY);
         setActivityBackground();
         setRunnable();
         loadPlaceHolder();
+    }
+
+    static void setOriginalFileNameList(LinkedList<String> originalNameList){
+        originalFileNameList = new LinkedList<>();
+        originalFileNameList.addAll(originalNameList);
+    }
+
+    static void setVaultFileList(LinkedList<String> vaultFilePathList){
+        vaultFileList = new LinkedList<>();
+        vaultFileList.addAll(vaultFilePathList);
+    }
+
+    static void setVaultIdList(LinkedList<String> vaultFileIdList){
+        vaultIdList = new LinkedList<>();
+        vaultIdList.addAll(vaultFileIdList);
+    }
+
+    static void setFileExtensionList(LinkedList<String> extensionList){
+        fileExtensionList = new LinkedList<>();
+        fileExtensionList.addAll(extensionList);
     }
 
     void setActivityBackground(){
@@ -292,22 +311,24 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
     }
 
     public void deleteAudio(){
-        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+        ArrayList<String> selectedId = new ArrayList<>();
+        selectedId.add(vaultIdList.get(currentPosition));
+        SelectedMediaModel selectedMediaModel = SelectedMediaModel.getInstance();
+        selectedMediaModel.setSelectedMediaIdList(selectedId);
+        startActivity(new Intent(this,MediaMoveActivity.class)
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,audioBucketId)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA)
-                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,
-                        new String[]{HiddenFileContentModel.getMediaId().get(currentPosition)})
                 .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
     }
 
     public void unlockAudio(){
-        startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
+        ArrayList<String> selectedId = new ArrayList<>();
+        selectedId.add(vaultIdList.get(currentPosition));
+        SelectedMediaModel selectedMediaModel = SelectedMediaModel.getInstance();
+        selectedMediaModel.setSelectedMediaIdList(selectedId);
+        startActivity(new Intent(this,MediaMoveActivity.class)
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,audioBucketId)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA)
-                .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,
-                        new String[]{HiddenFileContentModel.getMediaId().get(currentPosition)})
                 .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
     }
 
@@ -402,6 +423,12 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        shouldCloseAffinity = true;
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         File currentFile = new File(vaultFileList.get(currentPosition)+"."+fileExtensionList.get(currentPosition));
@@ -413,6 +440,17 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
         audioPlayer.stop();
         audioPlayer.release();
         audioPlayer = null;
+        if(shouldCloseAffinity){
+            vaultFileList.clear();
+            originalFileNameList.clear();
+            vaultIdList.clear();
+            fileExtensionList.clear();
+            vaultIdList = null;
+            fileExtensionList = null;
+            originalFileNameList = null;
+            vaultFileList = null;
+            finishAffinity();
+        }
     }
 
     @Override
@@ -425,11 +463,16 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(!isConfigChanged) {
-            HiddenFileContentModel.getMediaOriginalName().clear();
-            HiddenFileContentModel.getMediaVaultFile().clear();
-            HiddenFileContentModel.getMediaExtension().clear();
-            HiddenFileContentModel.getMediaId().clear();
+        if(!shouldCloseAffinity && !isConfigChanged) {
+            currentPosition = -1;
+            vaultFileList.clear();
+            originalFileNameList.clear();
+            vaultIdList.clear();
+            fileExtensionList.clear();
+            vaultIdList = null;
+            fileExtensionList = null;
+            originalFileNameList = null;
+            vaultFileList = null;
         }
     }
 }

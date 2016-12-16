@@ -21,7 +21,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ProgressBar;
@@ -31,8 +30,6 @@ import android.widget.TextView;
 import com.smartfoxitsolutions.lockup.DimensionConverter;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.MediaMoveInDialog;
-
-import java.util.ArrayList;
 
 /**
  * Created by RAAJA on 22-09-2016.
@@ -49,16 +46,17 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
     private ProgressBar loadingProgress;
     private TextView loadingText;
     private AppCompatImageButton selectAllButton,lockButton;
-    private ArrayList<String> selectedMediaId;
     private RelativeLayout bottomBar;
     private ValueAnimator bottomBarAnimator;
     private boolean isLockPressed;
     private DialogFragment moveInDialog;
     private Toolbar toolbar;
+    private boolean shouldTrackUserPresence, shouldCloseAffinity;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        shouldTrackUserPresence = true;
         setContentView(R.layout.vault_media_picker_activity);
         mediaPickerRecycler = (RecyclerView) findViewById(R.id.vault_media_picker_recycler);
         bottomBar = (RelativeLayout) findViewById(R.id.vault_media_picker_bottom_bar);
@@ -168,27 +166,14 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
     }
 
     public void moveMediaFiles(){
-        if(mediaPickerAdapter.getSelectedAll()){
-            startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                    .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_ALL)
-                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
-                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
-                    .putExtra(MediaAlbumPickerActivity.SELECTED_FILE_COUNT_KEY,mediaPickerAdapter.mediaCursor.getCount())
-                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT));
-        }
+        SelectedMediaModel selectedMediaModel = SelectedMediaModel.getInstance();
+        selectedMediaModel.setSelectedMediaIdList(mediaPickerAdapter.getSelectedMediaIds());
 
-        if(!mediaPickerAdapter.getSelectedAll() && !mediaPickerAdapter.getSelectedMediaIds().isEmpty()){
-            selectedMediaId = mediaPickerAdapter.getSelectedMediaIds();
-            String[] mediaIdArray = new String[selectedMediaId.size()];
-            String[] mediaId =selectedMediaId.toArray(mediaIdArray);
-            startActivity(new Intent(getBaseContext(),MediaMoveActivity.class)
-                    .putExtra(MediaMoveActivity.MEDIA_SELECTION_TYPE, MediaMoveActivity.MEDIA_SELECTION_TYPE_UNIQUE)
-                    .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
-                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
-                    .putExtra(MediaAlbumPickerActivity.SELECTED_FILE_COUNT_KEY,mediaId.length)
-                    .putExtra(MediaAlbumPickerActivity.SELECTED_MEDIA_FILES_KEY,mediaId)
-                    .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT));
-        }
+        startActivity(new Intent(this,MediaMoveActivity.class)
+                .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,getBucketId())
+                .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,getMediaType())
+                .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_INTO_VAULT));
+        shouldTrackUserPresence = false;
     }
 
     void setBottomBarAnimation(){
@@ -210,7 +195,6 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
         bottomBarAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                Log.d("Vault",animation.getAnimatedValue() + "");
                 bottomBar.setTop((int) animation.getAnimatedValue());
             }
         });
@@ -252,7 +236,6 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
             mediaPickerAdapter.setItemSize(getItemSize());
             mediaPickerRecycler.setAdapter(mediaPickerAdapter);
             mediaPickerRecycler.setLayoutManager(new GridLayoutManager(getBaseContext(),getNoOfColumns(), GridLayoutManager.VERTICAL,false));
-            loadingComplete();
         }else{
                mediaPickerAdapter.swapCursor(data);
         }
@@ -311,6 +294,33 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        shouldTrackUserPresence = true;
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        if(shouldTrackUserPresence){
+            shouldCloseAffinity = true;
+        }else{
+            shouldCloseAffinity = false;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(shouldCloseAffinity){
+            if(mediaPickerAdapter !=null){
+                mediaPickerAdapter.closeAdapter();
+            }
+            finishAffinity();
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         if(mediaPickerAdapter !=null){
            if(mediaPickerAdapter.getSelectedAll() || !mediaPickerAdapter.getSelectedMediaIds().isEmpty()){
@@ -324,7 +334,7 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mediaPickerAdapter !=null){
+        if(!shouldCloseAffinity && mediaPickerAdapter !=null){
             mediaPickerAdapter.closeAdapter();
         }
     }

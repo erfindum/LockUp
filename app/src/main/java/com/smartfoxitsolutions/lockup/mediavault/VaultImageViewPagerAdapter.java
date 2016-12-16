@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 
 import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.ImageViewState;
@@ -26,9 +25,9 @@ public class VaultImageViewPagerAdapter extends PagerAdapter {
     ImageViewState viewState;
 
     VaultImageViewPagerAdapter(VaultImageViewActivity activity){
-        originalNameList = HiddenFileContentModel.getMediaOriginalName();
-        fileExtensionList = HiddenFileContentModel.getMediaExtension();
-        vaultPathList = HiddenFileContentModel.getMediaVaultFile();
+        originalNameList = VaultImageViewActivity.originalFileNameList;
+        fileExtensionList = VaultImageViewActivity.fileExtensionList;
+        vaultPathList = VaultImageViewActivity.vaultFileList;
         this.activity = activity;
     }
 
@@ -118,7 +117,6 @@ public class VaultImageViewPagerAdapter extends PagerAdapter {
     }
 
     void closeAdapter(){
-
         if(activity !=null) {
             activity = null;
         }

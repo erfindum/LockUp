@@ -19,8 +19,8 @@ import android.view.View;
 import com.smartfoxitsolutions.lockup.dialogs.GrantUsageAccessDialog;
 import com.smartfoxitsolutions.lockup.dialogs.OverlayPermissionDialog;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
-import com.smartfoxitsolutions.lockup.mediavault.services.MediaMoveService;
 import com.smartfoxitsolutions.lockup.mediavault.MediaVaultAlbumActivity;
+import com.smartfoxitsolutions.lockup.mediavault.services.MediaMoveService;
 import com.smartfoxitsolutions.lockup.mediavault.services.ShareMoveService;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
 
@@ -38,6 +38,7 @@ public class LockUpMainActivity extends AppCompatActivity {
                             ,adEarningButton,settingsButton,faqButton;
 
     private DialogFragment overlayPermissionDialog,usageDialog;
+    private boolean shouldTrackUserPresence, shouldCloseAffinity;
 
 
 
@@ -45,6 +46,7 @@ public class LockUpMainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lock_up_main_activity);
+        shouldTrackUserPresence = true;
         appLockActivityButton= (AppCompatImageButton) findViewById(R.id.main_screen_activity_app_lock_image);
         vaultActivityButton = (AppCompatImageButton) findViewById(R.id.main_screen_activity_vault_image);
         adEarningButton = (AppCompatImageButton) findViewById(R.id.main_screen_activity_user_profile_image);
@@ -61,6 +63,7 @@ public class LockUpMainActivity extends AppCompatActivity {
                     checkAndSetUsagePermissions();
                 }else{
                     startActivity(new Intent(getBaseContext(),AppLockActivity.class));
+                    shouldTrackUserPresence = false;
                 }
             }
         });
@@ -70,6 +73,7 @@ public class LockUpMainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(!MediaMoveService.SERVICE_STARTED && !ShareMoveService.SERVICE_STARTED) {
                     startActivity(new Intent(getBaseContext(), MediaVaultAlbumActivity.class));
+                    shouldTrackUserPresence = false;
                 }else{
                     startActivity(new Intent(getBaseContext(),MediaMoveActivity.class));
                 }
@@ -80,6 +84,7 @@ public class LockUpMainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getBaseContext(),LockUpSettingsActivity.class));
+                shouldTrackUserPresence = false;
             }
         });
     }
@@ -94,6 +99,7 @@ public class LockUpMainActivity extends AppCompatActivity {
                         checkAndSetOverlayPermission();
                 }else{
                     startActivity(new Intent(getBaseContext(),AppLockActivity.class));
+                    shouldTrackUserPresence =false;
                 }
                 Log.d(AppLockingService.TAG,String.valueOf(opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS
                         , Process.myUid(), getPackageName())
@@ -114,6 +120,7 @@ public class LockUpMainActivity extends AppCompatActivity {
                     , Process.myUid(), getPackageName())
                     == AppOpsManager.MODE_ALLOWED));
             startActivity(new Intent(getBaseContext(),AppLockActivity.class));
+            shouldTrackUserPresence = false;
         }
         else
         {
@@ -141,28 +148,56 @@ public class LockUpMainActivity extends AppCompatActivity {
     @TargetApi(21)
     public void startUsageAccessSettingActivity(){
         startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS),USAGE_ACCESS_PERMISSION_REQUEST);
+        shouldTrackUserPresence = false;
     }
 
     @TargetApi(23)
     public void requestOverlayPermission(){
         startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION),OVERLAY_PERMISSION_REQUEST);
+        shouldTrackUserPresence = false;
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == USAGE_ACCESS_PERMISSION_REQUEST){
-            usageDialog.dismiss();
             checkAndSetUsagePermissions();
+            shouldTrackUserPresence = true;
         }else
         if(requestCode == OVERLAY_PERMISSION_REQUEST){
-            overlayPermissionDialog.dismiss();
             checkAndSetOverlayPermission();
+            shouldTrackUserPresence = true;
         }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        shouldTrackUserPresence = true;
+    }
+
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        if(shouldTrackUserPresence){
+            shouldCloseAffinity = true;
+        }else{
+            shouldCloseAffinity = false;
+        }
+
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        finishAffinity();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(shouldCloseAffinity){
+            finishAffinity();
+        }
     }
 }

@@ -39,8 +39,13 @@ import com.mopub.nativeads.NativeErrorCode;
 import com.mopub.nativeads.ViewBinder;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.DimensionConverter;
+import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by RAAJA on 27-10-2016.
@@ -53,15 +58,13 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
 
     private PatternLockView patternView;
     private ImageView appIconView;
-    private String selectedPatternNode;
+    private String selectedPatternNode, patternPassCode, salt;
     private int patternNodeSelectedCount;
-    boolean isVibratorEnabled;
+    boolean isVibratorEnabled,shouldHidePatternLine;
     private Vibrator patternViewVibrator;
     private FingerprintManagerCompat fingerprintManager;
     private CancellationSignal cancelSignal;
     private ValueAnimator patternAnimator;
-    private String packageName;
-    private long patternPassCode;
     private RelativeLayout patternViewParent;
     private AppCompatImageView fingerPrintIcon;
     private TextView fingerPrintInfoText;
@@ -76,7 +79,6 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
         this.context = context;
         setPinLockUnlockListener(patternLockListener);
         setFingerCanceledListener(fingerCanceledListener);
-        patternLockListener.onPinLocked();
         this.isFingerPrintActive = isFingerPrintActive;
         LayoutInflater.from(context).inflate(R.layout.pattern_lock_activity_finger,this,true);
         patternViewParent = (RelativeLayout) findViewById(R.id.pattern_lock_activity_finger_parent_view);
@@ -98,7 +100,7 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
     }
 
     public void setPackageName(String packageName){
-        this.packageName = packageName;
+        patternLockListener.onPinLocked(packageName);
         setAppIcon(packageName);
     }
 
@@ -123,8 +125,14 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
         appIconView = (ImageView) findViewById(R.id.pattern_lock_activity_finger_app_icon_view);
         selectedPatternNode = "";
         SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
-        isVibratorEnabled = prefs.getBoolean(AppLockModel.VIBRATOR_ENABLED_PREF_KEY,true);
-        patternPassCode = prefs.getLong(AppLockModel.USER_SET_LOCK_PASS_CODE,0);
+        isVibratorEnabled = prefs.getBoolean(LockUpSettingsActivity.VIBRATOR_ENABLED_PREFERENCE_KEY,true);
+        shouldHidePatternLine = prefs.getBoolean(LockUpSettingsActivity.HIDE_PATTERN_LINE_PREFERENCE_KEY,false);
+        if(shouldHidePatternLine){
+            patternView.setLinePaintTransparency(0);
+        }
+        patternPassCode = prefs.getString(AppLockModel.USER_SET_LOCK_PASS_CODE,"noPin");
+        salt = prefs.getString(AppLockModel.DEFAULT_APP_BACKGROUND_COLOR_KEY,"noColor");
+
         registerListeners();
         setPatternAnimator();
         if(isFingerPrintActive){
@@ -141,7 +149,7 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
 
     void setAppIcon(String packageName){
         try{
-            Log.e(AppLockingService.TAG,"App Icon CAlled " + packageName);
+            Log.d(AppLockingService.TAG,"App Icon CAlled " + packageName);
             Drawable appIcon =  context.getPackageManager().getApplicationIcon(packageName);
             appIconView.setImageDrawable(appIcon);
         }catch (PackageManager.NameNotFoundException e){
@@ -240,7 +248,7 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
                         public void onClick(View view) {
                             Toast.makeText(context,"Native ad clicked",Toast.LENGTH_LONG)
                                     .show();
-                            postPatternCompleted(packageName);
+                            postPatternCompleted();
                         }
                     });
                 }
@@ -293,15 +301,39 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
     public void onPatternCompleted(boolean patternCompleted) {
         if(patternCompleted && !selectedPatternNode.equals("")){
             // Log.d("PatternLock Confirm",selectedPatternNode);
-            long selectedPassCode= Long.parseLong(selectedPatternNode)*55439;
-            if(patternPassCode == selectedPassCode){
+            if(patternPassCode.equals(validatePassword(selectedPatternNode))){
                 //    Log.d("AppLock",selectedPatternNode + " " + patternPassCode);
                 patternView.resetPatternView();
                 resetPatternData();
-                postPatternCompleted(packageName);
+                postPatternCompleted();
             } else{
                 patternAnimator.start();
             }
+        }
+    }
+
+    private String validatePassword(String userPass){
+        StringBuilder builder = new StringBuilder();
+        try {
+            byte[] usePassByte = (userPass+salt).getBytes("UTF-8");
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            byte[] messageDigest = digest.digest(usePassByte);
+            for (int i = 0; i < messageDigest.length; ++i) {
+                builder.append(Integer.toHexString((messageDigest[i] & 0xFF) | 0x100).substring(1,3));
+            }
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return builder.toString();
+    }
+
+    @Override
+    public void onErrorStop() {
+        if(patternAnimator.isStarted()){
+            patternAnimator.end();
+            patternAnimator.cancel();
+            patternView.resetPatternView();
+            resetPatternData();
         }
     }
 
@@ -373,7 +405,7 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
                         @Override
                         public void onAuthenticationSucceeded(FingerprintManagerCompat.AuthenticationResult result) {
                             super.onAuthenticationSucceeded(result);
-                            postPatternCompleted(packageName);
+                            postPatternCompleted();
                         }
 
                         @Override
@@ -462,8 +494,8 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
         }
     }
 
-    private void postPatternCompleted(String packageUnlockedName){
-        patternLockListener.onPinUnlocked(packageUnlockedName);
+    private void postPatternCompleted(){
+        patternLockListener.onPinUnlocked();
     }
 
     void startHome(){
@@ -481,16 +513,6 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
         }
         startHome();
         return true;
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
     }
 
     public void removeView(){

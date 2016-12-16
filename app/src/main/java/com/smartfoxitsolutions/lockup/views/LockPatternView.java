@@ -30,8 +30,13 @@ import com.mopub.nativeads.NativeErrorCode;
 import com.mopub.nativeads.ViewBinder;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.DimensionConverter;
+import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by RAAJA on 06-10-2016.
@@ -42,20 +47,17 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
     private OnPinLockUnlockListener patternLockListener;
     PatternLockView patternView;
     ImageView appIconView;
-    private String selectedPatternNode;
+    private String selectedPatternNode, patternPassCode, salt;
     private int patternNodeSelectedCount;
-    boolean isVibratorEnabled;
+    boolean isVibratorEnabled, shouldHidePatternLine;
     Vibrator patternViewVibrator;
     ValueAnimator patternAnimator;
-    private String packageName;
-    private long patternPassCode;
     private RelativeLayout patternViewParent;
 
     public LockPatternView(Context context, OnPinLockUnlockListener patternLockListener) {
         super(context);
         this.context = context;
         setPinLockUnlockListener(patternLockListener);
-        patternLockListener.onPinLocked();
         LayoutInflater.from(context).inflate(R.layout.pattern_lock_activity,this,true);
         patternViewParent = (RelativeLayout) findViewById(R.id.pattern_lock_activity_parent_view);
         patternViewVibrator= (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
@@ -70,7 +72,7 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
     }
 
     public void setPackageName(String packageName){
-        this.packageName = packageName;
+        patternLockListener.onPinLocked(packageName);
         setAppIcon(packageName);
     }
 
@@ -92,7 +94,12 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         selectedPatternNode = "";
         SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
         isVibratorEnabled = prefs.getBoolean(AppLockModel.VIBRATOR_ENABLED_PREF_KEY,true);
-        patternPassCode = prefs.getLong(AppLockModel.USER_SET_LOCK_PASS_CODE,0);
+        shouldHidePatternLine = prefs.getBoolean(LockUpSettingsActivity.HIDE_PATTERN_LINE_PREFERENCE_KEY,false);
+        if(shouldHidePatternLine){
+            patternView.setLinePaintTransparency(0);
+        }
+        patternPassCode = prefs.getString(AppLockModel.USER_SET_LOCK_PASS_CODE,"noPin");
+        salt = prefs.getString(AppLockModel.DEFAULT_APP_BACKGROUND_COLOR_KEY,"noColor");
         registerListeners();
         setPatternAnimator();
     }
@@ -156,7 +163,7 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
                         public void onClick(View view) {
                             Toast.makeText(context,"Native ad clicked",Toast.LENGTH_LONG)
                                     .show();
-                            postPatternCompleted(packageName);
+                            postPatternCompleted();
                         }
                     });
                 }
@@ -209,15 +216,39 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
     public void onPatternCompleted(boolean patternCompleted) {
         if(patternCompleted && !selectedPatternNode.equals("")){
            // Log.d("PatternLock Confirm",selectedPatternNode);
-            long selectedPassCode= Long.parseLong(selectedPatternNode)*55439;
-            if(patternPassCode == selectedPassCode){
+            if(patternPassCode.equals(validatePassword(selectedPatternNode))){
             //    Log.d("AppLock",selectedPatternNode + " " + patternPassCode);
                 patternView.resetPatternView();
                 resetPatternData();
-                postPatternCompleted(packageName);
+                postPatternCompleted();
             } else{
                 patternAnimator.start();
             }
+        }
+    }
+
+    private String validatePassword(String userPass){
+        StringBuilder builder = new StringBuilder();
+        try {
+            byte[] usePassByte = (userPass+salt).getBytes("UTF-8");
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            byte[] messageDigest = digest.digest(usePassByte);
+            for (int i = 0; i < messageDigest.length; ++i) {
+                builder.append(Integer.toHexString((messageDigest[i] & 0xFF) | 0x100).substring(1,3));
+            }
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return builder.toString();
+    }
+
+    @Override
+    public void onErrorStop() {
+        if(patternAnimator.isStarted()){
+            patternAnimator.end();
+            patternAnimator.cancel();
+            patternView.resetPatternView();
+            resetPatternData();
         }
     }
 
@@ -226,8 +257,8 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         patternNodeSelectedCount=0;
     }
 
-    private void postPatternCompleted(String packageUnlockedName){
-        patternLockListener.onPinUnlocked(packageUnlockedName);
+    private void postPatternCompleted(){
+        patternLockListener.onPinUnlocked();
     }
 
     void startHome(){
