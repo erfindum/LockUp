@@ -100,7 +100,7 @@ public class MainPatternView extends FrameLayout implements PatternLockView.OnPa
         forgotPasswordButton = (Button) findViewById(R.id.main_pattern_lock_forgot_button);
         selectedPatternNode = "";
         SharedPreferences prefs = activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
-        isVibratorEnabled = prefs.getBoolean(AppLockModel.VIBRATOR_ENABLED_PREF_KEY,true);
+        isVibratorEnabled = prefs.getBoolean(AppLockModel.VIBRATOR_ENABLED_PREF_KEY,false);
         shouldHidePatternLine = prefs.getBoolean(LockUpSettingsActivity.HIDE_PATTERN_LINE_PREFERENCE_KEY,false);
         if(shouldHidePatternLine){
             patternView.setLinePaintTransparency(0);

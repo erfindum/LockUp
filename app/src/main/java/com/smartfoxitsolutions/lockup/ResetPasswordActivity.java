@@ -1,6 +1,5 @@
 package com.smartfoxitsolutions.lockup;
 
-import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -21,12 +20,9 @@ import android.widget.Toast;
 
 import com.smartfoxitsolutions.lockup.dialogs.NetworkProcessDialog;
 
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import okhttp3.Interceptor;
-import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -88,13 +84,6 @@ public class ResetPasswordActivity extends AppCompatActivity {
                     resetPassword(securityEdit.getText().toString());
                     return false;
                 }
-                return false;
-            }
-        });
-        securityEdit.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-
                 return false;
             }
         });

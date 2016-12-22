@@ -127,7 +127,7 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             bucketCountList.add(bucketCount);
             bucketCount = 0;
         }
-        if(bucketIdList.size()>4){
+      /*  if(bucketIdList.size()>4){
             bucketIdList.add(3,"Ads");
             bucketNameList.add(3,"Ads");
             bucketCountList.add(3,0);
@@ -138,7 +138,7 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             bucketNameList.add(bucketNameList.size()-1,"Ads");
             bucketCountList.add(bucketCountList.size()-1,0);
             bucketThumbnailPathList.add(bucketThumbnailPathList.size()-1,"Ads");
-        }
+        } */
         for(int i=0 ; i<bucketIdList.size(); i++){
             Log.d("VaultMedia",bucketIdList.get(i)+" id " + bucketNameList.get(i)+" name "
                     + bucketCountList.get(i)+" count " + bucketThumbnailPathList.get(i));
@@ -165,24 +165,24 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             holders.add(holder);
             return holder;
         }
-        if(viewType == ITEM_TYPE_ADS){
+       /* if(viewType == ITEM_TYPE_ADS){
             View itemView = inflater.inflate(R.layout.vault_album_fragment_ads_recycler_item, parent, false);
             MediaAlbumAdHolder holder = new MediaAlbumAdHolder(itemView);
             holder.setOnGridItemSelectedListener(this);
             adHolders.add(holder);
             return holder;
-        }
+        } */
         return null;
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if(getItemCount()>4 && position==3){
+      /*  if(getItemCount()>4 && position==3){
             return;
         }
         if(getItemCount()>8 && position==bucketIdList.size()-2){
             return;
-        }
+        } */
         MediaAlbumPickerHolder mediaHolder = (MediaAlbumPickerHolder) holder;
         File thumbnailFile = new File(bucketThumbnailPathList.get(position));
         File renamedFile = new File(bucketThumbnailPathList.get(position)+".jpg");
@@ -204,12 +204,12 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public int getItemViewType(int position) {
-        if(getItemCount()>4 && position==3){
+      /*  if(getItemCount()>4 && position==3){
             return ITEM_TYPE_ADS;
         }
         if(getItemCount()>8 && position==bucketIdList.size()-2){
             return ITEM_TYPE_ADS;
-        }
+        } */
         return ITEM_TYPE_ALBUM;
     }
 
@@ -242,9 +242,9 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         if(getItemViewType(gridPosition) == ITEM_TYPE_ALBUM) {
             mediaAlbumFragment.albumClicked(bucketIdList.get(gridPosition), bucketNameList.get(gridPosition));
         }
-        if(getItemViewType(gridPosition)== ITEM_TYPE_ADS){
+     /*   if(getItemViewType(gridPosition)== ITEM_TYPE_ADS){
             Toast.makeText(mediaAlbumFragment.getActivity(),"Ads Will be displayed",Toast.LENGTH_SHORT).show();
-        }
+        } */
     }
 
     void closeResources(){
@@ -254,8 +254,8 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         for (MediaAlbumPickerHolder holder : holders){
             holder.setOnGridItemSelectedListener(null);
         }
-        for(MediaAlbumAdHolder holder: adHolders){
+       /* for(MediaAlbumAdHolder holder: adHolders){
             holder.setOnGridItemSelectedListener(null);
-        }
+        } */
     }
 }

@@ -110,7 +110,7 @@ public class MainPinView extends FrameLayout implements View.OnClickListener{
         fingerPrintSwitchButton = (AppCompatImageButton) findViewById(R.id.main_pin_lock_finger_icon);
         pinPatternSwitchButton = (AppCompatImageButton) findViewById(R.id.main_pin_lock_keyboard_icon);
         SharedPreferences prefs = activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
-        isVibratorEnabled = prefs.getBoolean(LockUpSettingsActivity.VIBRATOR_ENABLED_PREFERENCE_KEY,true);
+        isVibratorEnabled = prefs.getBoolean(LockUpSettingsActivity.VIBRATOR_ENABLED_PREFERENCE_KEY,false);
         shouldHidePinTouch = prefs.getBoolean(LockUpSettingsActivity.HIDE_PIN_TOUCH_PREFERENCE_KEY,false);
         forgotPasswordMenu = (AppCompatImageButton) findViewById(R.id.main_pin_lock_menu);
         forgotPasswordButton = (Button) findViewById(R.id.main_pin_lock_forgot_button);

@@ -137,7 +137,7 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
         fingerPrintSwitchButton = (AppCompatImageButton) findViewById(R.id.pin_lock_activity_finger_switch_finger);
         pinPatternSwitchButton = (AppCompatImageButton) findViewById(R.id.pin_lock_activity_finger_switch_keyboard);
         SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
-        isVibratorEnabled = prefs.getBoolean(LockUpSettingsActivity.VIBRATOR_ENABLED_PREFERENCE_KEY,true);
+        isVibratorEnabled = prefs.getBoolean(LockUpSettingsActivity.VIBRATOR_ENABLED_PREFERENCE_KEY,false);
         shouldHidePinTouch = prefs.getBoolean(LockUpSettingsActivity.HIDE_PIN_TOUCH_PREFERENCE_KEY,false);
         selectedPin = "";
         pinPassCode = prefs.getString(AppLockModel.USER_SET_LOCK_PASS_CODE,"noPin");

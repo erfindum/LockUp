@@ -48,7 +48,7 @@ public class MediaMoveInTask implements Runnable {
 
    private Context context;
    private ContentResolver contentResolver;
-   private String albumBucketId, mediaType;
+   private String albumBucketId, mediaType, currentVaultMediaFile, currentVaultThumbnailFile;
    private ArrayList<String> selectedMediaId, fileNames;
    private int viewWidth, viewHeight;
    private VaultDbHelper vaultDatabaseHelper;
@@ -217,6 +217,14 @@ public class MediaMoveInTask implements Runnable {
                 e.printStackTrace();
                 SelectedMediaModel.getInstance().getSelectedMediaIdList().clear();
                 SelectedMediaModel.getInstance().getSelectedMediaFileNameList().clear();
+                File curentVaultFile = new File(currentVaultMediaFile);
+                File curentThumbnailFile = new File(currentVaultThumbnailFile);
+                if(curentVaultFile.exists()){
+                    curentVaultFile.delete();
+                }
+                if(curentThumbnailFile.exists()){
+                    curentThumbnailFile.delete();
+                }
                 mssg = uiHandler.obtainMessage();
                 mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
                 mssg.sendToTarget();
@@ -253,6 +261,8 @@ public class MediaMoveInTask implements Runnable {
                        + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
                        + uniqueBucketId + File.separator + ".thumbs" + File.separator + uniqueBucketId
                        + File.separator + fileNames.get(cursor.getPosition());
+               currentVaultMediaFile = destPathDummy;
+               currentVaultThumbnailFile = thumbnailPathDummy;
 
                boolean mediaCopied = false;
                mediaCopied = copyMediaFile(dataPath, destPathDummy);

@@ -92,7 +92,7 @@ public class LockUpSettingsActivity extends AppCompatActivity {
     void setUpPreferences(){
         shouldAppLockStart = prefs.getBoolean(APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
         isAppLockFirstLoad = prefs.getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,false);
-        isVibratorEnabled = prefs.getBoolean(VIBRATOR_ENABLED_PREFERENCE_KEY,true);
+        isVibratorEnabled = prefs.getBoolean(VIBRATOR_ENABLED_PREFERENCE_KEY,false);
         appLockMode = prefs.getInt(AppLockModel.APP_LOCK_LOCKMODE,0);
         if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.M) {
             isFingerPrintActive = prefs.getBoolean(FINGER_PRINT_LOCK_SELECTION_PREFERENCE_KEY, false);
@@ -167,18 +167,20 @@ public class LockUpSettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 SharedPreferences.Editor edit = prefs.edit();
-                if(shouldAppLockStart){
-                    startAlphaAnimation(activateAppLockText,getString(R.string.settings_activity_activate_locker_disabled));
-                    activateAppLockSwitch.setChecked(false);
-                    shouldAppLockStart = false;
-                    edit.putBoolean(APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
-                }else{
-                    startAlphaAnimation(activateAppLockText,getString(R.string.settings_activity_activate_locker_enabled));
-                    activateAppLockSwitch.setChecked(true);
-                    shouldAppLockStart = true;
-                    edit.putBoolean(APP_LOCKING_SERVICE_START_PREFERENCE_KEY,true);
+                if(!isAppLockFirstLoad) {
+                    if (shouldAppLockStart) {
+                        startAlphaAnimation(activateAppLockText, getString(R.string.settings_activity_activate_locker_disabled));
+                        activateAppLockSwitch.setChecked(false);
+                        shouldAppLockStart = false;
+                        edit.putBoolean(APP_LOCKING_SERVICE_START_PREFERENCE_KEY, false);
+                    } else {
+                        startAlphaAnimation(activateAppLockText, getString(R.string.settings_activity_activate_locker_enabled));
+                        activateAppLockSwitch.setChecked(true);
+                        shouldAppLockStart = true;
+                        edit.putBoolean(APP_LOCKING_SERVICE_START_PREFERENCE_KEY, true);
+                    }
+                    edit.apply();
                 }
-                edit.apply();
             }
         });
 
@@ -389,9 +391,11 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         super.onPause();
         if(shouldAppLockStart && !isAppLockFirstLoad) {
             startService(new Intent(getBaseContext(),AppLockingService.class));
+            LockUpMainActivity.hasAppLockStarted = true;
         }
         if(!shouldAppLockStart){
             sendBroadcast(new Intent(AppLockingService.STOP_APP_LOCK_SERVICE));
+            LockUpMainActivity.hasAppLockStarted = false;
         }
     }
 

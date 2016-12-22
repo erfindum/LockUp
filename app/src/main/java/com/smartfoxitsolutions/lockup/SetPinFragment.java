@@ -295,8 +295,6 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
                    pinCompleteAnimator.start();
                } else if (pinSetFirstAttempt.equals(selectedPin)) {
                    pinConfirmed = selectedPin;
-                   //pinHead.setText(R.string.set_pin_fragment_title_text);
-                   //changeLock.setText(R.string.set_pin_fragment_change_lock_text);
                    isPinSetCompleted = true;
                    persistUserPin(pinConfirmed);
                    pinPatternActivity.startLockUpMainActivity();
@@ -373,7 +371,8 @@ public class SetPinFragment extends Fragment implements View.OnClickListener {
             pinSetFirstAttempt="";
             pinConfirmed="";
             pinSetCount=PIN_SET_FIRST_ATTEMPT;
-
+            pinHead.setText(R.string.set_pin_fragment_title_text);
+            changeLock.setText(R.string.set_pin_fragment_change_lock_text);
         }
     }
 

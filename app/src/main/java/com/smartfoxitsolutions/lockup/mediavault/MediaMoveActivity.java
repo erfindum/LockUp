@@ -12,11 +12,13 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatImageView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.smartfoxitsolutions.lockup.MainLockActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.ShareAlertDialog;
 import com.smartfoxitsolutions.lockup.mediavault.services.MediaMoveService;
@@ -42,14 +44,15 @@ public class MediaMoveActivity extends AppCompatActivity {
 
     public static final String MEDIA_MOVE_MESSENGER_KEY = "media_move_messenger";
 
-    TextView countText;
-    ProgressBar countProgress;
-    Button doneButton;
-    TextView moveText, moveInfoText;
+    private TextView countText;
+    private ProgressBar countProgress;
+    private Button doneButton;
+    private TextView moveText, moveInfoText;
     int moveType;
-    String albumBucketId, mediaType;
-    AtomicLong timestamp;
+    private String albumBucketId, mediaType;
+    private AtomicLong timestamp;
     boolean isOperationComplete,hasMoveStarted,shouldDisplayShareAlert;
+    private AppCompatImageView moveInfoImage;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,6 +63,7 @@ public class MediaMoveActivity extends AppCompatActivity {
         doneButton = (Button) findViewById(R.id.media_move_activity_button_done);
         moveText = (TextView) findViewById(R.id.media_move_activity_move_text);
         moveInfoText = (TextView) findViewById(R.id.media_move_activity_move_info);
+        moveInfoImage = (AppCompatImageView) findViewById(R.id.media_move_activity_image);
         Intent intent = getIntent();
         if(intent.getAction()!=null && intent.getAction().equals(Intent.ACTION_SEND)){
             if(!MediaMoveService.SERVICE_STARTED) {
@@ -168,6 +172,7 @@ public class MediaMoveActivity extends AppCompatActivity {
                     .putParcelableArrayListExtra(SHARE_MEDIA_FILE_LIST_KEY,fileUriList)
                     .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger));
         moveText.setText(R.string.vault_move_activity_move_in_text);
+        moveInfoImage.setImageResource(R.drawable.ic_vault_share_icon);
         setMoveBackgroundButton();
         registerListeners();
     }
@@ -178,11 +183,12 @@ public class MediaMoveActivity extends AppCompatActivity {
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY, mediaType));
         }else{
-            startActivity(new Intent(this, MediaVaultAlbumActivity.class)
+            startActivity(new Intent(this, MainLockActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
         }
         NotificationManager notificationManager= (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancel(7549682);
+        finish();
     }
 
     private void moveToBackground(){
@@ -266,6 +272,13 @@ public class MediaMoveActivity extends AppCompatActivity {
         if(ShareMoveService.SERVICE_STARTED){
             Messenger messenger = new Messenger(new MoveHandler(getWeakReference()));
             ShareMoveService.updateShareMessenger(messenger);
+        }
+        if(moveType ==  MediaMoveActivity.MOVE_TYPE_INTO_VAULT){
+            moveInfoImage.setImageResource(R.drawable.ic_vault_share_icon);
+        }
+
+        if(moveType == MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT || moveType ==  MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT){
+            moveInfoImage.setImageResource(R.drawable.ic_vault_share_out_icon);
         }
         if(shouldDisplayShareAlert){
             displayShareAlertDialog();

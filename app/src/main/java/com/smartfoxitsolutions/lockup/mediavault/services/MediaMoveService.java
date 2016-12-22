@@ -14,6 +14,7 @@ import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
+import com.smartfoxitsolutions.lockup.MainLockActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.MediaAlbumPickerActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
@@ -194,10 +195,9 @@ public class MediaMoveService extends Service implements Handler.Callback{
                     .setAutoCancel(true)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentIntent(PendingIntent.getActivity(getBaseContext(),29,new Intent(getBaseContext()
-                                    , MediaVaultAlbumActivity.class)
+                                    , MainLockActivity.class)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                                    .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY, MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA)
                             ,PendingIntent.FLAG_UPDATE_CURRENT))
                     .setOnlyAlertOnce(true)
                     .setColor(Color.parseColor("#2874F0"));

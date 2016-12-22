@@ -448,6 +448,8 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 checkedAppsMap.put(checkedAppsPackage.get(listPosition),checkedAppsName.get(listPosition));
                 installedAppsMap.remove(checkedAppsPackage.get(listPosition));
             }
+            LockUpMainActivity.installedAppsCount = installedAppsMap.size();
+            LockUpMainActivity.lockedAppsCount = checkedAppsMap.size();
         }
         else if (!installedAppsPackage.isEmpty() && getItemPositionRange(listItemPosition)==ITEM_POSITION_RANGE_INSTALLED_APPS){
             if(!AppLockActivity.shouldStartAppLock){
@@ -467,6 +469,8 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 installedAppsMap.put(installedAppsPackage.get(listPosition),installedAppsName.get(listPosition));
                 checkedAppsMap.remove(installedAppsPackage.get(listPosition));
             }
+            LockUpMainActivity.installedAppsCount = installedAppsMap.size();
+            LockUpMainActivity.lockedAppsCount = checkedAppsMap.size();
             Log.d(TAG," Item count " + getItemCount() +" "+ installedAppsMap.size()+" "+ checkedAppsMap.size());
         }
     }

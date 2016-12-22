@@ -51,6 +51,9 @@ public class ShareMoveTask implements Runnable {
     private Message mssg;
     private ArrayList<Uri> fileUriList;
     private MimeTypeMap mimeTypeMap;
+    private String currentVaultMediaFile, currentThumbnailMediaFile;
+    private int currentPosition;
+
 
     public ShareMoveTask(Context context, Handler.Callback callback) {
         this.context = context;
@@ -63,6 +66,7 @@ public class ShareMoveTask implements Runnable {
         this.fileUriList = uriList;
         this.viewWidth = viewWidth;
         this.viewHeight = viewHeight;
+        currentPosition=0;
         timestamp = new AtomicLong(System.currentTimeMillis());
         String databasePath = Environment.getExternalStorageDirectory()+ File.separator
                 +".lockup"+File.separator+"vault_db";
@@ -137,6 +141,9 @@ public class ShareMoveTask implements Runnable {
         retriever.setDataSource(path);
         String albumName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
         retriever.release();
+        if(albumName==null){
+            return "UnknownAlbum";
+        }
         return albumName;
     }
 
@@ -161,15 +168,8 @@ public class ShareMoveTask implements Runnable {
 
     @Override
     public void run() {
-        int currentPosition = 0;
         for(Uri uri:fileUriList){
             moveFileToVault(uri,uri.getScheme());
-            currentPosition+=1;
-            mssg = uiHandler.obtainMessage();
-            mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
-            mssg.arg1 = currentPosition;
-            mssg.arg2 = fileUriList.size();
-            mssg.sendToTarget();
         }
         mssg = uiHandler.obtainMessage();
         mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
@@ -177,19 +177,23 @@ public class ShareMoveTask implements Runnable {
     }
 
     private void moveFileToVault(Uri uri, String scheme){
-        if(scheme.equals("content")){
-            try {
+        try {
+            if (scheme.equals("content")) {
                 moveContentScheme(uri);
-            }catch (IOException e){
-                e.printStackTrace();
             }
-        }
-        if(scheme.equals("file")){
-            try {
+            if (scheme.equals("file")) {
                 moveFileScheme(uri);
-            }catch (IOException e){
-                e.printStackTrace();
             }
+        }catch (IOException e){
+            File currentVaultFile = new File(currentVaultMediaFile);
+            File currentThumbnailFile = new File(currentThumbnailMediaFile);
+            if(currentVaultFile.exists()){
+                currentVaultFile.delete();
+            }
+            if(currentThumbnailFile.exists()){
+                currentThumbnailFile.delete();
+            }
+            e.printStackTrace();
         }
     }
 
@@ -233,6 +237,8 @@ public class ShareMoveTask implements Runnable {
                     + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
                     + uniqueBucketId + File.separator + ".thumbs" + File.separator + uniqueBucketId
                     + File.separator + vaultFileName;
+            currentVaultMediaFile = destPathDummy;
+            currentThumbnailMediaFile = thumbnailPathDummy;
 
             boolean mediaCopied = false;
             mediaCopied = copyMediaFile(dataPath, destPathDummy);
@@ -300,6 +306,12 @@ public class ShareMoveTask implements Runnable {
                     deleteFailedFiles(thumbnailPathDummy);
                 }
             }
+            currentPosition+=1;
+            mssg = uiHandler.obtainMessage();
+            mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
+            mssg.arg1 = currentPosition;
+            mssg.arg2 = fileUriList.size();
+            mssg.sendToTarget();
             mediaCursor.close();
         }
     }
@@ -342,6 +354,9 @@ public class ShareMoveTask implements Runnable {
                 + ".lockup" + File.separator + getMediaFolder(mediaType) + File.separator
                 + uniqueBucketId + File.separator + ".thumbs" + File.separator + uniqueBucketId
                 + File.separator + vaultFileName;
+
+        currentVaultMediaFile = destPathDummy;
+        currentThumbnailMediaFile = thumbnailPathDummy;
 
         boolean mediaCopied = false;
         mediaCopied = copyMediaFile(dataPath, destPathDummy);
@@ -409,6 +424,12 @@ public class ShareMoveTask implements Runnable {
                 deleteFailedFiles(thumbnailPathDummy);
             }
         }
+        currentPosition+=1;
+        mssg = uiHandler.obtainMessage();
+        mssg.what = MediaMoveService.MEDIA_SUCCESSFULLY_MOVED;
+        mssg.arg1 = currentPosition;
+        mssg.arg2 = fileUriList.size();
+        mssg.sendToTarget();
 
     }
 

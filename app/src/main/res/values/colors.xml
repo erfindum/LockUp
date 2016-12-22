@@ -4,6 +4,8 @@
     <color name="colorLightPrimary">#E3F2FD</color>
     <color name="colorMainPrimaryDark">#1565C0</color>
     <color name="colorMainAccent">#f7e830</color>
+    <color name="mainScreenLightBlue">#42A5F5</color>
+    <color name="mainScreenDarkBlue">#0D47A1</color>
 
 
     <color name="textSecondaryColor">#42A5F5</color>
@@ -12,6 +14,7 @@
     <color name="dividerColor">#BDBDBD</color>
     <color name="textDarkGrey">#536E7A</color>
     <color name="viewPagerTabBlue">#90CAF9</color>
+    <color name="mainScreenText">#D4E8F4</color>
 
     <color name="white">#ffffff</color>
     <color name="transparentWhite">#7Dffffff</color>

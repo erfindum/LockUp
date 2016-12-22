@@ -30,10 +30,10 @@ import java.util.List;
             appLockUIHandler = new Handler(Looper.getMainLooper(),callback);
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                 usageStatsManager =
-                        (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+                        (UsageStatsManager) context.getApplicationContext().getSystemService(Context.USAGE_STATS_SERVICE);
                 packages = new String[2];
             }else{
-                activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+                activityManager = (ActivityManager) context.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
             }
 
         }

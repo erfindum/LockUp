@@ -172,8 +172,8 @@ public class SetPatternFragment extends Fragment implements PatternLockView.OnPa
             isRestPatternEnabled=false;
             patternSelectedFirstAttempt="";
             patternConfirmed="";
-           // patternHead.setText(R.string.set_pattern_fragment_title_text);
-           // changeLock.setText(R.string.set_pattern_fragment_change_lock_text);
+            patternHead.setText(R.string.set_pattern_fragment_title_text);
+            changeLock.setText(R.string.set_pattern_fragment_change_lock_text);
         }
     }
 

@@ -6,12 +6,12 @@
     android:layout_marginTop="@dimen/tenDpDimension"
     android:background="#fff"
     app:cardCornerRadius="@dimen/fiveDpDimension"
-    app:cardPreventCornerOverlap="false"
+    android:layout_marginBottom="-7dp"
+    app:cardElevation="2dp"
     >
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/fiveDpDimension"
         >
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/vault_album_picker_recycler_item_thumbnail"
@@ -24,7 +24,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/vault_album_picker_recycler_item_thumbnail"
-        android:layout_marginTop="@dimen/twoDpDimension"
         android:maxLines="1"
         android:ellipsize="end"
         android:textColor="@color/textDarkGrey"

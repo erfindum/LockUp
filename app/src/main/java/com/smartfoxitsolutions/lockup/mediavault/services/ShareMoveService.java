@@ -20,6 +20,7 @@ import android.support.v4.app.NotificationCompat;
 import com.smartfoxitsolutions.lockup.AppLoaderActivity;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.DimensionConverter;
+import com.smartfoxitsolutions.lockup.MainLockActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaVaultAlbumActivity;
@@ -176,7 +177,7 @@ public class ShareMoveService extends Service implements Handler.Callback{
                     .setAutoCancel(true)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentIntent(PendingIntent.getActivity(getBaseContext(),29,new Intent(getBaseContext()
-                                        , MediaVaultAlbumActivity.class)
+                                        , MainLockActivity.class)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                             ,0))

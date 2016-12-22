@@ -190,6 +190,7 @@ public class AppLockActivity extends AppCompatActivity {
         }
         if(shouldStartAppLock) {
             startService(new Intent(this, GetPaletteColorService.class));
+            LockUpMainActivity.hasAppLockStarted = true;
         }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(notifUpdateReceiver);
         Log.d(TAG,"Called onStop");

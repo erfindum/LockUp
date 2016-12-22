@@ -93,7 +93,7 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         appIconView = (ImageView) findViewById(R.id.pattern_lock_activity_app_icon_view);
         selectedPatternNode = "";
         SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
-        isVibratorEnabled = prefs.getBoolean(AppLockModel.VIBRATOR_ENABLED_PREF_KEY,true);
+        isVibratorEnabled = prefs.getBoolean(AppLockModel.VIBRATOR_ENABLED_PREF_KEY,false);
         shouldHidePatternLine = prefs.getBoolean(LockUpSettingsActivity.HIDE_PATTERN_LINE_PREFERENCE_KEY,false);
         if(shouldHidePatternLine){
             patternView.setLinePaintTransparency(0);

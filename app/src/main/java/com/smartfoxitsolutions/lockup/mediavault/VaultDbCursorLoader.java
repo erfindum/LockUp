@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.support.v4.content.AsyncTaskLoader;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 
 /**
  * Created by RAAJA on 15-10-2016.
@@ -36,7 +37,7 @@ public class VaultDbCursorLoader extends AsyncTaskLoader<Cursor> {
         String databasePath = Environment.getExternalStorageDirectory()+ File.separator
                 +".lockup"+File.separator+"vault_db";
         dbHelper = new VaultDbHelper(context.getApplicationContext(),databasePath,null,version);
-        loadReceiver = new LoadReceiver();
+        loadReceiver = new LoadReceiver(new WeakReference<>(this));
     }
 
     @Override
@@ -112,16 +113,21 @@ public class VaultDbCursorLoader extends AsyncTaskLoader<Cursor> {
         }
     }
 
-    private class LoadReceiver extends BroadcastReceiver{
+    private static class LoadReceiver extends BroadcastReceiver{
+        WeakReference<VaultDbCursorLoader> vaultCursorLoader;
+        LoadReceiver(WeakReference<VaultDbCursorLoader> cursorLoader){
+            this.vaultCursorLoader = cursorLoader;
+    }
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            onContentChanged();
+            vaultCursorLoader.get().onContentChanged();
         }
     }
 
     private void closeResources(){
         loadReceiver = null;
+        appContext = null;
         if(dbCursor!=null && !dbCursor.isClosed()){
             dbCursor.close();
         }

@@ -253,7 +253,6 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
 
     void closeFragment(){
         if(mediaAdapter !=null){
-            mediaAdapter.swapCursor(null);
             mediaAdapter.closeResources();
             mediaAdapter = null;
         }

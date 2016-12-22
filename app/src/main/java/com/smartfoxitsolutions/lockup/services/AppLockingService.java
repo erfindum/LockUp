@@ -216,13 +216,15 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                         if (appLockMode == AppLockModel.APP_LOCK_MODE_PATTERN) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                 if (Settings.canDrawOverlays(getBaseContext())) {
-                                    FingerPrintActivity.updateService(this);
                                     patternLockViewFinger = new LockPatternViewFinger(getBaseContext(), this, this, isFingerPrintLockActive);
                                     patternLockViewFinger.setPackageName(checkedAppPackage[0]);
                                     patternLockViewFinger.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
                                     windowManager.addView(patternLockViewFinger, params);
-                                    startActivity(new Intent(getBaseContext(), FingerPrintActivity.class)
-                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                                    if(isFingerPrintLockActive) {
+                                        FingerPrintActivity.updateService(this);
+                                        startActivity(new Intent(getBaseContext(), FingerPrintActivity.class)
+                                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                                    }
                                 } else {
                                     String permissionMessage = getResources().getString(R.string.appLock_activity_usage_dialog_overlay_permission_request);
                                     Toast.makeText(getBaseContext(), permissionMessage, Toast.LENGTH_LONG).show();
@@ -238,13 +240,15 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                         } else {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                 if (Settings.canDrawOverlays(getBaseContext())) {
-                                    FingerPrintActivity.updateService(this);
                                     lockPinViewFinger = new LockPinViewFinger(getBaseContext(), this, this, isFingerPrintLockActive);
                                     lockPinViewFinger.setPackageName(checkedAppPackage[0]);
                                     lockPinViewFinger.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
                                     windowManager.addView(lockPinViewFinger, params);
-                                    startActivity(new Intent(getBaseContext(), FingerPrintActivity.class)
-                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                                    if(isFingerPrintLockActive) {
+                                        FingerPrintActivity.updateService(this);
+                                        startActivity(new Intent(getBaseContext(), FingerPrintActivity.class)
+                                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                                    }
                                 } else {
                                     String permissionMessage = getResources().getString(R.string.appLock_activity_usage_dialog_overlay_permission_request);
                                     Toast.makeText(getBaseContext(), permissionMessage, Toast.LENGTH_LONG).show();
@@ -258,8 +262,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                             }
                         }
                     }
-                } else if (launcherAppsList.contains(checkedAppPackage[0]) || systemUIApp.equals(checkedAppPackage[0])
-                        || recentlyLockedApp.equals(checkedAppPackage[1])) {
+                } else if (recentlyLockedApp.equals(checkedAppPackage[1])) {
                     if(checkedAppPackage[0]!=null) {
                         if (checkedAppPackage[0].equals(getPackageName())) {
                             return true;

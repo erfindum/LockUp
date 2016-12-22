@@ -20,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.smartfoxitsolutions.lockup.LockUpMainActivity;
 import com.smartfoxitsolutions.lockup.R;
 
 import java.io.File;
@@ -259,5 +260,14 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         if(shouldCloseAffinity){
             finishAffinity();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        shouldCloseAffinity = true;
+        startActivity(new Intent(getBaseContext(), LockUpMainActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        super.onBackPressed();
     }
 }

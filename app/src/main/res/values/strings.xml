@@ -126,6 +126,11 @@
     <string name="main_screen_activity_vault_button_text">Vault</string>
     <string name="main_screen_activity_settings_button_text">Settings</string>
     <string name="main_screen_activity_user_profile_button_text">My Profile</string>
+    <string name="main_screen_activity_app_name_text">LockUp</string>
+    <string name="main_screen_activity_app_lock_info_On">ON</string>
+    <string name="main_screen_activity_app_lock_info_Off">OFF</string>
+    <string name="main_screen_activity_installed_info">Installed Apps</string>
+    <string name="main_screen_activity_locked_info">Locked Apps</string>
     <string name="main_screen_activity_faq_button_text">FAQ</string>
     <string name="main_screen_activity_ad_unit_id">ca-app-pub-4739007494599063/2472603036</string>
     <string name="main_lock_activity_forgot_button">FORGOT PASSWORD</string>

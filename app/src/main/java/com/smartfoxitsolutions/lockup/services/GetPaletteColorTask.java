@@ -13,7 +13,6 @@ import android.support.v7.graphics.Palette;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.TreeMap;
 
 /**
