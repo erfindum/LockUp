@@ -41,7 +41,7 @@ public class AppLockActivity extends AppCompatActivity {
     private static final String START_APP_LOG_DIALOG_TAG = "start_app_lock_dialog";
     public static final String APP_LOCK_FIRST_START_PREFERENCE_KEY = "app_lock_first_start";
 
-    public static boolean shouldStartAppLock;
+    public static boolean shouldStartAppLock,isDeviceAdminEnabled;
     boolean shouldCloseAffinity;
     boolean shouldTrackUserPresence;
 
@@ -51,6 +51,8 @@ public class AppLockActivity extends AppCompatActivity {
     private AppLockModel appLockModel;
     private DialogFragment notificationPermissionDialog;
     private NotificationMapUpdateReceiver notifUpdateReceiver;
+    private SharedPreferences prefs;
+    private LockScreenOffReceiver lockScreenOffReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,8 +71,9 @@ public class AppLockActivity extends AppCompatActivity {
         }
         calculateMarginHeader();
         displayRecyclerView();
-        SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, MODE_PRIVATE);
+        prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, MODE_PRIVATE);
         boolean isAppLockFirstStart = prefs.getBoolean(APP_LOCK_FIRST_START_PREFERENCE_KEY,true);
+        isDeviceAdminEnabled = prefs.getBoolean(LockUpSettingsActivity.DEVICE_ADMIN_PREFERENCE_KEY,false);
         if(isAppLockFirstStart){
             shouldStartAppLock = true;
             SharedPreferences.Editor edit = prefs.edit();
@@ -92,9 +95,10 @@ public class AppLockActivity extends AppCompatActivity {
 
     void calculateMarginHeader(){
        DisplayMetrics metrices =  getResources().getDisplayMetrics();
-        AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_TEN = 10 * (metrices.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
-        AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_FIFTEEN = 15 * (metrices.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
-        AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_MINUS_SEVEN = -7 * (metrices.densityDpi/DisplayMetrics.DENSITY_DEFAULT);
+        AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_TEN = Math.round(getResources().getDimension(R.dimen.app_lock_header_margin_left));
+        AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_FIFTEEN = Math.round(getResources().getDimension(R.dimen.app_lock_header_margin_top));
+        AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_MINUS_SEVEN = Math.round(getResources()
+                                        .getDimension(R.dimen.app_lock_header_margin_bottom_21_down));
     }
 
 
@@ -156,6 +160,9 @@ public class AppLockActivity extends AppCompatActivity {
     protected void onRestart() {
         super.onRestart();
         shouldTrackUserPresence = true;
+        if(appLockRecyclerAdapter!=null){
+            appLockRecyclerAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -180,6 +187,9 @@ public class AppLockActivity extends AppCompatActivity {
         });
         IntentFilter filter = new IntentFilter(NotificationLockService.UPDATE_LOCK_PACKAGES);
         LocalBroadcastManager.getInstance(this).registerReceiver(notifUpdateReceiver,filter);
+        IntentFilter screenOffReceiver = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        lockScreenOffReceiver = new LockScreenOffReceiver(new WeakReference<>(this));
+        registerReceiver(lockScreenOffReceiver,screenOffReceiver);
     }
 
     @Override
@@ -190,7 +200,7 @@ public class AppLockActivity extends AppCompatActivity {
         }
         if(shouldStartAppLock) {
             startService(new Intent(this, GetPaletteColorService.class));
-            LockUpMainActivity.hasAppLockStarted = true;
+            //LockUpMainActivity.hasAppLockStarted = true;
         }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(notifUpdateReceiver);
         Log.d(TAG,"Called onStop");
@@ -200,6 +210,9 @@ public class AppLockActivity extends AppCompatActivity {
             }
             finishAffinity();
         }
+        if(!shouldTrackUserPresence){
+            unregisterReceiver(lockScreenOffReceiver);
+        }
     }
 
     @Override
@@ -207,6 +220,9 @@ public class AppLockActivity extends AppCompatActivity {
         super.onDestroy();
         if(!shouldCloseAffinity && appLockRecyclerAdapter!=null){
             appLockRecyclerAdapter.closeAppLockRecyclerAdapter();
+        }
+        if(shouldTrackUserPresence){
+            unregisterReceiver(lockScreenOffReceiver);
         }
         Log.d(TAG,"Called onDestroy");
     }
@@ -223,6 +239,21 @@ public class AppLockActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(NotificationLockService.UPDATE_LOCK_PACKAGES)){
                 activityReference.get().updateNotificationMap();
+            }
+        }
+    }
+
+    static class LockScreenOffReceiver extends BroadcastReceiver {
+
+        WeakReference<AppLockActivity> activity;
+        LockScreenOffReceiver(WeakReference<AppLockActivity> activity){
+            this.activity = activity;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
+                activity.get().finishAffinity();
             }
         }
     }

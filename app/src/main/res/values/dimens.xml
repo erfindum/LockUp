@@ -27,8 +27,12 @@
     <dimen name="oneHunderedDpDimension">100dp</dimen>
     <dimen name="oneHunderedAndTwentyDpDimension">120dp</dimen>
     <dimen name="oneHunderedAndFiftyDpDimension">150dp</dimen>
+    <dimen name="oneHunderedAndFourtyDpDimension">140dp</dimen>
+    <dimen name="oneHunderedAndThirtyDpDimension">130dp</dimen>
+    <dimen name="oneHunderedAndSixtyDpDimension">160dp</dimen>
     <dimen name="sevenDpDimension">7dp</dimen>
     <dimen name="seventyDpDimension">60dp</dimen>
+    <dimen name="seventyOneDpDimension">70dp</dimen>
     <dimen name="sixtyFiveDpDimension">65dp</dimen>
     <dimen name="sixteenDpDimension">16dp</dimen>
     <dimen name="seventyFiveDpDimension">75dp</dimen>
@@ -46,7 +50,11 @@
     <dimen name="twoHundredDpDimension">200dp</dimen>
     <dimen name="twoHunderedAndFourtyDpDimension">240dp</dimen>
 
+    <dimen name="app_lock_header_margin_left">10dp</dimen>
+    <dimen name="app_lock_header_margin_top">15dp</dimen>
+    <dimen name="app_lock_header_margin_bottom_21_down">-7dp</dimen>
 
-
+    <dimen name="main_activity_lock_icon_size">160dp</dimen>
+    <dimen name="main_activity_lock_icon_size_pressed">150dp</dimen>
 
 </resources>

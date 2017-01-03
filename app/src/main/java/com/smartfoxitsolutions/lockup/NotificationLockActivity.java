@@ -1,5 +1,9 @@
 package com.smartfoxitsolutions.lockup;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
 
+import java.lang.ref.WeakReference;
 import java.util.TreeMap;
 
 /**
@@ -19,14 +24,15 @@ import java.util.TreeMap;
 
 public class NotificationLockActivity extends AppCompatActivity {
 
-    Toolbar toolbar;
-    RecyclerView notificationRecycler;
-    NotificationLockRecyclerAdapter notificationAdapter;
-    AppLockModel appLockModel;
-    AppCompatImageView imageView;
-    TextView infoText;
+    private Toolbar toolbar;
+    private RecyclerView notificationRecycler;
+    private NotificationLockRecyclerAdapter notificationAdapter;
+    private AppLockModel appLockModel;
+    private AppCompatImageView imageView;
+    private TextView infoText;
 
     private boolean shouldTrackUserPresence, shouldCloseAffinity;
+    private NotificationScreenOffReceiver notificationScreenOffReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,6 +83,9 @@ public class NotificationLockActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
+        notificationScreenOffReceiver = new NotificationScreenOffReceiver(new WeakReference<>(this));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(notificationScreenOffReceiver,filter);
     }
 
     @Override
@@ -106,6 +115,31 @@ public class NotificationLockActivity extends AppCompatActivity {
         if(shouldCloseAffinity){
             finishAffinity();
         }
+        if(!shouldTrackUserPresence){
+            unregisterReceiver(notificationScreenOffReceiver);
+        }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(shouldTrackUserPresence){
+            unregisterReceiver(notificationScreenOffReceiver);
+        }
+    }
+
+    static class NotificationScreenOffReceiver extends BroadcastReceiver {
+
+        WeakReference<NotificationLockActivity> activity;
+        NotificationScreenOffReceiver(WeakReference<NotificationLockActivity> activity){
+            this.activity = activity;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
+                activity.get().finishAffinity();
+            }
+        }
+    }
 }

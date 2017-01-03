@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -79,6 +80,7 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     private void loadAlbumData(Cursor cursor){
         cursor.moveToFirst();
+        Log.d("VaultAlbum",cursor.getCount() + " Cursor COunt ------");
         String bucketId = "";
         int bucketCount = 0;
         do{
@@ -93,8 +95,10 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
                 bucketThumbnailId.add(cursor.getString(firstImageIndex));
                 if(!cursor.isFirst()){
                     bucketCountList.add(bucketCount);
+                    Log.d("VaultAlbum",bucketCount+" count");
                     bucketCount = 0;
                 }
+                Log.d("VaultAlbum",bucketId);
             }
             bucketCount += 1;
         }while (cursor.moveToNext());
@@ -177,14 +181,26 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
     private void loadPlaceHolderImages(){
         switch(getMediaType()) {
             case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
+                    placeHolder = ContextCompat.getDrawable(mediaAlbumActivity, R.drawable.ic_vault_image_placeholder_01);
+                    return;
+                }
                 placeHolder = ContextCompat.getDrawable(mediaAlbumActivity, R.drawable.ic_vault_image_placeholder);
                 return;
 
             case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
+                    placeHolder = ContextCompat.getDrawable(mediaAlbumActivity, R.drawable.ic_vault_video_placeholder_01);
+                    return;
+                }
                 placeHolder = ContextCompat.getDrawable(mediaAlbumActivity, R.drawable.ic_vault_video_placeholder);
                 return;
 
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
+                    placeHolder = ContextCompat.getDrawable(mediaAlbumActivity, R.drawable.ic_vault_audio_placeholder_01);
+                    return;
+                }
                 placeHolder = ContextCompat.getDrawable(mediaAlbumActivity, R.drawable.ic_vault_audio_placeholder);
         }
     }

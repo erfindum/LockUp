@@ -1,5 +1,7 @@
 package com.smartfoxitsolutions.lockup;
 
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +15,8 @@ import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
+import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +36,8 @@ public class AppLoaderActivity extends AppCompatActivity {
     public static final String MEDIA_THUMBNAIL_WIDTH_KEY = "thumbnail_width_key";
     public static final String MEDIA_THUMBNAIL_HEIGHT_KEY = "thumbnail_height_key";
     public static final String ALBUM_THUMBNAIL_WIDTH = "album_thumbnail_width";
+
+    public static final String UPDATE_APP_CLOUD_KEY = "update_lockup_app";
     private SharedPreferences prefs;
     private static boolean isFirstLoad;
     private ArrayList<String> recommendedAppList;
@@ -47,6 +53,7 @@ public class AppLoaderActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.app_loader_activity);
+        boolean isHandled = queryIncomingIntent();
         appLockModel = new AppLockModel(getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE));
         prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
         isFirstLoad = prefs.getBoolean(AppLockModel.LOCK_UP_FIRST_LOAD_PREF_KEY,true);
@@ -60,25 +67,47 @@ public class AppLoaderActivity extends AppCompatActivity {
             array1Resource = Arrays.asList(array1);
         }
         recommendedAppList = new ArrayList<>(array1Resource);
-        measureVaultItemView();
-        queryInstalledApps();
-
+        if(!isHandled) {
+            queryInstalledApps();
+        }
     }
 
-    void measureVaultItemView(){
-        Context ctxt = getBaseContext();
-        int viewWidth = Math.round(DimensionConverter.convertDpToPixel(165,ctxt));
-        int viewHeight = Math.round(DimensionConverter.convertDpToPixel(120,ctxt));
-        int itemWidth = Math.round(DimensionConverter.convertDpToPixel(165,ctxt));
-        SharedPreferences.Editor edit = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE).edit();
-        edit.putInt(MEDIA_THUMBNAIL_WIDTH_KEY,viewWidth);
-        edit.putInt(MEDIA_THUMBNAIL_HEIGHT_KEY,viewHeight);
-        edit.putInt(ALBUM_THUMBNAIL_WIDTH,itemWidth);
-        edit.apply();
+    boolean queryIncomingIntent(){
+        if(getIntent().getExtras()!=null){
+            for(String key:getIntent().getExtras().keySet()){
+                Log.d("LockFire","KEY : " + key);
+                if(key.equals(UPDATE_APP_CLOUD_KEY)) {
+                    String value = (String) getIntent().getExtras().get(key);
+                    if (value != null) {
+                        Log.d("LockFire", "VALUE : " + value);
+                    }
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + value))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                        finish();
+                        return true;
+                    }catch (ActivityNotFoundException e){
+                        startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("http://play.google.com/store/apps/details?id="+value))
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                        finish();
+                        return true;
+                    }
+                }
+
+            }
+        }
+        return false;
     }
 
     void queryInstalledApps(){
         PackageManager pkgManager = getPackageManager();
+        if(isLockUpFirstLoad()){
+            ComponentName mediaMoveActivityComponent = new ComponentName(this, MediaMoveActivity.class);
+            pkgManager.setComponentEnabledSetting(mediaMoveActivityComponent,PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                    ,PackageManager.DONT_KILL_APP);
+        }
         LinkedList<String> recommendedAddedList = new LinkedList<>();
         installedAppMap = appLockModel.getInstalledAppsMap();
         checkedAppMap = appLockModel.getCheckedAppsMap();
@@ -91,23 +120,23 @@ public class AppLoaderActivity extends AppCompatActivity {
 
             if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2){
                 if(i==0) {
-                    stringMap.put("Prevent Force Stop",false);
+                    stringMap.put(getResources().getString(R.string.recommended_text_sixteen_down_one),false);
                     recommendedAppMap.put(recommendedAppList.get(i),stringMap);
                 }
             }
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
                 if(i==0 ) {
-                    stringMap.put("Lock Notifications",false);
+                    stringMap.put(getResources().getString(R.string.recommended_text_sixteen_up_one),false);
                     recommendedAppMap.put(recommendedAppList.get(i), stringMap);
                 }
                 if(i==1){
-                    stringMap.put("Prevent Force Stop",false);
+                    stringMap.put(getResources().getString(R.string.recommended_text_sixteen_up_two),false);
                     recommendedAppMap.put(recommendedAppList.get(i),stringMap);
                 }
             }
         }
         List<ResolveInfo> installerPackages = pkgManager.queryIntentActivities(new Intent(Intent.ACTION_INSTALL_PACKAGE)
-                                                                                    .setData(Uri.parse("file://"))
+                                            .setDataAndType(Uri.parse("file:///"),"application/vnd.android.package-archive")
                                                                                 ,PackageManager.GET_META_DATA);
         if(installerPackages!=null && !installerPackages.isEmpty()){
             ResolveInfo installerInfo = installerPackages.get(0);
@@ -143,17 +172,19 @@ public class AppLoaderActivity extends AppCompatActivity {
         List<ResolveInfo> marketPackages = pkgManager.queryIntentActivities(marketIntent,PackageManager.GET_META_DATA);
         if(marketPackages!=null && !marketPackages.isEmpty()){
             for(ResolveInfo marketInfo : marketPackages){
-                try{
-                    String marketPackage = marketInfo.activityInfo.packageName;
-                    ApplicationInfo appNameInfo = pkgManager.getApplicationInfo(marketPackage, PackageManager.GET_META_DATA);
-                    String marketAppName = pkgManager.getApplicationLabel(appNameInfo).toString();
-                    HashMap<String,Boolean> recomendTemp = new HashMap<>();
-                    recomendTemp.put(marketAppName,false);
-                    recommendedAppMap.put(marketPackage,recomendTemp);
-                    recommendedAddedList.add(marketPackage);
-                    Log.d("AppLoader","Added Installer " + marketPackage);
-                }catch (PackageManager.NameNotFoundException e){
-                    e.printStackTrace();
+                if(marketInfo.activityInfo.packageName.startsWith("com.android")) {
+                    try {
+                        String marketPackage = marketInfo.activityInfo.packageName;
+                        ApplicationInfo appNameInfo = pkgManager.getApplicationInfo(marketPackage, PackageManager.GET_META_DATA);
+                        String marketAppName = pkgManager.getApplicationLabel(appNameInfo).toString();
+                        HashMap<String, Boolean> recomendTemp = new HashMap<>();
+                        recomendTemp.put(marketAppName, false);
+                        recommendedAppMap.put(marketPackage, recomendTemp);
+                        recommendedAddedList.add(marketPackage);
+                        Log.d("AppLoader", "Added Installer " + marketPackage);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

@@ -117,7 +117,10 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
         setAppIcon(packageName);
     }
 
-    public void setWindowBackground(int colorVibrant, int displayHeight){
+    public void setWindowBackground(Integer colorVibrant, int displayHeight){
+        if(colorVibrant == null){
+            colorVibrant = Color.parseColor("#2874F0");
+        }
         GradientDrawable drawable = new GradientDrawable();
         int[] colors = {colorVibrant,Color.parseColor("#263238")};
         drawable.setColors(colors);
@@ -142,7 +145,6 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
         selectedPin = "";
         pinPassCode = prefs.getString(AppLockModel.USER_SET_LOCK_PASS_CODE,"noPin");
         salt = prefs.getString(AppLockModel.DEFAULT_APP_BACKGROUND_COLOR_KEY,"noColor");
-        String adAppId = getResources().getString(R.string.pin_lock_activity_ad_app_id);
         digitTypFace = Typeface.createFromAsset(context.getAssets(),"fonts/arquitectabook.ttf");
         appIconView = (ImageView) findViewById(R.id.pin_lock_activity_finger_app_icon_view);
         inflatePinViews();
@@ -781,14 +783,12 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
                     nativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
                         @Override
                         public void onImpression(View view) {
-                            Toast.makeText(context,"Impression Will be tracked",Toast.LENGTH_LONG)
-                                    .show();
+
                         }
 
                         @Override
                         public void onClick(View view) {
-                            Toast.makeText(context,"Native ad clicked",Toast.LENGTH_LONG)
-                                    .show();
+
                             postPinCompleted();
                         }
                     });
@@ -1003,8 +1003,7 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if(event.getAction()!=KeyEvent.ACTION_UP && (event.getKeyCode() != KeyEvent.KEYCODE_BACK
-                || event.getKeyCode() != KeyEvent.KEYCODE_HOME)) {
+        if(event.getAction()!=KeyEvent.ACTION_UP && event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
             return super.dispatchKeyEvent(event);
         }
         startHome();

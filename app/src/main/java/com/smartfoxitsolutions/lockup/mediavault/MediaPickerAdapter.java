@@ -21,7 +21,8 @@ import java.util.ArrayList;
  * Created by RAAJA on 24-09-2016.
  */
 
-public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements MediaPickerHolder.OnMediaPickedListener {
+public class
+MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements MediaPickerHolder.OnMediaPickedListener {
 
     private ArrayList<MediaPickerHolder> holder;
     private ArrayList<String> selectedMediaIds, mediaIdList;
@@ -215,6 +216,7 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             for(MediaPickerHolder imageHolder:holder){
                 imageHolder.setItemSelected();
             }
+            selectedMediaIds.clear();
             selectedMediaIds.addAll(mediaIdList);
         }else{
             for(MediaPickerHolder imageHolder:holder){
@@ -222,6 +224,16 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             }
             selectedMediaIds.clear();
         }
+    }
+
+    void clearAllSelections(){
+        if(getSelectedAll()){
+            setSelectedAll(false);
+        }
+        for(MediaPickerHolder mediaHolder:holder){
+            mediaHolder.setItemDeselected();
+        }
+        selectedMediaIds.clear();
     }
 
     @Override

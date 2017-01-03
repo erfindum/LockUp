@@ -1,16 +1,22 @@
 package com.smartfoxitsolutions.lockup.mediavault;
 
+import android.annotation.TargetApi;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageView;
 import android.view.View;
@@ -20,7 +26,9 @@ import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.MainLockActivity;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.mediavault.dialogs.ExternalStoragePermissionDialog;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.ShareAlertDialog;
+import com.smartfoxitsolutions.lockup.mediavault.dialogs.ShareMovePermissionDialog;
 import com.smartfoxitsolutions.lockup.mediavault.services.MediaMoveService;
 import com.smartfoxitsolutions.lockup.mediavault.services.ShareMoveService;
 
@@ -53,6 +61,8 @@ public class MediaMoveActivity extends AppCompatActivity {
     private AtomicLong timestamp;
     boolean isOperationComplete,hasMoveStarted,shouldDisplayShareAlert;
     private AppCompatImageView moveInfoImage;
+    private Messenger messenger;
+    private ArrayList<Uri> fileUriList;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,9 +79,9 @@ public class MediaMoveActivity extends AppCompatActivity {
             if(!MediaMoveService.SERVICE_STARTED) {
                 Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
                 if (uri != null) {
-                    ArrayList<Uri> fileUri = new ArrayList<>();
-                    fileUri.add(uri);
-                    startShareService(fileUri);
+                    fileUriList = new ArrayList<>();
+                    fileUriList.add(uri);
+                    startShareFileMove(fileUriList);
                 }
                 return;
             }else{
@@ -80,9 +90,9 @@ public class MediaMoveActivity extends AppCompatActivity {
         }
         if(intent.getAction()!=null && intent.getAction().equals(Intent.ACTION_SEND_MULTIPLE)){
             if(!MediaMoveService.SERVICE_STARTED) {
-                ArrayList<Uri> uriList = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-                if (uriList != null && !uriList.isEmpty()) {
-                   startShareService(uriList);
+               fileUriList = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                if (fileUriList != null && !fileUriList.isEmpty()) {
+                   startShareFileMove(fileUriList);
                 }
                 return;
             }else{
@@ -166,15 +176,66 @@ public class MediaMoveActivity extends AppCompatActivity {
         shouldDisplayShareAlert = false;
     }
 
-    private void startShareService(ArrayList<Uri> fileUriList){
-        Messenger messenger = new Messenger(new MoveHandler(getWeakReference()));
-        startService(new Intent(getBaseContext(), ShareMoveService.class)
-                    .putParcelableArrayListExtra(SHARE_MEDIA_FILE_LIST_KEY,fileUriList)
-                    .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger));
+    private void startShareFileMove(ArrayList<Uri> fileUriList) {
+        messenger = new Messenger(new MoveHandler(getWeakReference()));
         moveText.setText(R.string.vault_move_activity_move_in_text);
         moveInfoImage.setImageResource(R.drawable.ic_vault_share_icon);
         setMoveBackgroundButton();
         registerListeners();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getStoragePermission(fileUriList, messenger);
+        }else{
+            startShareMoveService(fileUriList,messenger);
+        }
+    }
+
+    @TargetApi(23)
+    void getStoragePermission(ArrayList<Uri> fileUriList, Messenger messenger){
+            if (ContextCompat.checkSelfPermission(this,"android.permission.WRITE_EXTERNAL_STORAGE")
+                    != PackageManager.PERMISSION_GRANTED) {
+                if(ActivityCompat.shouldShowRequestPermissionRationale
+                        (this,"android.permission.WRITE_EXTERNAL_STORAGE")){
+                    DialogFragment storagePermissionDialog = new ShareMovePermissionDialog();
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction =fragmentManager.beginTransaction();
+                    storagePermissionDialog.show(fragmentTransaction,"storage_read_write_dialog");
+                }
+                else{
+                    requestReadPermission();
+                }
+
+            }else{
+               startShareMoveService(fileUriList,messenger);
+            }
+    }
+
+    public void requestReadPermission(){
+        ActivityCompat.requestPermissions(this,new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}
+                ,MediaVaultAlbumActivity.REQUEST_READ_WRITE_EXTERNAL_PERMISSION);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == MediaVaultAlbumActivity.REQUEST_READ_WRITE_EXTERNAL_PERMISSION){
+            if(grantResults.length>=0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                messenger = new Messenger(new MoveHandler(getWeakReference()));
+                startShareMoveService(fileUriList,messenger);
+            }
+            else{
+                permissionDenied();
+            }
+        }
+    }
+
+    private void startShareMoveService(ArrayList<Uri> fileUriList, Messenger messenger){
+        startService(new Intent(getBaseContext(), ShareMoveService.class)
+                .putParcelableArrayListExtra(SHARE_MEDIA_FILE_LIST_KEY,fileUriList)
+                .putExtra(MEDIA_MOVE_MESSENGER_KEY,messenger));
+    }
+
+    public void permissionDenied(){
+        finish();
     }
 
     private void startVaultHome(){

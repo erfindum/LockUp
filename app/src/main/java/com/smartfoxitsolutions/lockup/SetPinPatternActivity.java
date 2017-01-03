@@ -34,6 +34,7 @@ public class SetPinPatternActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.set_pin_pattern_activity);
         startType = getIntent().getIntExtra(INTENT_PIN_PATTERN_START_TYPE_KEY,0);
+        shouldTrackUserPresence = true;
     }
 
     @Override
@@ -82,7 +83,7 @@ public class SetPinPatternActivity extends AppCompatActivity {
             boolean shouldStartAppLock = prefs.getBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
             if(shouldStartAppLock && !isAppLockFirstLoad){
                 startService(new Intent(getBaseContext(),AppLockingService.class));
-                LockUpMainActivity.hasAppLockStarted = true;
+               // LockUpMainActivity.hasAppLockStarted = true;
             }
             startActivity(new Intent(getBaseContext(),LockUpMainActivity.class)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

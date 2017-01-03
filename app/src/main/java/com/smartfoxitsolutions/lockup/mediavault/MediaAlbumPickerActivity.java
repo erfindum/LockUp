@@ -1,8 +1,11 @@
 package com.smartfoxitsolutions.lockup.mediavault;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -11,6 +14,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -22,6 +26,8 @@ import android.widget.TextView;
 import com.smartfoxitsolutions.lockup.AppLoaderActivity;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.R;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Created by RAAJA on 22-09-2016.
@@ -44,6 +50,8 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
     int viewWidth, viewHeight,noOfColumns;
     private String mediaType;
     private boolean shouldTrackUserPresence, shouldCloseAffinity;
+    private AlbumPickerScreenOffReceiver albumPickerScreenOffReceiver;
+    private AppCompatImageView emptyPlaceholder;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,6 +62,7 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
         mediaPickerBuckRecycler = (RecyclerView)findViewById(R.id.vault_album_picker_activity_recycler);
         loadingProgress = (ProgressBar)findViewById(R.id.vault_album_picker_activity_progress);
         loadingText = (TextView)findViewById(R.id.vault_album_picker_activity_load_text);
+        emptyPlaceholder = (AppCompatImageView) findViewById(R.id.vault_album_picker_activity_placeholder);
         loadingText.setText(R.string.vault_album_picker_load_text);
         setMediaType(getIntent().getStringExtra(MEDIA_TYPE_KEY));
         setSupportActionBar(toolbar);
@@ -80,17 +89,22 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
 
     void measureItemView(){
         Context ctxt = getBaseContext();
-        SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
-        viewWidth = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_WIDTH_KEY,155);
-        viewHeight = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_HEIGHT_KEY,115);
-        int itemWidth = prefs.getInt(AppLoaderActivity.ALBUM_THUMBNAIL_WIDTH,165);
+        viewWidth = Math.round(getResources().getDimension(R.dimen.vault_album_thumbnail_width));
+        viewHeight =Math.round(getResources().getDimension(R.dimen.vault_album_thumbnail_height));
+        int itemWidth = Math.round(getResources().getDimension(R.dimen.vault_album_item_size));
         DisplayMetrics metrics = ctxt.getResources().getDisplayMetrics();
-        int displayWidth = metrics.widthPixels;
+        int  displayWidth = metrics.widthPixels;
         noOfColumns = displayWidth/itemWidth;
     }
 
 
-
+    @Override
+    protected void onStart() {
+        super.onStart();
+        albumPickerScreenOffReceiver = new AlbumPickerScreenOffReceiver(new WeakReference<>(this));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(albumPickerScreenOffReceiver,filter);
+    }
 
     @Override
     protected void onResume() {
@@ -112,9 +126,17 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
             mediaAdapter = new MediaAlbumPickerAdapter(data,this
                     , viewWidth, viewHeight);
             mediaPickerBuckRecycler.setAdapter(mediaAdapter);
+            int itemMargin = Math.round(getResources().getDimension(R.dimen.tenDpDimension));
+            mediaPickerBuckRecycler.addItemDecoration(new MediaVaultAlbumDecoration(itemMargin));
             mediaPickerBuckRecycler.setLayoutManager(new GridLayoutManager(getBaseContext()
                     ,noOfColumns,GridLayoutManager.VERTICAL,false));
+            if(data.getCount()<=0){
+                loadEmptyPlaceholder();
+            }
         }else{
+            if(data.getCount()<=0){
+                loadEmptyPlaceholder();
+            }
             mediaAdapter.swapCursor(data);
         }
     }
@@ -131,14 +153,14 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
             case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
                 String[] imageProjection = {MediaStore.Images.Media._ID, MediaStore.Images.Media.BUCKET_DISPLAY_NAME
                         ,MediaStore.Images.Media.BUCKET_ID};
-                String imageOrderBy = MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " COLLATE NOCASE";
+                String imageOrderBy = MediaStore.Images.Media.BUCKET_ID +" DESC";
                 return   new CursorLoader(getBaseContext(),
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,imageProjection,null,null,imageOrderBy);
 
             case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
                 String[] videoProjection = {MediaStore.Video.Media._ID, MediaStore.Video.Media.BUCKET_DISPLAY_NAME
                         ,MediaStore.Video.Media.BUCKET_ID};
-                String videoOrderBy = MediaStore.Video.Media.BUCKET_DISPLAY_NAME + " COLLATE NOCASE";
+                String videoOrderBy = MediaStore.Video.Media.BUCKET_ID + " DESC";
                     return   new CursorLoader(getBaseContext(),
                             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,videoProjection,null,null,videoOrderBy);
 
@@ -146,7 +168,7 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
                 String[] audioProjection = {MediaStore.Audio.Media._ID, MediaStore.Audio.Media.ALBUM
                         ,MediaStore.Audio.Media.ALBUM_ID};
-                String audioOrderBy = MediaStore.Audio.Media.ALBUM + " COLLATE NOCASE";
+                String audioOrderBy = MediaStore.Audio.Media.ALBUM_ID + " DESC";
                     return   new CursorLoader(getBaseContext(),
                             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,audioProjection,null,null,audioOrderBy);
         }
@@ -157,12 +179,20 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
         loadingProgress.setVisibility(View.VISIBLE);
         loadingText.setVisibility(View.VISIBLE);
         mediaPickerBuckRecycler.setVisibility(View.INVISIBLE);
+        emptyPlaceholder.setVisibility(View.INVISIBLE);
     }
 
     public void loadingComplete() {
         loadingProgress.setVisibility(View.INVISIBLE);
         loadingText.setVisibility(View.INVISIBLE);
         mediaPickerBuckRecycler.setVisibility(View.VISIBLE);
+    }
+
+    void loadEmptyPlaceholder(){
+        emptyPlaceholder.setImageResource(R.drawable.ic_vault_placeholder);
+        emptyPlaceholder.setVisibility(View.VISIBLE);
+        loadingText.setVisibility(View.VISIBLE);
+        loadingText.setText(getResources().getString(R.string.vault_album_picker_load_failed_external_text));
     }
 
     public void albumClicked(String albumId, String albumName) {
@@ -199,6 +229,9 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
             }
             finishAffinity();
         }
+        if(!shouldTrackUserPresence){
+            unregisterReceiver(albumPickerScreenOffReceiver);
+        }
     }
 
     @Override
@@ -207,6 +240,24 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
         if(!shouldCloseAffinity && mediaAdapter !=null){
             mediaAdapter.closeResources();
             mediaAdapter = null;
+        }
+        if(shouldTrackUserPresence){
+            unregisterReceiver(albumPickerScreenOffReceiver);
+        }
+    }
+
+    static class AlbumPickerScreenOffReceiver extends BroadcastReceiver {
+
+        WeakReference<MediaAlbumPickerActivity> activity;
+        AlbumPickerScreenOffReceiver(WeakReference<MediaAlbumPickerActivity> activity){
+            this.activity = activity;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
+                activity.get().finishAffinity();
+            }
         }
     }
 

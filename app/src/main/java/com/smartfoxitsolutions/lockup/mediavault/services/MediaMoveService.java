@@ -5,7 +5,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -106,15 +109,24 @@ public class MediaMoveService extends Service implements Handler.Callback{
         notifManager.notify(3542124, getNotifBuilder().build());
     }
 
+    Bitmap getLauncherIcon(){
+        return BitmapFactory.decodeResource(getResources(),R.mipmap.ic_launcher);
+    }
+
     Notification getForegroundNotification(){
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(getBaseContext());
         notifBuilder.setContentTitle("LockUp Vault");
         notifBuilder.setContentText("Moving Media");
                 notifBuilder.setOngoing(true)
                 .setAutoCancel(false)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setLargeIcon(getLauncherIcon())
                 .setOnlyAlertOnce(true)
                 .setColor(Color.parseColor("#2874F0"));
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+            notifBuilder.setSmallIcon(R.drawable.ic_notification_small);
+        }else{
+            notifBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        }
         return notifBuilder.build();
     }
 
@@ -135,9 +147,14 @@ public class MediaMoveService extends Service implements Handler.Callback{
                 notifBuilder.setContentText("0 / 0")
                 .setOngoing(true)
                 .setAutoCancel(false)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setLargeIcon(getLauncherIcon())
                 .setOnlyAlertOnce(true)
                 .setColor(Color.parseColor("#2874F0"));
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+            notifBuilder.setSmallIcon(R.drawable.ic_notification_small);
+        }else{
+            notifBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        }
         return notifBuilder;
     }
 
@@ -193,7 +210,7 @@ public class MediaMoveService extends Service implements Handler.Callback{
             builder.setContentText(getResources().getString(R.string.vault_move_activity_vault_redirect_message))
                     .setOngoing(false)
                     .setAutoCancel(true)
-                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setLargeIcon(getLauncherIcon())
                     .setContentIntent(PendingIntent.getActivity(getBaseContext(),29,new Intent(getBaseContext()
                                     , MainLockActivity.class)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -201,6 +218,11 @@ public class MediaMoveService extends Service implements Handler.Callback{
                             ,PendingIntent.FLAG_UPDATE_CURRENT))
                     .setOnlyAlertOnce(true)
                     .setColor(Color.parseColor("#2874F0"));
+            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+                builder.setSmallIcon(R.drawable.ic_notification_small);
+            }else{
+                builder.setSmallIcon(R.mipmap.ic_launcher);
+            }
             notifManager.notify(7549682, builder.build());
             closeService();
             return true;

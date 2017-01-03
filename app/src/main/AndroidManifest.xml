@@ -26,6 +26,12 @@
         >
         <meta-data android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification_small" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorMainPrimary" />
 
         <meta-data android:name="com.smartfoxitsolutions.lockup.mediavault.AlbumArtModule"
             android:value="GlideModule"
@@ -48,12 +54,14 @@
             android:excludeFromRecents="true"/>
         <activity android:name=".SetEmailActivity"
             android:excludeFromRecents="true"
+            android:screenOrientation="portrait"
             />
         <activity android:name=".LockUpSettingsActivity"
             android:excludeFromRecents="true"
             />
         <activity android:name=".SetPinPatternActivity"
             android:excludeFromRecents="true"
+            android:screenOrientation="portrait"
             />
         <activity android:name=".AppLockActivity"
             android:excludeFromRecents="true"
@@ -123,6 +131,12 @@
                 <action android:name="android.service.notification.NotificationListenerService"/>
             </intent-filter>
         </service>
+        <service
+            android:name=".services.AppUpdateService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
 
 
         <receiver android:name=".receivers.AppLockServiceRestartReceiver"
@@ -145,6 +159,16 @@
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_REMOVED"/>
                 <data android:scheme="package"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".receivers.PreventUninstallReceiver"
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            >
+            <meta-data android:name="android.app.device_admin"
+                android:resource="@xml/device_admin_policy"
+                />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
             </intent-filter>
         </receiver>
     </application>

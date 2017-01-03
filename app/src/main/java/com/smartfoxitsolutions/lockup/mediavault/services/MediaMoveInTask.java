@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.smartfoxitsolutions.lockup.AppLoaderActivity;
 import com.smartfoxitsolutions.lockup.AppLockModel;
+import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.MediaAlbumPickerActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaVaultModel;
 import com.smartfoxitsolutions.lockup.mediavault.SelectedMediaModel;
@@ -70,8 +71,10 @@ public class MediaMoveInTask implements Runnable {
         this.fileNames = SelectedMediaModel.getInstance().getSelectedMediaFileNameList();
         this.contentResolver = context.getContentResolver();
         SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
-        this.viewWidth = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_WIDTH_KEY,155);
-        this.viewHeight = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_HEIGHT_KEY,115);
+        int viewWidthPixel = Math.round(context.getResources().getDimension(R.dimen.vault_album_thumbnail_width));
+        int viewHeightPixel = Math.round(context.getResources().getDimension(R.dimen.vault_album_thumbnail_height));
+        this.viewWidth = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_WIDTH_KEY,viewWidthPixel);
+        this.viewHeight = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_HEIGHT_KEY,viewHeightPixel);
         String databasePath = Environment.getExternalStorageDirectory()+ File.separator
                 +".lockup"+File.separator+"vault_db";
         vaultDatabaseHelper = new VaultDbHelper(context.getApplicationContext(),databasePath,null,1);

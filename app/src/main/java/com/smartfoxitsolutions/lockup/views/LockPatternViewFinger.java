@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.fingerprint.FingerprintManager;
@@ -22,6 +23,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
@@ -72,6 +74,7 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
     private boolean isFingerPrintActive;
     private int noOfAttempts,noOfNoisyAttempts;
     private ValueAnimator animatorMain, animatorFingerError;
+    private RectF patternRect;
 
     public LockPatternViewFinger(Context context, OnPinLockUnlockListener patternLockListener
             ,OnFingerScannerCancelListener fingerCanceledListener, boolean isFingerPrintActive) {
@@ -104,7 +107,10 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
         setAppIcon(packageName);
     }
 
-    public void setWindowBackground(int colorVibrant, int displayHeight){
+    public void setWindowBackground(Integer colorVibrant, int displayHeight){
+        if(colorVibrant == null){
+            colorVibrant = Color.parseColor("#2874F0");
+        }
         GradientDrawable drawable = new GradientDrawable();
         int[] colors = {colorVibrant,Color.parseColor("#263238")};
         drawable.setColors(colors);
@@ -176,6 +182,23 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
                 pinPatternSwitchButton.setVisibility(INVISIBLE);
             }
         });
+        patternRect = new RectF();
+        patternViewParent.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(patternRect.contains(event.getX(),event.getY())){
+                    event.setLocation(event.getX()-patternRect.left,event.getY()-patternRect.top);
+                    patternView.onTouchEvent(event);
+                    return true;
+                }
+                if(event.getAction() == MotionEvent.ACTION_UP){
+                    event.setLocation(event.getX()-patternRect.left,event.getY()-patternRect.top);
+                    patternView.onTouchEvent(event);
+                    return true;
+                }
+                return true;
+            }
+        });
     }
 
     void unRegisterListeners(){
@@ -204,6 +227,15 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
         patternView.setEnabled(false);
         if(cancelSignal.isCanceled()){
             fingerCanceledListener.onFingerScannerCanceled();
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if(hasWindowFocus){
+            patternRect.set(patternView.getLeft(),patternView.getTop()
+                    ,patternView.getRight(),patternView.getBottom());
         }
     }
 
@@ -240,14 +272,10 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
                     nativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
                         @Override
                         public void onImpression(View view) {
-                            Toast.makeText(context,"Impression Will be tracked",Toast.LENGTH_LONG)
-                                    .show();
                         }
 
                         @Override
                         public void onClick(View view) {
-                            Toast.makeText(context,"Native ad clicked",Toast.LENGTH_LONG)
-                                    .show();
                             postPatternCompleted();
                         }
                     });
@@ -503,12 +531,13 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
                 .addCategory(Intent.CATEGORY_HOME)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         );
+        Log.d("LockUp","Called Start Home");
+
     }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if(event.getAction()!=KeyEvent.ACTION_UP && (event.getKeyCode() != KeyEvent.KEYCODE_BACK
-                || event.getKeyCode() != KeyEvent.KEYCODE_HOME)) {
+        if(event.getAction()!=KeyEvent.ACTION_UP && event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
             return super.dispatchKeyEvent(event);
         }
         startHome();

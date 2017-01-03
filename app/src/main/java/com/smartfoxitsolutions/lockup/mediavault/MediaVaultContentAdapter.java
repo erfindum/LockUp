@@ -133,6 +133,7 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
             for(MediaVaultContentHolder mediaHolder:holders){
                 mediaHolder.setItemSelected();
             }
+            selectedMediaIds.clear();
             selectedMediaIds.addAll(vaultIdList);
             MediaVaultContentAdapter.isLongPressed=true;
         }else{

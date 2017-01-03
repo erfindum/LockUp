@@ -3,11 +3,15 @@ package com.smartfoxitsolutions.lockup;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -22,6 +26,9 @@ import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.dialogs.FingerPrintActivateDialog;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
+import com.smartfoxitsolutions.lockup.services.NotificationLockService;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Created by RAAJA on 18-08-2016.
@@ -32,12 +39,12 @@ public class LockUpSettingsActivity extends AppCompatActivity {
     private TextView changePinPatternText, activateAppLockText;
     private int appLockMode;
     private SwitchCompat fingerPrintSwitch, activateAppLockSwitch, vibrateSwitch, pinTouchSwitch, patternLineSwitch
-                            ,lockScreenOnSwitch;
+                            ,lockScreenOnSwitch, notificationLockSwitch;
     private SharedPreferences prefs;
     private boolean isFingerPrintActive, shouldAppLockStart,isVibratorEnabled,shouldHidePinTouch, shouldHidePatternLine
                     , shouldLockScreenOn, isAppLockFirstLoad;
     private RelativeLayout activateAppLockItem, vibrateItem, changePinPatternItem,fingerPrintItem, pinTouchItem
-                    , patternLineItem, screenOnLockItem;
+                    , patternLineItem, screenOnLockItem, notificationLockItem;
     private FingerPrintActivateDialog fingerprintActivateDialog;
     private ValueAnimator textAnimator;
 
@@ -48,12 +55,14 @@ public class LockUpSettingsActivity extends AppCompatActivity {
     public static final String HIDE_PATTERN_LINE_PREFERENCE_KEY = "hidePatternLine";
     public static final String LOCK_SCREEN_ON_PREFERENCE_KEY = "lockScreenOn";
     public static final String RECOVERY_EMAIL_PREFERENCE_KEY = "recoverEmail";
+    public static final String DEVICE_ADMIN_PREFERENCE_KEY = "deviceAdminStatus";
 
     private static final String FINGERPRINT_ACTIVATE_DIALOG_TAG = "fingerprint_activate_dialog";
     private static final int SET_PIN_PATTERN_REQUEST_CODE = 44;
     private FingerprintManagerCompat fingerprintManager;
     private boolean shouldTrackUserPresence, shouldCloseAffinity;
     private Toolbar toolbar;
+    private SettingsScreenOffReceiver settingsScreenOffReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,6 +77,7 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         pinTouchSwitch = (SwitchCompat) findViewById(R.id.settings_activity_pin_touch_switch);
         patternLineSwitch = (SwitchCompat) findViewById(R.id.settings_activity_pattern_line_switch);
         lockScreenOnSwitch = (SwitchCompat) findViewById(R.id.settings_activity_relock_switch);
+        notificationLockSwitch = (SwitchCompat) findViewById(R.id.settings_activity_notification_lock_switch);
 
         activateAppLockItem = (RelativeLayout) findViewById(R.id.settings_activity_activate_lock_group);
         vibrateItem = (RelativeLayout) findViewById(R.id.settings_activity_vibrate_group);
@@ -76,6 +86,7 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         pinTouchItem = (RelativeLayout) findViewById(R.id.settings_activity_pin_touch_group);
         patternLineItem = (RelativeLayout) findViewById(R.id.settings_activity_pattern_line_group);
         screenOnLockItem = (RelativeLayout) findViewById(R.id.settings_activity_relock_group);
+        notificationLockItem = (RelativeLayout) findViewById(R.id.settings_activity_notification_lock_group);
 
         toolbar = (Toolbar) findViewById(R.id.settings_activity_tool_bar);
         setSupportActionBar(toolbar);
@@ -114,6 +125,13 @@ public class LockUpSettingsActivity extends AppCompatActivity {
             if(!isAppLockFirstLoad) {
                 activateAppLockSwitch.setChecked(false);
             }
+        }
+
+        //Notification Lock On/Off
+        if(NotificationLockService.isNotificationServiceConnected){
+            notificationLockSwitch.setChecked(true);
+        }else{
+            notificationLockSwitch.setChecked(false);
         }
 
         //Vibration
@@ -180,6 +198,24 @@ public class LockUpSettingsActivity extends AppCompatActivity {
                         edit.putBoolean(APP_LOCKING_SERVICE_START_PREFERENCE_KEY, true);
                     }
                     edit.apply();
+                }
+            }
+        });
+
+        //Notification Lock On/Off
+        notificationLockItem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(NotificationLockService.isNotificationServiceConnected){
+                    startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS),
+                            AppLockActivity.NOTIFICATION_PERMISSION_REQUEST);
+                    notificationLockSwitch.setChecked(false);
+                    shouldTrackUserPresence = false;
+                }else{
+                    startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS),
+                            AppLockActivity.NOTIFICATION_PERMISSION_REQUEST);
+                    notificationLockSwitch.setChecked(true);
+                    shouldTrackUserPresence = false;
                 }
             }
         });
@@ -353,6 +389,10 @@ public class LockUpSettingsActivity extends AppCompatActivity {
                 changePinPatternText.setText(getString(R.string.settings_activity_change_pattern_summery));
             }
         }
+        if(requestCode == AppLockActivity.NOTIFICATION_PERMISSION_REQUEST){
+            shouldTrackUserPresence = true;
+            return;
+        }
     }
 
     @Override
@@ -366,6 +406,14 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         });
         textAnimator = ValueAnimator.ofFloat(0.0f,1.0f);
         textAnimator.setDuration(400).setInterpolator(new AccelerateDecelerateInterpolator());
+        if(NotificationLockService.isNotificationServiceConnected){
+            notificationLockSwitch.setChecked(true);
+        }else{
+            notificationLockSwitch.setChecked(false);
+        }
+        settingsScreenOffReceiver = new SettingsScreenOffReceiver(new WeakReference<>(this));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(settingsScreenOffReceiver,filter);
     }
 
     void startAlphaAnimation(final TextView textView, final String text){
@@ -391,11 +439,11 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         super.onPause();
         if(shouldAppLockStart && !isAppLockFirstLoad) {
             startService(new Intent(getBaseContext(),AppLockingService.class));
-            LockUpMainActivity.hasAppLockStarted = true;
+           // LockUpMainActivity.hasAppLockStarted = true;
         }
         if(!shouldAppLockStart){
             sendBroadcast(new Intent(AppLockingService.STOP_APP_LOCK_SERVICE));
-            LockUpMainActivity.hasAppLockStarted = false;
+           // LockUpMainActivity.hasAppLockStarted = false;
         }
     }
 
@@ -404,6 +452,32 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         super.onStop();
         if(shouldCloseAffinity){
             finishAffinity();
+        }
+        if(!shouldTrackUserPresence){
+            unregisterReceiver(settingsScreenOffReceiver);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(shouldTrackUserPresence){
+            unregisterReceiver(settingsScreenOffReceiver);
+        }
+    }
+
+    static class SettingsScreenOffReceiver extends BroadcastReceiver {
+
+        WeakReference<LockUpSettingsActivity> activity;
+        SettingsScreenOffReceiver(WeakReference<LockUpSettingsActivity> activity){
+            this.activity = activity;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
+                activity.get().finishAffinity();
+            }
         }
     }
 }

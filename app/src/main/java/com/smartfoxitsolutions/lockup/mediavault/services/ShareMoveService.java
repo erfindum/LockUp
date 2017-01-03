@@ -7,8 +7,11 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -83,22 +86,9 @@ public class ShareMoveService extends Service implements Handler.Callback{
     }
 
     private void measureThumbnailSize(){
-        SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
-        viewWidth = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_WIDTH_KEY,0);
-        if(viewWidth != 0){
-            viewHeight = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_HEIGHT_KEY,0);
-        }
-        else{
-            Context ctxt = getBaseContext();
-            viewWidth = Math.round(DimensionConverter.convertDpToPixel(165,ctxt));
-            viewHeight = Math.round(DimensionConverter.convertDpToPixel(120,ctxt));
-            itemWidth = Math.round(DimensionConverter.convertDpToPixel(165,ctxt));
-            SharedPreferences.Editor edit = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE).edit();
-            edit.putInt(AppLoaderActivity.MEDIA_THUMBNAIL_WIDTH_KEY,viewWidth);
-            edit.putInt(AppLoaderActivity.MEDIA_THUMBNAIL_HEIGHT_KEY,viewHeight);
-            edit.putInt(AppLoaderActivity.ALBUM_THUMBNAIL_WIDTH,itemWidth);
-            edit.apply();
-        }
+            viewWidth = Math.round(getResources().getDimension(R.dimen.vault_album_thumbnail_width));
+            viewHeight = Math.round(getResources().getDimension(R.dimen.vault_album_thumbnail_height));
+            itemWidth = Math.round(getResources().getDimension(R.dimen.vault_album_item_size));
     }
 
     private void startMediaMoveTask(){
@@ -109,15 +99,24 @@ public class ShareMoveService extends Service implements Handler.Callback{
         notifManager.notify(541895, getNotifBuilder().build());
     }
 
+    Bitmap getLauncherIcon(){
+        return BitmapFactory.decodeResource(getResources(),R.mipmap.ic_launcher);
+    }
+
     Notification getForegroundNotification(){
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(getBaseContext());
         notifBuilder.setContentTitle("LockUp Vault");
         notifBuilder.setContentText("Moving Media");
         notifBuilder.setOngoing(true)
                 .setAutoCancel(false)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setLargeIcon(getLauncherIcon())
                 .setOnlyAlertOnce(true)
                 .setColor(Color.parseColor("#2874F0"));
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+            notifBuilder.setSmallIcon(R.drawable.ic_notification_small);
+        }else{
+            notifBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        }
         return notifBuilder.build();
     }
 
@@ -128,9 +127,14 @@ public class ShareMoveService extends Service implements Handler.Callback{
         notifBuilder.setContentText("0 / 0")
                 .setOngoing(true)
                 .setAutoCancel(false)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setLargeIcon(getLauncherIcon())
                 .setOnlyAlertOnce(true)
                 .setColor(Color.parseColor("#2874F0"));
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+            notifBuilder.setSmallIcon(R.drawable.ic_notification_small);
+        }else{
+            notifBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        }
         return notifBuilder;
     }
 
@@ -175,7 +179,7 @@ public class ShareMoveService extends Service implements Handler.Callback{
                     .setContentText(getResources().getString(R.string.vault_move_activity_vault_redirect_message))
                     .setOngoing(false)
                     .setAutoCancel(true)
-                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setLargeIcon(getLauncherIcon())
                     .setContentIntent(PendingIntent.getActivity(getBaseContext(),29,new Intent(getBaseContext()
                                         , MainLockActivity.class)
                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -183,6 +187,11 @@ public class ShareMoveService extends Service implements Handler.Callback{
                             ,0))
                     .setOnlyAlertOnce(true)
                     .setColor(Color.parseColor("#2874F0"));
+            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+                builder.setSmallIcon(R.drawable.ic_notification_small);
+            }else{
+                builder.setSmallIcon(R.mipmap.ic_launcher);
+            }
             notifManager.notify(7549682, builder.build());
             closeService();
             return true;

@@ -2,7 +2,10 @@ package com.smartfoxitsolutions.lockup;
 
 import android.annotation.TargetApi;
 import android.app.AppOpsManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -27,6 +30,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.dialogs.GrantUsageAccessDialog;
+import com.smartfoxitsolutions.lockup.dialogs.MainActivityInfoDialog;
 import com.smartfoxitsolutions.lockup.dialogs.OverlayPermissionDialog;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaVaultAlbumActivity;
@@ -34,7 +38,7 @@ import com.smartfoxitsolutions.lockup.mediavault.services.MediaMoveService;
 import com.smartfoxitsolutions.lockup.mediavault.services.ShareMoveService;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
 
-import java.util.ArrayList;
+import java.lang.ref.WeakReference;
 
 /**
  * Created by RAAJA on 16-09-2016.
@@ -46,18 +50,22 @@ public class LockUpMainActivity extends AppCompatActivity {
     private static final String USAGE_ACCESS_DIALOG_TAG = "usageAccessPermissionDialog";
     private static final String OVERLAY_ACCESS_DIALOG_TAG = "overlay_permission_dialog";
 
-    public static int installedAppsCount, lockedAppsCount;
-    public static boolean hasAppLockStarted;
+    private static final String SHOULD_SHOW_APP_LOCK_INFO_KEY = "shouldShowAppLockInfo";
 
-    private AppCompatImageButton appLockActivityButton, vaultActivityButton
+    public static int installedAppsCount, lockedAppsCount;
+    //public static boolean hasAppLockStarted;
+
+    private AppCompatImageButton vaultActivityButton
                             ,adEarningButton,settingsButton,faqButton;
 
     private DialogFragment overlayPermissionDialog,usageDialog;
     private boolean shouldTrackUserPresence, shouldCloseAffinity, shouldStartAppLock, isAppLockFirstLoad;
-    private TextView installedAppNo, lockedAppNo, installedAppText, lockedAppText, appLockStatusInfo;
+    private TextView installedAppNo, lockedAppNo, installedAppText, lockedAppText;// appLockStatusInfo;
     private ImageButton lockButton;
     private int lockOriginalSize,lockPressedSize;
-    private ImageView appLockStatusImage;
+    //private ImageView appLockStatusImage;
+    private ScreenOffReceiver screenOffReceiver;
+    private boolean shouldShowAppLockInfo;
 
 
     @Override
@@ -72,16 +80,17 @@ public class LockUpMainActivity extends AppCompatActivity {
         lockedAppText = (TextView) findViewById(R.id.lockup_main_activity_locked_text);
         lockedAppNo = (TextView) findViewById(R.id.lockup_main_activity_locked_no);
         lockButton = (ImageButton) findViewById(R.id.lockup_main_activity_lock_button);
-        appLockStatusInfo = (TextView) findViewById(R.id.lockup_main_activity_applock_info);
-        appLockStatusImage = (ImageView) findViewById(R.id.lockup_main_activity_applock_info_img);
+       // appLockStatusInfo = (TextView) findViewById(R.id.lockup_main_activity_applock_info);
+        //appLockStatusImage = (ImageView) findViewById(R.id.lockup_main_activity_applock_info_img);
         Typeface typeface = Typeface.createFromAsset(getAssets(),"fonts/arquitectabook.ttf");
         SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
         shouldStartAppLock = prefs.getBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
         isAppLockFirstLoad = prefs.getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,false);
+        shouldShowAppLockInfo = prefs.getBoolean(LockUpMainActivity.SHOULD_SHOW_APP_LOCK_INFO_KEY,true);
         AppLockModel appLockModel = new AppLockModel(prefs);
         installedAppsCount = appLockModel.getInstalledAppsPackage().size();
         lockedAppsCount = appLockModel.getCheckedAppsPackage().size();
-        hasAppLockStarted = prefs.getBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
+        //hasAppLockStarted = prefs.getBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
         setTypeFace(typeface);
         setLockButtonSize();
         setImageButtonListeners();
@@ -112,19 +121,19 @@ public class LockUpMainActivity extends AppCompatActivity {
             String lockedAppCountSpaced = TextUtils.join(" ",lockedAppSplit);
             lockedAppNo.setText(lockedAppCountSpaced);
         }
-
+        /*
         if(hasAppLockStarted){
             appLockStatusImage.setImageResource(R.drawable.img_main_screen_lock_on);
             appLockStatusInfo.setText(getString(R.string.main_screen_activity_app_lock_info_On));
         }else{
             appLockStatusImage.setImageResource(R.drawable.img_main_screen_lock_off);
             appLockStatusInfo.setText(getString(R.string.main_screen_activity_app_lock_info_Off));
-        }
+        } */
     }
 
     void setLockButtonSize(){
-        lockOriginalSize = Math.round(DimensionConverter.convertDpToPixel(160,this));
-        lockPressedSize = Math.round(DimensionConverter.convertDpToPixel(150,this));
+        lockOriginalSize = Math.round(getResources().getDimension(R.dimen.main_activity_lock_icon_size));
+        lockPressedSize = Math.round(getResources().getDimension(R.dimen.main_activity_lock_icon_size_pressed));
     }
 
     void setImageButtonListeners(){
@@ -142,7 +151,7 @@ public class LockUpMainActivity extends AppCompatActivity {
                     parms.width = lockOriginalSize;
                     parms.height = lockOriginalSize;
                     lockButton.setLayoutParams(parms);
-                    if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) {
+                   if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) {
                         checkAndSetUsagePermissions();
                     }else{
                         startActivity(new Intent(getBaseContext(),AppLockActivity.class));
@@ -269,6 +278,38 @@ public class LockUpMainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        screenOffReceiver = new ScreenOffReceiver(new WeakReference<>(this));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(screenOffReceiver,filter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(shouldShowAppLockInfo && MainActivityInfoDialog.shouldDisplayDialog){
+            startAppLockInfoDialog();
+        }
+    }
+
+    void startAppLockInfoDialog(){
+        MainActivityInfoDialog fragment = new MainActivityInfoDialog();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction =fragmentManager.beginTransaction();
+        fragmentTransaction.addToBackStack("main_info_dialog");
+        fragment.show(fragmentTransaction,"main_info_dialog");
+    }
+
+    public void closeAppLockInfoDialog(){
+        SharedPreferences.Editor edit = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE)
+                                        .edit();
+        edit.putBoolean(SHOULD_SHOW_APP_LOCK_INFO_KEY,false);
+        edit.apply();
+        shouldShowAppLockInfo = false;
+    }
+
+    @Override
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
         if(shouldTrackUserPresence){
@@ -293,12 +334,38 @@ public class LockUpMainActivity extends AppCompatActivity {
             startAppLock();
             finishAffinity();
         }
+        if(!shouldTrackUserPresence){
+            unregisterReceiver(screenOffReceiver);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(shouldTrackUserPresence){
+            unregisterReceiver(screenOffReceiver);
+        }
     }
 
     void startAppLock(){
         if(shouldStartAppLock && !isAppLockFirstLoad){
             if(!AppLockingService.isAppLockRunning) {
                 startService(new Intent(getBaseContext(), AppLockingService.class));
+            }
+        }
+    }
+
+    static class ScreenOffReceiver extends BroadcastReceiver{
+
+        WeakReference<LockUpMainActivity> activity;
+        ScreenOffReceiver(WeakReference<LockUpMainActivity> activity){
+            this.activity = activity;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
+                activity.get().finishAffinity();
             }
         }
     }

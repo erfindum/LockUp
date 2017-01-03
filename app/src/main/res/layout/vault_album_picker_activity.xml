@@ -43,9 +43,12 @@
 
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/vault_album_picker_activity_placeholder"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_centerInParent="true"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/vault_album_picker_activity_load_text"
+            android:scaleType="fitXY"
+            android:visibility="invisible"
             />
     </RelativeLayout>
 </RelativeLayout>

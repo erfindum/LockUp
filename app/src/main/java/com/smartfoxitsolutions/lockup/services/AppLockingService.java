@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
@@ -78,7 +79,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     private LockPinViewFinger lockPinViewFinger;
     private LockPatternView patternLockView;
     private LockPatternViewFinger patternLockViewFinger;
-    private boolean isFingerPrintLockActive,isScreenOn ;
+    private boolean isFingerPrintLockActive,isScreenOn, hasLockDisplayed ;
     private boolean stopAppLock, shouldLockOnScreenOn;
     int displayHeight;
 
@@ -107,11 +108,11 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         scheduleAppQuery();
         appLockReceiver = new AppLockReceiver();
         IntentFilter appLockFilter = new IntentFilter();
-        appLockFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         appLockFilter.addAction(Intent.ACTION_SCREEN_OFF);
         appLockFilter.addAction(Intent.ACTION_SCREEN_ON);
-        appLockFilter.addAction(Intent.ACTION_USER_PRESENT);
+        appLockFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         appLockFilter.addAction(AppLockingService.STOP_APP_LOCK_SERVICE);
+
         registerReceiver(appLockReceiver,appLockFilter);
     }
 
@@ -121,6 +122,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         params.height = WindowManager.LayoutParams.MATCH_PARENT;
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.gravity = Gravity.TOP| Gravity.START;
+        params.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
         DisplayMetrics metrics = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(metrics);
          displayHeight = metrics.heightPixels;
@@ -148,9 +150,8 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                     .putExtra(AppLockForegroundService.FOREGROUND_SERVICE_TYPE,
                             AppLockForegroundService.APP_LOCK_SERVICE));
         isAppLockRunning = true;
-        appLockMode = getBaseContext().getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE)
-                .getInt(AppLockModel.APP_LOCK_LOCKMODE,54);
         SharedPreferences prefs = getBaseContext().getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
+        appLockMode = prefs.getInt(AppLockModel.APP_LOCK_LOCKMODE,54);
         isFingerPrintLockActive = prefs.getBoolean(LockUpSettingsActivity.FINGER_PRINT_LOCK_SELECTION_PREFERENCE_KEY,false);
         shouldLockOnScreenOn = prefs.getBoolean(LockUpSettingsActivity.LOCK_SCREEN_ON_PREFERENCE_KEY,false);
         isScreenOn = false;
@@ -182,6 +183,15 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                 stopSelf();
             }
         }
+       /* for(Map.Entry<String,Integer> color:checkedAppsColor.entrySet()){
+            Log.d("AppLockColor","Package: "+color.getKey() + " Color: " +color.getValue());
+        }
+        for (String app:checkedAppsList){
+            Log.d("AppLockColor","Package: "+app + " Checked App");
+        }
+        for (String app:recommendedAppsList){
+            Log.d("AppLockColor","Package: "+app + " Recommended App");
+        } */
         return START_STICKY;
     }
 
@@ -202,7 +212,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         if(msg.what == RECENT_APP_INFO_V21_UP){
             String[] checkedAppPackage = (String[]) msg.obj;
             synchronized (this) {
-                if(isScreenOn && checkedAppPackage[0]!=null){
+                if(isScreenOn && checkedAppPackage[0]!=null && !hasLockDisplayed){
                     if(!checkedAppsList.contains(checkedAppPackage[0]) && !recommendedAppsList.contains(checkedAppPackage[0])){
                         recentlyLockedApp = NIL_APPS_LOCKED;
                         isScreenOn = false;
@@ -210,7 +220,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                     }
                 }
                 if (checkedAppsList.contains(checkedAppPackage[0]) || recommendedAppsList.contains(checkedAppPackage[0])) {
-                    if (!checkedAppPackage[0].equals(recentlyLockedApp)) {
+                    if (!recentlyLockedApp.equals(checkedAppPackage[0])) {
                         removeView();
                         recentlyLockedApp = checkedAppPackage[0];
                         if (appLockMode == AppLockModel.APP_LOCK_MODE_PATTERN) {
@@ -220,6 +230,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                                     patternLockViewFinger.setPackageName(checkedAppPackage[0]);
                                     patternLockViewFinger.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
                                     windowManager.addView(patternLockViewFinger, params);
+                                    hasLockDisplayed = true;
                                     if(isFingerPrintLockActive) {
                                         FingerPrintActivity.updateService(this);
                                         startActivity(new Intent(getBaseContext(), FingerPrintActivity.class)
@@ -235,6 +246,8 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                                 patternLockView.setPackageName(checkedAppPackage[0]);
                                 patternLockView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
                                 windowManager.addView(patternLockView, params);
+                                hasLockDisplayed = true;
+
                             }
 
                         } else {
@@ -244,6 +257,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                                     lockPinViewFinger.setPackageName(checkedAppPackage[0]);
                                     lockPinViewFinger.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
                                     windowManager.addView(lockPinViewFinger, params);
+                                    hasLockDisplayed = true;
                                     if(isFingerPrintLockActive) {
                                         FingerPrintActivity.updateService(this);
                                         startActivity(new Intent(getBaseContext(), FingerPrintActivity.class)
@@ -259,6 +273,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                                 lockPinView.setPackageName(checkedAppPackage[0]);
                                 lockPinView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
                                 windowManager.addView(lockPinView, params);
+                                hasLockDisplayed = true;
                             }
                         }
                     }
@@ -269,6 +284,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                         }
                         recentlyLockedApp = NIL_APPS_LOCKED;
                         removeView();
+                        hasLockDisplayed = false;
                     }
                 }
             }
@@ -288,6 +304,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                             patternLockView.setPackageName(checkedAppPackage);
                             patternLockView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage), displayHeight);
                             windowManager.addView(patternLockView, params);
+                            hasLockDisplayed = true;
 
                         } else {
                             if(lockPinView!=null){
@@ -297,12 +314,14 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                             lockPinView.setPackageName(checkedAppPackage);
                             lockPinView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage), displayHeight);
                             windowManager.addView(lockPinView, params);
+                            hasLockDisplayed = true;
                         }
                     }
 
                 } else {
                     recentlyLockedApp = NIL_APPS_LOCKED;
                     removeView();
+                    hasLockDisplayed = false;
                 }
             }
             return true;
@@ -313,6 +332,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     @Override
     public void onPinUnlocked() {
         removeView();
+        hasLockDisplayed = false;
     }
 
     @Override
@@ -355,24 +375,28 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if(action.equals(Intent.ACTION_PACKAGE_ADDED)){
-                loadLaunchers();
+            if(action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)){
+                if(hasLockDisplayed) {
+               //     removeView();
+                }
             }
             if(action.equals(Intent.ACTION_SCREEN_OFF)){
                 if(!appLockService.isShutdown()){
                     appLockService.shutdown();
+                }
+                if(hasLockDisplayed){
+                   removeView();
+                    recentlyLockedApp = NIL_APPS_LOCKED;
                 }
             }
             if(action.equals(Intent.ACTION_SCREEN_ON)){
                 if(!shouldLockOnScreenOn) {
                     isScreenOn = true;
                 }
-                scheduleAppQuery();
-            }
-            if(action.equals(Intent.ACTION_USER_PRESENT)){
                 if(shouldLockOnScreenOn){
                     recentlyLockedApp = NIL_APPS_LOCKED;
                 }
+                scheduleAppQuery();
             }
             if(action.equals(AppLockingService.STOP_APP_LOCK_SERVICE)){
                 stopAppLock = true;

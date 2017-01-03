@@ -19,9 +19,10 @@
 
            <com.smartfoxitsolutions.lockup.views.PatternLockView
                android:id="@+id/pattern_lock_activity_pattern_view"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
+               android:layout_width="400dp"
+               android:layout_height="400dp"
                android:layout_alignParentBottom="true"
+               android:layout_centerHorizontal="true"
                android:paddingLeft="@dimen/fiftyDpDimension"
                android:paddingRight="@dimen/fiftyDpDimension"
                android:paddingTop="@dimen/thirtyDpDimension"

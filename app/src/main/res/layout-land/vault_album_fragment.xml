@@ -33,8 +33,8 @@
 
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/vault_fragment_placeholder"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
         android:layout_centerInParent="true"
         android:layout_above="@+id/vault_fragment_load_text"
         android:scaleType="fitXY"

@@ -118,6 +118,8 @@ public class NotificationLockService extends NotificationListenerService impleme
                                     .getString(AppLockModel.NOTIFICATION_CHECKED_APPS_SHARED_PREF_KEY,null);
         if(notifAppMapString!=null){
             notificationAppsMap = gson.fromJson(notifAppMapString,notificationAppsMapToken);
+        }else{
+            notificationAppsMap = new TreeMap<>();
         }
     }
 

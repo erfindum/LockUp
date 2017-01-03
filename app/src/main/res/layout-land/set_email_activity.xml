@@ -71,6 +71,7 @@
         android:id="@+id/set_email_activity_info_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
         android:layout_above="@+id/set_email_activity_button"
         android:gravity="center"
         android:text="@string/set_email_activity_info"

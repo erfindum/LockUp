@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Vibrator;
@@ -15,6 +16,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
@@ -53,6 +55,7 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
     Vibrator patternViewVibrator;
     ValueAnimator patternAnimator;
     private RelativeLayout patternViewParent;
+    private RectF patternRect;
 
     public LockPatternView(Context context, OnPinLockUnlockListener patternLockListener) {
         super(context);
@@ -76,7 +79,10 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         setAppIcon(packageName);
     }
 
-    public void setWindowBackground(int colorVibrant, int displayHeight){
+    public void setWindowBackground(Integer colorVibrant, int displayHeight){
+        if(colorVibrant == null){
+            colorVibrant = Color.parseColor("#2874F0");
+        }
         GradientDrawable drawable = new GradientDrawable();
         int[] colors = {colorVibrant,Color.parseColor("#263238")};
         drawable.setColors(colors);
@@ -93,7 +99,7 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         appIconView = (ImageView) findViewById(R.id.pattern_lock_activity_app_icon_view);
         selectedPatternNode = "";
         SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
-        isVibratorEnabled = prefs.getBoolean(AppLockModel.VIBRATOR_ENABLED_PREF_KEY,false);
+        isVibratorEnabled = prefs.getBoolean(LockUpSettingsActivity.VIBRATOR_ENABLED_PREFERENCE_KEY,false);
         shouldHidePatternLine = prefs.getBoolean(LockUpSettingsActivity.HIDE_PATTERN_LINE_PREFERENCE_KEY,false);
         if(shouldHidePatternLine){
             patternView.setLinePaintTransparency(0);
@@ -116,10 +122,37 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
 
     void registerListeners(){
         patternView.setOnPatternChangedListener(this);
+
+        patternRect = new RectF();
+        patternViewParent.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(patternRect.contains(event.getX(),event.getY())){
+                    event.setLocation(event.getX()-patternRect.left,event.getY()-patternRect.top);
+                    patternView.onTouchEvent(event);
+                    return true;
+                }
+                if(event.getAction() == MotionEvent.ACTION_UP){
+                    event.setLocation(event.getX()-patternRect.left,event.getY()-patternRect.top);
+                    patternView.onTouchEvent(event);
+                    return true;
+                }
+                return true;
+            }
+        });
     }
 
     void unRegisterListeners(){
         patternView.setOnPatternChangedListener(null);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if(hasWindowFocus){
+            patternRect.set(patternView.getLeft(),patternView.getTop()
+                    ,patternView.getRight(),patternView.getBottom());
+        }
     }
 
     void setPatternAnimator(){
@@ -155,14 +188,10 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
                     nativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
                         @Override
                         public void onImpression(View view) {
-                            Toast.makeText(context,"Impression Will be tracked",Toast.LENGTH_LONG)
-                                    .show();
                         }
 
                         @Override
                         public void onClick(View view) {
-                            Toast.makeText(context,"Native ad clicked",Toast.LENGTH_LONG)
-                                    .show();
                             postPatternCompleted();
                         }
                     });
@@ -209,7 +238,6 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         if(isVibratorEnabled){
             patternViewVibrator.vibrate(30);
         }
-        context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
     }
 
     @Override
@@ -270,8 +298,7 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if(event.getAction()!=KeyEvent.ACTION_UP && (event.getKeyCode() != KeyEvent.KEYCODE_BACK
-                || event.getKeyCode() != KeyEvent.KEYCODE_HOME)) {
+        if(event.getAction()!=KeyEvent.ACTION_UP && (event.getKeyCode() != KeyEvent.KEYCODE_BACK)) {
             return super.dispatchKeyEvent(event);
         }
         startHome();

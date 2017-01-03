@@ -1,5 +1,7 @@
 package com.smartfoxitsolutions.lockup;
 
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.smartfoxitsolutions.lockup.receivers.PreventUninstallReceiver;
 import com.smartfoxitsolutions.lockup.services.NotificationLockService;
 
 import java.util.ArrayList;
@@ -167,9 +170,17 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 AppLockRecyclerViewItem itemView = (AppLockRecyclerViewItem) holder;
                 int listPosition = position - getHeaderOneSize();
                 if (listPosition == 0) {
-                    itemView.getAppImage().setImageDrawable(null);
                     itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
-                    itemView.getAppImage().setBackgroundResource(R.drawable.img_pin_normal);
+                    if(AppLockActivity.isDeviceAdminEnabled){
+                        itemView.getAppImage().setImageDrawable(null);
+                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion_selected);
+                        changeLockButtonImage(itemView.getLockButton(), true);
+                    }else{
+                        itemView.getAppImage().setImageDrawable(null);
+                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion);
+                        changeLockButtonImage(itemView.getLockButton(), false);
+                    }
+
                 } else {
                     try {
                         itemView.getAppImage().setBackgroundResource(0);
@@ -179,23 +190,33 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         e.printStackTrace();
                     }
                     itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
-                }
-                if (recommendedAppLocked.get(listPosition)) {
-                    changeLockButtonImage(itemView.getLockButton(), true);
-                } else {
-                    changeLockButtonImage(itemView.getLockButton(), false);
+                    if (recommendedAppLocked.get(listPosition)) {
+                        changeLockButtonImage(itemView.getLockButton(), true);
+                    } else {
+                        changeLockButtonImage(itemView.getLockButton(), false);
+                    }
                 }
             }else {
                 AppLockRecyclerViewItem itemView = (AppLockRecyclerViewItem) holder;
                 int listPosition = position - getHeaderOneSize();
                 if (listPosition == 0) {
                     itemView.getAppImage().setImageDrawable(null);
-                    itemView.getAppImage().setBackgroundResource(R.drawable.ic_app_lock_activity_hide_notif);
+                    itemView.getAppImage().setBackgroundResource(R.drawable.ic_app_lock_activity_main_hide_notif);
                     itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
+                    itemView.getLockButton().setImageResource(0);
+                    itemView.getLockButton().setImageResource(R.drawable.ic_app_lock_activity_notif_navigation);
                 } else if (listPosition == 1) {
-                    itemView.getAppImage().setImageDrawable(null);
                     itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
-                    itemView.getAppImage().setBackgroundResource(R.drawable.img_pin_normal);
+                    if(AppLockActivity.isDeviceAdminEnabled){
+                        itemView.getAppImage().setImageDrawable(null);
+                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion_selected);
+                        changeLockButtonImage(itemView.getLockButton(), true);
+
+                    }else{
+                        itemView.getAppImage().setImageDrawable(null);
+                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion);
+                        changeLockButtonImage(itemView.getLockButton(), false);
+                    }
                 } else {
                     try {
                         itemView.getAppImage().setBackgroundResource(0);
@@ -205,15 +226,11 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                         e.printStackTrace();
                     }
                     itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
-                }
-                if(listPosition == 0){
-                    itemView.getLockButton().setImageResource(0);
-                    itemView.getLockButton().setImageResource(R.drawable.ic_app_lock_activity_notif_navigation);
-                }else
-                if (recommendedAppLocked.get(listPosition)) {
-                    changeLockButtonImage(itemView.getLockButton(), true);
-                } else {
-                    changeLockButtonImage(itemView.getLockButton(), false);
+                    if (recommendedAppLocked.get(listPosition)) {
+                        changeLockButtonImage(itemView.getLockButton(), true);
+                    } else {
+                        changeLockButtonImage(itemView.getLockButton(), false);
+                    }
                 }
             }
         }
@@ -333,13 +350,13 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         return 0;
     }
 
-    private String[] getCheckedAppsPackages(){
+    private String[] getCurrentCheckedAppsPackages(){
             String[] packageArray = new String[0];
             String[] packages; packages = checkedAppsMap.keySet().toArray(packageArray);
         return packages;
     }
 
-    private String[] getCheckedAppsNames(){
+    private String[] getCurrentCheckedAppsNames(){
 
             String[] appNameArray = new String[0];
             String[] appNames = checkedAppsMap.values().toArray(appNameArray);
@@ -360,14 +377,25 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 AppCompatImageButton lockButton = itemView.getLockButton();
                 boolean val = recommendedAppLocked.get(listPosition);
                 if(listPosition == 0) {
-                    if (val) {
+                    if (AppLockActivity.isDeviceAdminEnabled) {
                         itemView.getLockButtonAnimator().start();
                         changeLockButtonImage(lockButton, false);
-                        recommendedAppLocked.add(listPosition,false);
+                        DevicePolicyManager manager = (DevicePolicyManager) activity.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                        manager.removeActiveAdmin(new ComponentName(activity,PreventUninstallReceiver.class));
+                        itemView.getAppImage().setImageDrawable(null);
+                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion);
                     } else {
                         itemView.getLockButtonAnimator().start();
                         changeLockButtonImage(lockButton, true);
-                        recommendedAppLocked.add(listPosition,true);
+                        Intent enableDeviceIntent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+                        ComponentName componentName = new ComponentName(activity,PreventUninstallReceiver.class);
+                        enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName);
+                        enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                                activity.getResources().getString(R.string.appLock_activity_prevent_uninstall_message_text));
+                        activity.startActivity(enableDeviceIntent);
+                        activity.shouldTrackUserPresence = false;
+                        itemView.getAppImage().setImageDrawable(null);
+                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion_selected);
                     }
                 }
                 else{
@@ -388,8 +416,8 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 if(listPosition == 0){
                     if(NotificationLockService.isNotificationServiceConnected) {
                             activity.startActivity(new Intent(activity.getBaseContext(), NotificationLockActivity.class)
-                                    .putExtra(AppLockModel.NOTIFICATION_ACTIVITY_CHECKED_APPS_NAME_KEY, getCheckedAppsNames())
-                                    .putExtra(AppLockModel.NOTIFICATION_ACTIVITY_CHECKED_APPS_PACKAGE_KEY, getCheckedAppsPackages()));
+                                    .putExtra(AppLockModel.NOTIFICATION_ACTIVITY_CHECKED_APPS_NAME_KEY, getCurrentCheckedAppsNames())
+                                    .putExtra(AppLockModel.NOTIFICATION_ACTIVITY_CHECKED_APPS_PACKAGE_KEY, getCurrentCheckedAppsPackages()));
                             activity.shouldTrackUserPresence = false;
                         return;
                     }else{
@@ -400,14 +428,25 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 boolean val = recommendedAppLocked.get(listPosition);
                 AppCompatImageButton lockButton = itemView.getLockButton();
                 if(listPosition == 1) {
-                    if (val) {
+                    if (AppLockActivity.isDeviceAdminEnabled) {
                         itemView.getLockButtonAnimator().start();
                         changeLockButtonImage(lockButton, false);
-                        recommendedAppLocked.add(listPosition,false);
+                        DevicePolicyManager manager = (DevicePolicyManager) activity.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                        manager.removeActiveAdmin(new ComponentName(activity,PreventUninstallReceiver.class));
+                        itemView.getAppImage().setImageDrawable(null);
+                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion);
                     } else {
                         itemView.getLockButtonAnimator().start();
                         changeLockButtonImage(lockButton, true);
-                        recommendedAppLocked.add(listPosition,true);
+                        Intent enableDeviceIntent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+                        ComponentName componentName = new ComponentName(activity,PreventUninstallReceiver.class);
+                        enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName);
+                        enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                                activity.getResources().getString(R.string.appLock_activity_prevent_uninstall_message_text));
+                        activity.startActivity(enableDeviceIntent);
+                        activity.shouldTrackUserPresence = false;
+                        itemView.getAppImage().setImageDrawable(null);
+                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion_selected);
                     }
                 }
                 else {

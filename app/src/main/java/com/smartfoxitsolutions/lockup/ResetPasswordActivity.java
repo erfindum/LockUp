@@ -70,7 +70,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
             }
         });
         long intervalStart = prefs.getLong(RESET_PASSWORD_TIME_INTERVAL_KEY,0);
-        long intervalEnd = intervalStart+(2*60*1000);
+        long intervalEnd = intervalStart+(10*60*1000);
         if(intervalStart!=0 && System.currentTimeMillis()<intervalEnd){
            securityEdit.setEnabled(true);
         }else{
@@ -80,7 +80,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if(actionId == EditorInfo.IME_ACTION_DONE){
-                    Log.d("ResetEmail","Request Code " + securityEdit.getText().toString());
+                   // Log.d("ResetEmail","Request Code " + securityEdit.getText().toString());
                     resetPassword(securityEdit.getText().toString());
                     return false;
                 }
@@ -97,7 +97,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("ResetEmail","Request Code " + securityEdit.getText().toString());
+               // Log.d("ResetEmail","Request Code " + securityEdit.getText().toString());
                 resetPassword(securityEdit.getText().toString());
             }
         });
@@ -106,7 +106,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
     private void sendResetCode(){
         final SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
         long intervalStart = prefs.getLong(RESET_PASSWORD_TIME_INTERVAL_KEY,0);
-        long intervalEnd = intervalStart+(60*300);
+        long intervalEnd = intervalStart+(10*60*1000);
         if(intervalStart!=0 && System.currentTimeMillis()<intervalEnd){
             String pauseRequest = getString(R.string.reset_pin_pattern_pause_request);
             long interval = intervalEnd - System.currentTimeMillis();

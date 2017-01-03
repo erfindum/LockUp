@@ -4,7 +4,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,6 +32,7 @@ import com.smartfoxitsolutions.lockup.mediavault.dialogs.VideoPlayerDeleteDialog
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.VideoPlayerUnlockDialog;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,6 +61,7 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
     private AtomicInteger mediaControlDurationCount;
     private String videoBucketId;
     private boolean shouldCloseAffinity;
+    private VideoPlayerScreenOffReceiver videoPlayerScreenOffReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -466,6 +471,7 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,videoBucketId)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA)
                 .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
+        finishAffinity();
     }
 
     public void unlockVideo(){
@@ -477,6 +483,7 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,videoBucketId)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA)
                 .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
+        finishAffinity();
 
     }
 
@@ -507,6 +514,9 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
         currentAudioProgress = currentSeekProgressState;
         videoView.setVideoPath(vaultFileList.get(currentPosition)+"."+fileExtensionList.get(currentPosition));
         titleText.setText(originalFileNameList.get(currentPosition));
+        videoPlayerScreenOffReceiver = new VideoPlayerScreenOffReceiver(new WeakReference<>(this));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(videoPlayerScreenOffReceiver,filter);
         Log.d("VaultVideo","Called onResume");
     }
 
@@ -566,6 +576,22 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
             fileExtensionList = null;
             Log.d("VaultVideo","Called Destroy Clear");
         }
+        unregisterReceiver(videoPlayerScreenOffReceiver);
         Log.d("VaultVideo","Called onDestroy");
+    }
+
+    static class VideoPlayerScreenOffReceiver extends BroadcastReceiver {
+
+        WeakReference<VaultVideoPlayerActivity> activity;
+        VideoPlayerScreenOffReceiver(WeakReference<VaultVideoPlayerActivity> activity){
+            this.activity = activity;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
+                activity.get().finishAffinity();
+            }
+        }
     }
 }

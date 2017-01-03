@@ -4,7 +4,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -24,6 +27,7 @@ import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.ImageViewDeleteDialog;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.ImageViewUnlockDialog;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -48,6 +52,7 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
     private static boolean isConfigChanged;
     private String imageBucketId;
     private boolean shouldCloseAffinity;
+    private ImageViewScreenOffReceiver imageViewScreenOffReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -102,6 +107,10 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
             imageAdapter.setImageViewState(viewState);
             imageAdapter.notifyDataSetChanged();
         }
+
+        imageViewScreenOffReceiver = new ImageViewScreenOffReceiver(new WeakReference<>(this));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(imageViewScreenOffReceiver,filter);
     }
 
     void setListeners(){
@@ -251,6 +260,7 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,imageBucketId)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA)
                 .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
+        finishAffinity();
     }
 
     public void unlockImage(){
@@ -262,6 +272,7 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,imageBucketId)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA)
                 .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
+        finishAffinity();
     }
 
     public void deleteImageCancelled(){
@@ -350,6 +361,22 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
             vaultFileList = null;
             vaultIdList = null;
             fileExtensionList = null;
+        }
+        unregisterReceiver(imageViewScreenOffReceiver);
+    }
+
+    static class ImageViewScreenOffReceiver extends BroadcastReceiver {
+
+        WeakReference<VaultImageViewActivity> activity;
+        ImageViewScreenOffReceiver(WeakReference<VaultImageViewActivity> activity){
+            this.activity = activity;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
+                activity.get().finishAffinity();
+            }
         }
     }
 }

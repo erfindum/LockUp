@@ -11,6 +11,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Vibrator;
@@ -18,6 +20,7 @@ import android.support.v4.hardware.fingerprint.FingerprintManagerCompat;
 import android.support.v4.os.CancellationSignal;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.AppCompatImageView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,6 +29,7 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.AppLockModel;
@@ -60,6 +64,8 @@ public class MainPatternView extends FrameLayout implements PatternLockView.OnPa
     private boolean isFingerPrintActive, isForgotPasswordVisible;
     private int noOfAttempts,noOfNoisyAttempts;
     private ValueAnimator animatorMain, animatorFingerError;
+    private RelativeLayout patternParent;
+    private RectF patternRect;
 
     public MainPatternView(MainLockActivity activity, OnPinLockUnlockListener patternLockListener
                             , boolean isFingerPrintActive) {
@@ -98,9 +104,10 @@ public class MainPatternView extends FrameLayout implements PatternLockView.OnPa
         pinPatternSwitchButton = (AppCompatImageButton) findViewById(R.id.main_pattern_lock_keyboard_icon);
         forgotPasswordMenu = (AppCompatImageButton) findViewById(R.id.main_pattern_lock_menu);
         forgotPasswordButton = (Button) findViewById(R.id.main_pattern_lock_forgot_button);
+        patternParent = (RelativeLayout) findViewById(R.id.main_pattern_lock_parent);
         selectedPatternNode = "";
         SharedPreferences prefs = activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
-        isVibratorEnabled = prefs.getBoolean(AppLockModel.VIBRATOR_ENABLED_PREF_KEY,false);
+        isVibratorEnabled = prefs.getBoolean(LockUpSettingsActivity.VIBRATOR_ENABLED_PREFERENCE_KEY,false);
         shouldHidePatternLine = prefs.getBoolean(LockUpSettingsActivity.HIDE_PATTERN_LINE_PREFERENCE_KEY,false);
         if(shouldHidePatternLine){
             patternView.setLinePaintTransparency(0);
@@ -142,6 +149,7 @@ public class MainPatternView extends FrameLayout implements PatternLockView.OnPa
             }
         });
 
+
         forgotPasswordMenu.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -174,6 +182,29 @@ public class MainPatternView extends FrameLayout implements PatternLockView.OnPa
                 }
             }
         });
+        patternRect = new RectF();
+
+        patternParent.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(isForgotPasswordVisible){
+                    isForgotPasswordVisible = false;
+                    forgotPasswordButton.setVisibility(INVISIBLE);
+                    return true;
+                }
+                if(patternRect.contains(event.getX(),event.getY())){
+                    event.setLocation(event.getX()-patternRect.left,event.getY()-patternRect.top);
+                    patternView.onTouchEvent(event);
+                    return true;
+                }
+                if(event.getAction() == MotionEvent.ACTION_UP){
+                    event.setLocation(event.getX()-patternRect.left,event.getY()-patternRect.top);
+                    patternView.onTouchEvent(event);
+                    return true;
+                }
+                return true;
+            }
+        });
     }
 
     void unRegisterListeners(){
@@ -204,6 +235,15 @@ public class MainPatternView extends FrameLayout implements PatternLockView.OnPa
             updateCancelSignal();
         }else {
             analyzeFingerPrint();
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if(hasWindowFocus){
+            patternRect.set(patternView.getLeft(),patternView.getTop()
+                            ,patternView.getRight(),patternView.getBottom());
         }
     }
 
@@ -438,14 +478,10 @@ public class MainPatternView extends FrameLayout implements PatternLockView.OnPa
         patternLockListener.onPinUnlocked();
     }
 
+
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if(isForgotPasswordVisible){
-            isForgotPasswordVisible = false;
-            forgotPasswordButton.setVisibility(INVISIBLE);
-            return true;
-        }
-        return super.onTouchEvent(event);
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return super.dispatchTouchEvent(ev);
     }
 
     public void removeView(){

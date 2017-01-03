@@ -138,7 +138,11 @@ public class ShareMoveTask implements Runnable {
 
     private String getAudioBucketName(String path){
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(path);
+        try {
+            retriever.setDataSource(path);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         String albumName = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
         retriever.release();
         if(albumName==null){

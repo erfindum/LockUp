@@ -3,6 +3,7 @@ package com.smartfoxitsolutions.lockup.mediavault;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -89,10 +90,9 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
 
     void measureItemView(){
         Context ctxt = activity.getBaseContext();
-        SharedPreferences prefs = activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
-        viewWidth = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_WIDTH_KEY,155);
-        viewHeight = prefs.getInt(AppLoaderActivity.MEDIA_THUMBNAIL_HEIGHT_KEY,115);
-        int itemWidth = prefs.getInt(AppLoaderActivity.ALBUM_THUMBNAIL_WIDTH,165);
+        viewWidth = Math.round(getResources().getDimension(R.dimen.vault_album_thumbnail_width));
+        viewHeight = Math.round(getResources().getDimension(R.dimen.vault_album_thumbnail_height));
+        int itemWidth = Math.round(getResources().getDimension(R.dimen.vault_album_item_size));
         DisplayMetrics metrics = ctxt.getResources().getDisplayMetrics();
         int displayWidth = metrics.widthPixels;
         noOfColumns = displayWidth/itemWidth;
@@ -105,7 +105,7 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
                     ,MediaVaultModel.VAULT_BUCKET_ID};
             String selection = MediaVaultModel.MEDIA_TYPE+"=?";
             String[] selectionArgs = {getMediaCursorType(getMediaType())};
-            String mediaOrderBy = MediaVaultModel.VAULT_BUCKET_NAME + " COLLATE NOCASE";
+            String mediaOrderBy = MediaVaultModel.VAULT_BUCKET_ID + " COLLATE NOCASE";
             return   new VaultDbCursorLoader(getContext(),1,mediaProjection
                     ,selection,selectionArgs,mediaOrderBy);
         }
@@ -114,7 +114,7 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
                     ,MediaVaultModel.VAULT_BUCKET_ID};
             String selection = MediaVaultModel.MEDIA_TYPE+"=?";
             String[] selectionArgs = {getMediaCursorType(getMediaType())};
-            String mediaOrderBy = MediaVaultModel.VAULT_BUCKET_NAME + " COLLATE NOCASE";
+            String mediaOrderBy = MediaVaultModel.VAULT_BUCKET_ID + " COLLATE NOCASE";
             return   new VaultDbCursorLoader(getContext(),1,mediaProjection
                     ,selection,selectionArgs,mediaOrderBy);
         }
@@ -123,7 +123,7 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
                     ,MediaVaultModel.VAULT_BUCKET_ID};
             String selection = MediaVaultModel.MEDIA_TYPE+"=?";
             String[] selectionArgs = {getMediaCursorType(getMediaType())};
-            String mediaOrderBy = MediaVaultModel.VAULT_BUCKET_NAME + " COLLATE NOCASE";
+            String mediaOrderBy = MediaVaultModel.VAULT_BUCKET_ID + " COLLATE NOCASE";
             return   new VaultDbCursorLoader(getContext(),1,mediaProjection
                     ,selection,selectionArgs,mediaOrderBy);
         }
@@ -137,6 +137,8 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
             mediaAdapter = new MediaVaultAlbumAdapter(data,this
                     , viewWidth, viewHeight);
             mediaVaultBuckRecycler.setAdapter(mediaAdapter);
+            int itemMargin = Math.round(getResources().getDimension(R.dimen.tenDpDimension));
+            mediaVaultBuckRecycler.addItemDecoration(new MediaVaultAlbumDecoration(itemMargin));
             mediaVaultBuckRecycler.setLayoutManager(new GridLayoutManager(activity.getBaseContext()
                                 ,noOfColumns,GridLayoutManager.VERTICAL,false));
             if(data.getCount()<=0){
@@ -172,26 +174,9 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
     }
 
     void loadEmptyPlaceholder(){
-        switch(getMediaType()){
-            case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
-                emptyPlaceholder.setImageResource(R.drawable.ic_vault_image_placeholder_empty);
-                loadingText.setVisibility(View.VISIBLE);
-                loadingText.setText(getResources().getString(R.string.vault_album_picker_load_failed_image_text));
-
-
-            case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
-                emptyPlaceholder.setImageResource(R.drawable.ic_vault_video_placeholder_empty);
-                loadingText.setVisibility(View.VISIBLE);
-                loadingText.setText(getResources().getString(R.string.vault_album_picker_load_failed_video_text));
-
-
-            case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                emptyPlaceholder.setImageResource(R.drawable.ic_vault_audio_placeholder_empty);
-                loadingText.setVisibility(View.VISIBLE);
-                loadingText.setText(getResources().getString(R.string.vault_album_picker_load_failed_audio_text));
-
-        }
-
+        emptyPlaceholder.setImageResource(R.drawable.ic_vault_placeholder);
+        loadingText.setVisibility(View.VISIBLE);
+        loadingText.setText(getResources().getString(R.string.vault_album_picker_load_failed_general_text));
     }
 
     public void loadingStarted() {

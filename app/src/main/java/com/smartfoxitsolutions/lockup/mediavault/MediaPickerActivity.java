@@ -3,8 +3,11 @@ package com.smartfoxitsolutions.lockup.mediavault;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -31,6 +34,8 @@ import com.smartfoxitsolutions.lockup.DimensionConverter;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.MediaMoveInDialog;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Created by RAAJA on 22-09-2016.
  */
@@ -52,6 +57,7 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
     private DialogFragment moveInDialog;
     private Toolbar toolbar;
     private boolean shouldTrackUserPresence, shouldCloseAffinity;
+    private ContentPickerScreenOffReceiver contentPickerScreenOffReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -202,7 +208,7 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
 
     void measureImageView(){
         Context ctxt = getBaseContext();
-        setItemSize(Math.round(DimensionConverter.convertDpToPixel(113,ctxt)));
+        setItemSize(Math.round(getResources().getDimension(R.dimen.vault_album_content_item_size)));
         DisplayMetrics metrics = ctxt.getResources().getDisplayMetrics();
         int displayWidth = metrics.widthPixels;
         setNoOfColumns(displayWidth/ itemSize);
@@ -235,6 +241,8 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
             mediaPickerAdapter = new MediaPickerAdapter(data,this);
             mediaPickerAdapter.setItemSize(getItemSize());
             mediaPickerRecycler.setAdapter(mediaPickerAdapter);
+            int itemMargin = Math.round(getResources().getDimension(R.dimen.fiveDpDimension));
+            mediaPickerRecycler.addItemDecoration(new MediaVaultAlbumDecoration(itemMargin));
             mediaPickerRecycler.setLayoutManager(new GridLayoutManager(getBaseContext(),getNoOfColumns(), GridLayoutManager.VERTICAL,false));
         }else{
                mediaPickerAdapter.swapCursor(data);
@@ -310,6 +318,14 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        contentPickerScreenOffReceiver = new ContentPickerScreenOffReceiver(new WeakReference<>(this));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(contentPickerScreenOffReceiver,filter);
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         if(shouldCloseAffinity){
@@ -318,15 +334,16 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
             }
             finishAffinity();
         }
+        if(!shouldTrackUserPresence){
+            unregisterReceiver(contentPickerScreenOffReceiver);
+        }
     }
 
     @Override
     public void onBackPressed() {
-        if(mediaPickerAdapter !=null){
-           if(mediaPickerAdapter.getSelectedAll() || !mediaPickerAdapter.getSelectedMediaIds().isEmpty()){
-               mediaPickerAdapter.selectedAllImages();
-               return;
-           }
+        if(mediaPickerAdapter !=null && !mediaPickerAdapter.getSelectedMediaIds().isEmpty()){
+            mediaPickerAdapter.clearAllSelections();
+            return;
         }
         super.onBackPressed();
     }
@@ -336,6 +353,24 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
         super.onDestroy();
         if(!shouldCloseAffinity && mediaPickerAdapter !=null){
             mediaPickerAdapter.closeAdapter();
+        }
+        if(shouldTrackUserPresence){
+            unregisterReceiver(contentPickerScreenOffReceiver);
+        }
+    }
+
+    static class ContentPickerScreenOffReceiver extends BroadcastReceiver {
+
+        WeakReference<MediaPickerActivity> activity;
+        ContentPickerScreenOffReceiver(WeakReference<MediaPickerActivity> activity){
+            this.activity = activity;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
+                activity.get().finishAffinity();
+            }
         }
     }
 }

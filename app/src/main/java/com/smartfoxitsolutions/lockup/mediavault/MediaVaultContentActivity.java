@@ -3,8 +3,11 @@ package com.smartfoxitsolutions.lockup.mediavault;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -30,6 +33,7 @@ import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.MediaDeleteDialog;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.MediaMoveOutDialog;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -57,6 +61,7 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
     private boolean isLockPressed,isDeletePressed;
     private DialogFragment moveOutDialog, deleteFilesDialog;
     boolean shouldTrackUserPresence, shouldCloseAffinity;
+    private VaultContentScreenOffReceiver vaultContentScreenOffReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -251,7 +256,7 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
 
     void measureImageView(){
         Context ctxt = getBaseContext();
-        setItemSize(Math.round(DimensionConverter.convertDpToPixel(113,ctxt)));
+        setItemSize(Math.round(getResources().getDimension(R.dimen.vault_album_content_item_size)));
         DisplayMetrics metrics = ctxt.getResources().getDisplayMetrics();
         int displayWidth = metrics.widthPixels;
         setNoOfColumns(displayWidth/ itemSize);
@@ -286,6 +291,8 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
         if(mediaContentAdapter ==null){
             mediaContentAdapter = new MediaVaultContentAdapter(data,this);
             mediaContentAdapter.setItemSize(getItemSize());
+            int itemMargin = Math.round(getResources().getDimension(R.dimen.fiveDpDimension));
+            mediaVaultContentRecycler.addItemDecoration(new MediaVaultAlbumDecoration(itemMargin));
             mediaVaultContentRecycler.setAdapter(mediaContentAdapter);
             mediaVaultContentRecycler.setLayoutManager(new GridLayoutManager(getBaseContext(),getNoOfColumns(), GridLayoutManager.VERTICAL,false));
         }else{
@@ -355,6 +362,14 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        vaultContentScreenOffReceiver = new VaultContentScreenOffReceiver(new WeakReference<>(this));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(vaultContentScreenOffReceiver,filter);
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         if(mediaContentAdapter!=null){
@@ -371,6 +386,9 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
             }
             finishAffinity();
         }
+        if(!shouldTrackUserPresence){
+            unregisterReceiver(vaultContentScreenOffReceiver);
+        }
     }
 
     @Override
@@ -378,6 +396,24 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
         super.onDestroy();
         if(!shouldCloseAffinity && mediaContentAdapter !=null){
             mediaContentAdapter.closeAdapter();
+        }
+        if(shouldTrackUserPresence){
+            unregisterReceiver(vaultContentScreenOffReceiver);
+        }
+    }
+
+    static class VaultContentScreenOffReceiver extends BroadcastReceiver {
+
+        WeakReference<MediaVaultContentActivity> activity;
+        VaultContentScreenOffReceiver(WeakReference<MediaVaultContentActivity> activity){
+            this.activity = activity;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
+                activity.get().finishAffinity();
+            }
         }
     }
 }

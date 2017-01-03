@@ -1,6 +1,9 @@
 package com.smartfoxitsolutions.lockup.mediavault;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -32,6 +35,7 @@ import com.smartfoxitsolutions.lockup.mediavault.dialogs.AudioPlayerUnlockDialog
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -56,6 +60,7 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
     boolean isAlbumArtLoaded,isAudioStopped,isConfigChanged;
     private String audioBucketId;
     private boolean isDeletePressed,isUnlockPressed, shouldCloseAffinity;
+    private AudioPlayerScreenOffReceiver audioPlayerScreenOffReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -319,6 +324,7 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,audioBucketId)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA)
                 .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT));
+        finishAffinity();
     }
 
     public void unlockAudio(){
@@ -330,6 +336,7 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
                 .putExtra(MediaAlbumPickerActivity.ALBUM_BUCKET_ID_KEY,audioBucketId)
                 .putExtra(MediaAlbumPickerActivity.MEDIA_TYPE_KEY,MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA)
                 .putExtra(MediaMoveActivity.VAULT_TYPE_KEY,MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT));
+        finishAffinity();
     }
 
     public void deleteAudioCancelled(){
@@ -370,6 +377,9 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
         }
         setTitleText(currentPosition);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        audioPlayerScreenOffReceiver = new AudioPlayerScreenOffReceiver(new WeakReference<>(this));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(audioPlayerScreenOffReceiver,filter);
     }
 
     @Override
@@ -473,6 +483,22 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
             fileExtensionList = null;
             originalFileNameList = null;
             vaultFileList = null;
+        }
+        unregisterReceiver(audioPlayerScreenOffReceiver);
+    }
+
+    static class AudioPlayerScreenOffReceiver extends BroadcastReceiver {
+
+        WeakReference<VaultAudioPlayerActivity> activity;
+        AudioPlayerScreenOffReceiver(WeakReference<VaultAudioPlayerActivity> activity){
+            this.activity = activity;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
+                activity.get().finishAffinity();
+            }
         }
     }
 }

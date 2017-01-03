@@ -1,7 +1,11 @@
 package com.smartfoxitsolutions.lockup.mediavault;
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,9 +26,11 @@ import android.view.View;
 
 import com.smartfoxitsolutions.lockup.LockUpMainActivity;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.mediavault.dialogs.ExternalStoragePermissionDialog;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -33,7 +39,7 @@ import java.util.concurrent.Executors;
  */
 public class MediaVaultAlbumActivity extends AppCompatActivity {
 
-    private static final int REQUEST_READ_WRITE_EXTERNAL_PERMISSION= 3;
+    public static final int REQUEST_READ_WRITE_EXTERNAL_PERMISSION= 3;
     public static final int TYPE_IMAGE_MEDIA = 5;
     public static final int TYPE_AUDIO_MEDIA = 8;
     public static final int TYPE_VIDEO_MEDIA = 14;
@@ -47,6 +53,7 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
     private SetVaultTask vaultTask;
     private String mediaType;
     boolean shouldTrackUserPresence, shouldCloseAffinity;
+    private VaultAlbumScreenOffReceiver vaultAlbumScreenOffReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -137,7 +144,7 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         }
     }
 
-    void requestReadPermission(){
+   public void requestReadPermission(){
         ActivityCompat.requestPermissions(this,new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}
                                         ,REQUEST_READ_WRITE_EXTERNAL_PERMISSION);
     }
@@ -223,8 +230,9 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         }
     }
 
-    void permissionDenied(){
-        finish();
+   public void permissionDenied(){
+       shouldCloseAffinity = false;
+       finish();
     }
 
     @Override
@@ -244,6 +252,14 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        vaultAlbumScreenOffReceiver = new VaultAlbumScreenOffReceiver(new WeakReference<>(this));
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        registerReceiver(vaultAlbumScreenOffReceiver,filter);
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         if(vaultExecutor!=null && !vaultExecutor.isShutdown()){
@@ -260,6 +276,17 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         if(shouldCloseAffinity){
             finishAffinity();
         }
+        if(!shouldTrackUserPresence){
+            unregisterReceiver(vaultAlbumScreenOffReceiver);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(shouldTrackUserPresence){
+            unregisterReceiver(vaultAlbumScreenOffReceiver);
+        }
     }
 
     @Override
@@ -269,5 +296,20 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK));
         super.onBackPressed();
+    }
+
+    static class VaultAlbumScreenOffReceiver extends BroadcastReceiver {
+
+        WeakReference<MediaVaultAlbumActivity> activity;
+        VaultAlbumScreenOffReceiver(WeakReference<MediaVaultAlbumActivity> activity){
+            this.activity = activity;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
+                activity.get().finishAffinity();
+            }
+        }
     }
 }

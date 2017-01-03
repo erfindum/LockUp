@@ -40,6 +40,7 @@
     <string name="settings_activity_activate_locker_title">Activate App Lock</string>
     <string name="settings_activity_activate_locker_enabled">App lock enabled</string>
     <string name="settings_activity_activate_locker_disabled">App lock disabled</string>
+    <string name="settings_activity_notification_locker_title">Hide Notifications</string>
     <string name="settings_activity_vibrate_title">Vibrate</string>
     <string name="settings_activity_vibrate_summery">Vibrate pin/pattern touch</string>
     <string name="settings_activity_change_pin_title">Change Pin/Pattern</string>
@@ -48,7 +49,7 @@
     <string name="settings_activity_fingerprint_title">Fingerprint Lock</string>
     <string name="settings_activity_pin_hide_title">Hide Pin Touches</string>
     <string name="settings_activity_pattern_hide_title">Hide Pattern Lines</string>
-    <string name="settings_activity_relock_title">Lock on screen on</string>
+    <string name="settings_activity_relock_title">Re-Lock on screen OFF</string>
     <string name="settings_activity_relock_summery">Re-lock apps when screen locked</string>
     <string name="settings_activity_change_pin_summery">PIN enabled</string>
     <string name="settings_activity_change_pattern_summery">Pattern enabled</string>
@@ -93,7 +94,7 @@
     <string name="set_email_activity_info">LockUp recommends you to add recovery email, to reset the pin/pattern when you forget it.
                                             Note: Only recovery email is sent to the email address you provide</string>
     <string name="set_email_activity_header">Set Up Recovery Email</string>
-    <string name="set_email_activity_add_email">Add Email</string>
+    <string name="set_email_activity_add_email">Submit</string>
     <string name="set_email_activity_choose_email">Choose From Device</string>
     <string name="set_email_activity_add_email_hint">Enter your email</string>
     <string name="set_email_activity_or_text">-  Or  -</string>
@@ -122,7 +123,7 @@
 
 
     <!-- MainScreenActivity -->
-    <string name="main_screen_activity_lock_button_text">App Lock</string>
+    <string name="main_screen_activity_lock_button_text">Lock Apps</string>
     <string name="main_screen_activity_vault_button_text">Vault</string>
     <string name="main_screen_activity_settings_button_text">Settings</string>
     <string name="main_screen_activity_user_profile_button_text">My Profile</string>
@@ -132,6 +133,7 @@
     <string name="main_screen_activity_installed_info">Installed Apps</string>
     <string name="main_screen_activity_locked_info">Locked Apps</string>
     <string name="main_screen_activity_faq_button_text">FAQ</string>
+    <string name="main_screen_activity_lock_info_message">Click to lock installed apps</string>
     <string name="main_screen_activity_ad_unit_id">ca-app-pub-4739007494599063/2472603036</string>
     <string name="main_lock_activity_forgot_button">FORGOT PASSWORD</string>
 
@@ -181,11 +183,16 @@
     </string>
     <string name="appLock_activity_should_start_dialog_permit">START</string>
     <string name="appLock_activity_should_start_dialog_cancel">NOT NOW</string>
+    <string name="appLock_activity_prevent_uninstall_info_text">Deactivating may cause LockUp to be uninstalled or
+        force stopped by other applications. Are you sure you want to proceed?</string>
+    <string name="appLock_activity_prevent_uninstall_message_text">
+        Activate now to prevent unauthorized LockUp un-installation and force stops.
+    </string>
 
-    <string name="recommended_text_sixteen_down_one">Prevent Force Stop</string>
+    <string name="recommended_text_sixteen_down_one">Prevent LockUp Uninstall</string>
 
-    <string name="recommended_text_sixteen_up_one">Lock Notifications</string>
-    <string name="recommended_text_sixteen_up_two">Prevent Force Stop</string>
+    <string name="recommended_text_sixteen_up_one">Hide Notifications</string>
+    <string name="recommended_text_sixteen_up_two">Prevent LockUp Uninstall</string>
     <string name="recommended_unlock_alert_text">
         Unlocking the app will allow unauthorized users to stop app lock or uninstall LockUp completely. Are you sure you want to unlock?
     </string>
@@ -213,7 +220,7 @@
 
 
     <!-- Notification Lock Activity -->
-    <string name="notification_lock_activity_title">NotificationLock</string>
+    <string name="notification_lock_activity_title">Hide Notifications</string>
     <string name="notification_lock_activity_empty_info">Lock apps to hide notifications </string>
 
     <!-- facebook App ID -->
@@ -232,12 +239,15 @@
     <string name="vault_album_picker_load_failed_image_text">No Images To Move</string>
     <string name="vault_album_picker_load_failed_video_text">No Videos To Move</string>
     <string name="vault_album_picker_load_failed_audio_text">No Audios To Move</string>
+    <string name="vault_album_picker_load_failed_general_text">Add Media files into vault</string>
+    <string name="vault_album_picker_load_failed_external_text">No Media files to hide</string>
+
 
     <!-- Media Vault General -->
     <string name="media_vault_toolbar_title">Vault</string>
     <string name="media_vault_ads_text">Ads</string>
     <string name="media_vault_permission_request_message">
-        LockUp vault requires user permission to read or write media files from Storage. Without this permission vault will stop working.
+        Vault requires user permission to read or write media files from Storage.
     </string>
     <string name="media_vault_permission_grant">PERMIT</string>
     <string name="media_vault_permission_deny">CANCEL</string>
@@ -248,35 +258,31 @@
     </string-array>
 
     <!-- Vault Move Activity -->
-    <string name="vault_move_activity_move_in_text">Moving Into Vault</string>
-    <string name="vault_move_activity_move_out_text">Moving Out Of Vault</string>
+    <string name="vault_move_activity_move_in_text">Hiding Media Files</string>
+    <string name="vault_move_activity_move_out_text">Un-Hiding media files</string>
     <string name="vault_move_activity_delete_files">Deleting from Vault</string>
     <string name="vault_move_activity_move_info_text">Please wait. This may take a while depending on the file size and number of files.</string>
     <string name="vault_move_activity_move_button">Open Vault</string>
     <string name="vault_move_activity_cancel_notif">CANCEL</string>
-    <string name="vault_move_activity_move_complete">Files successfully moved</string>
-    <string name="vault_move_activity_delete_complete">Files successfully deleted</string>
+    <string name="vault_move_activity_move_complete">Operation Complete</string>
+    <string name="vault_move_activity_delete_complete">Operation Complete</string>
     <string name="vault_move_activity_vault_redirect_message">Touch to open LockUp Vault</string>
     <string name="vault_move_activity_move_background">Move in background</string>
 
 
     <!-- Vault Move Dialog -->
-    <string name="vault_move_dialog_move_in_title_text">Move into Vault:</string>
-    <string name="vault_move_dialog_move_out_title_text">Move out of Vault:</string>
+    <string name="vault_move_dialog_move_in_title_text">Hide media files:</string>
+    <string name="vault_move_dialog_move_out_title_text">Un-Hide media files:</string>
     <string name="vault_move_dialog_delete_title_text">Delete selected files:</string>
     <string name="vault_share_dialog_title_text">Unable to move files:</string>
-    <string name="vault_move_dialog_move_in_sub_text">Move selected files into Vault?</string>
-    <string name="vault_move_dialog_move_out_sub_text">Move selected files out of Vault?</string>
+    <string name="vault_move_dialog_move_in_sub_text">Hide selected files from device?</string>
+    <string name="vault_move_dialog_move_out_sub_text">Un-Hide selected files from Vault?</string>
     <string name="vault_move_dialog_delete_sub_text">Permanently delete selected files? Note: This action cannot be undone</string>
     <string name="vault_share_dialog_sub_text">Please wait while the ongoing operation is complete, before moving new files</string>
-    <string name="vault_move_dialog_move_in_positive">MOVE IN</string>
-    <string name="vault_move_dialog_move_out_positive">MOVE OUT</string>
+    <string name="vault_move_dialog_move_in_positive">HIDE</string>
+    <string name="vault_move_dialog_move_out_positive">UN-HIDE</string>
     <string name="vault_move_dialog_delete_positive">DELETE</string>
     <string name="vault_move_dialog_move_negative">NOT NOW</string>
     <string name="vault_share_dialog_negative">CLOSE</string>
-
-
-
-
 
 </resources>

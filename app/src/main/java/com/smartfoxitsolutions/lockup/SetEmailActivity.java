@@ -1,8 +1,10 @@
 package com.smartfoxitsolutions.lockup;
 
 import android.accounts.AccountManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -15,6 +17,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 
 import java.util.regex.Pattern;
 
@@ -97,7 +101,6 @@ public class SetEmailActivity extends AppCompatActivity {
             edit.putBoolean(AppLockModel.LOCK_UP_FIRST_LOAD_PREF_KEY,false);
             edit.apply();
             startLockUpMain();
-
         }else{
             displayToast(getString(R.string.set_email_activity_valid_email));
         }
@@ -108,6 +111,9 @@ public class SetEmailActivity extends AppCompatActivity {
     }
 
     void startLockUpMain(){
+        ComponentName mediaMoveActivityComponent = new ComponentName(this, MediaMoveActivity.class);
+        getPackageManager().setComponentEnabledSetting(mediaMoveActivityComponent, PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                ,PackageManager.DONT_KILL_APP);
         startActivity(new Intent(this, LockUpMainActivity.class));
         shouldCloseAffinity = false;
         finishAffinity();

@@ -216,8 +216,6 @@ public class SetPatternFragment extends Fragment implements PatternLockView.OnPa
     @Override
     public void onStop() {
         super.onStop();
-
-        Log.d("PatternLock","Selected : Called PatternView OnDestroy"  );
     }
 
     @Override
