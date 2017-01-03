@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    >
+
+    <TextView
+        android:id="@+id/lockup_main_activity_lockup_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="@dimen/twentyDpDimension"
+        android:textSize="@dimen/twentyFourSpDimension"
+        android:textColor="@color/viewPagerTabBlue"
+        android:text="@string/main_screen_activity_app_name_text"
+        />
+
+    <ImageButton
+        android:id="@+id/lockup_main_activity_lock_button"
+        android:layout_width="@dimen/main_activity_lock_icon_size"
+        android:layout_height="@dimen/main_activity_lock_icon_size"
+        android:background="@drawable/ic_main_screen_lock"
+        android:layout_above="@+id/lockup_main_activity_applock_header"
+        android:layout_toLeftOf="@+id/lockup_main_activity_info_seperator"
+        android:layout_toStartOf="@+id/lockup_main_activity_info_seperator"
+        android:layout_marginRight="@dimen/twentyDpDimension"
+        android:layout_marginEnd="@dimen/twentyDpDimension"
+        />
+
+    <TextView
+        android:id="@+id/lockup_main_activity_applock_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textSize="@dimen/twentySpDimension"
+        android:textColor="@color/mainScreenText"
+        android:text="@string/main_screen_activity_lock_button_text"
+        android:layout_alignBottom="@+id/lockup_main_activity_button_group"
+        android:layout_toLeftOf="@+id/lockup_main_activity_info_seperator"
+        android:layout_toStartOf="@+id/lockup_main_activity_info_seperator"
+        android:layout_marginEnd="53dp"
+        android:layout_marginRight="53dp"
+        android:layout_marginBottom="@dimen/twentyDpDimension"
+        />
+
+    <!--
+
+   <RelativeLayout
+       android:id="@+id/lockup_main_activity_applock_info_group"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_toLeftOf="@+id/lockup_main_activity_info_seperator"
+       android:layout_toStartOf="@+id/lockup_main_activity_info_seperator"
+       android:layout_alignTop="@+id/lockup_main_activity_button_group"
+       android:layout_centerHorizontal="true"
+       android:layout_marginBottom="@dimen/tenDpDimension"
+       android:layout_marginRight="@dimen/fourtyDpDimension"
+       android:layout_marginEnd="@dimen/fourtyDpDimension"
+       >
+
+       <ImageView
+           android:id="@+id/lockup_main_activity_applock_info_img"
+           android:layout_width="10dp"
+           android:layout_height="10dp"
+           android:layout_centerInParent="true"
+           android:layout_alignParentStart="true"
+           android:layout_alignParentLeft="true"
+           android:background="@drawable/img_main_screen_lock_on"
+           />
+       <TextView
+           android:id="@+id/lockup_main_activity_applock_info"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_centerInParent="true"
+           android:layout_toRightOf="@+id/lockup_main_activity_applock_info_img"
+           android:layout_toEndOf="@+id/lockup_main_activity_applock_info_img"
+           android:textSize="@dimen/seventeenSpDimension"
+           android:textColor="@color/mainScreenText"
+           />
+
+   </RelativeLayout> -->
+
+   <View
+       android:id="@+id/lockup_main_activity_info_seperator"
+       android:layout_width="@dimen/oneDpDimension"
+       android:layout_height="0dp"
+       android:layout_centerHorizontal="true"
+       android:layout_above="@+id/lockup_main_activity_button_group"
+       android:layout_marginLeft="@dimen/thirtyDpDimension"
+       android:layout_marginStart="@dimen/thirtyDpDimension"
+       android:layout_marginRight="@dimen/thirtyDpDimension"
+       android:layout_marginEnd="@dimen/thirtyDpDimension"
+       android:background="@color/dividerColor"
+       android:visibility="invisible"
+       />
+  <RelativeLayout
+      android:id="@+id/lockup_main_activity_installed_group"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_centerVertical="true"
+      android:layout_toRightOf="@+id/lockup_main_activity_info_seperator"
+      android:layout_toEndOf="@+id/lockup_main_activity_info_seperator"
+      android:layout_marginBottom="@dimen/twentyDpDimension"
+      >
+      <TextView
+          android:id="@+id/lockup_main_activity_installed_no"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_centerHorizontal="true"
+          android:layout_alignParentTop="true"
+          android:layout_marginBottom="@dimen/tenDpDimension"
+          android:textSize="30sp"
+          android:textColor="@color/mainScreenText"
+          />
+
+      <TextView
+          android:id="@+id/lockup_main_activity_installed_text"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_centerHorizontal="true"
+          android:layout_below="@+id/lockup_main_activity_installed_no"
+          android:textSize="@dimen/seventeenSpDimension"
+          android:textColor="@color/mainScreenText"
+          android:text="@string/main_screen_activity_installed_info"
+          />
+
+  </RelativeLayout>
+   <RelativeLayout
+       android:id="@+id/lockup_main_activity_locked_group"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_centerVertical="true"
+       android:layout_toRightOf="@+id/lockup_main_activity_installed_group"
+       android:layout_toEndOf="@+id/lockup_main_activity_installed_group"
+       android:layout_marginBottom="@dimen/twentyDpDimension"
+       android:layout_marginLeft="@dimen/thirtyDpDimension"
+       android:layout_marginStart="@dimen/thirtyDpDimension"
+       >
+       <TextView
+           android:id="@+id/lockup_main_activity_locked_no"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_centerHorizontal="true"
+           android:layout_alignParentTop="true"
+           android:layout_marginBottom="@dimen/tenDpDimension"
+           android:textSize="30sp"
+           android:textColor="@color/mainScreenText"
+           />
+
+       <TextView
+           android:id="@+id/lockup_main_activity_locked_text"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_below="@+id/lockup_main_activity_locked_no"
+           android:layout_centerHorizontal="true"
+           android:textSize="@dimen/seventeenSpDimension"
+           android:textColor="@color/mainScreenText"
+           android:text="@string/main_screen_activity_locked_info"
+           />
+
+   </RelativeLayout>
+
+<RelativeLayout
+   android:id="@+id/lockup_main_activity_button_group"
+   android:layout_alignParentBottom="true"
+   android:layout_below="@+id/lockup_main_activity_installed_group"
+   android:layout_width="wrap_content"
+   android:layout_height="wrap_content"
+   android:layout_alignLeft="@+id/lockup_main_activity_info_seperator"
+   android:layout_alignStart="@+id/lockup_main_activity_info_seperator"
+   android:layout_marginLeft="@dimen/fourtyDpDimension"
+   android:layout_marginStart="@dimen/fourtyDpDimension"
+   >
+   <android.support.v7.widget.AppCompatImageButton
+       android:id="@+id/lockup_main_activity_settings_image"
+       android:layout_width="@dimen/seventyDpDimension"
+       android:layout_height="@dimen/seventyDpDimension"
+       android:layout_toRightOf="@+id/lockup_main_activity_vault_image"
+       android:layout_toEndOf="@+id/lockup_main_activity_vault_image"
+       android:contentDescription="@string/main_screen_activity_settings_button_text"
+       android:layout_marginTop="@dimen/tenDpDimension"
+       android:layout_marginBottom="@dimen/tenDpDimension"
+       android:layout_marginLeft="@dimen/seventyOneDpDimension"
+       android:layout_marginStart="@dimen/seventyOneDpDimension"
+       android:background="@null"
+       app:srcCompat="@drawable/selector_main_screen_settings_button"
+       android:scaleType="fitXY"
+       android:adjustViewBounds="true"
+       />
+
+   <android.support.v7.widget.AppCompatImageButton
+       android:id="@+id/lockup_main_activity_vault_image"
+       android:layout_width="@dimen/seventyDpDimension"
+       android:layout_height="@dimen/seventyDpDimension"
+       android:layout_margin="@dimen/tenDpDimension"
+       android:contentDescription="@string/main_screen_activity_vault_button_text"
+       android:background="@null"
+       app:srcCompat="@drawable/selector_main_screen_vault_button"
+       android:scaleType="fitXY"
+       android:adjustViewBounds="true"
+       />
+
+   <TextView
+       android:id="@+id/main_screen_activity_app_vault_text"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_below="@+id/lockup_main_activity_vault_image"
+       android:layout_marginLeft="@dimen/twentyEightDpDImension"
+       android:layout_marginStart="@dimen/twentyEightDpDImension"
+       android:text="@string/main_screen_activity_vault_button_text"
+       android:textSize="@dimen/twelveSpDimension"
+       android:gravity="center"
+       android:textColor="@color/mainScreenText"
+       />
+
+   <TextView
+       android:id="@+id/lockup_main_activity_app_settings_text"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_below="@+id/lockup_main_activity_settings_image"
+       android:layout_toRightOf="@+id/main_screen_activity_app_vault_text"
+       android:layout_toEndOf="@id/main_screen_activity_app_vault_text"
+       android:layout_marginLeft="102dp"
+       android:layout_marginStart="102dp"
+       android:text="@string/main_screen_activity_settings_button_text"
+       android:textSize="@dimen/twelveSpDimension"
+       android:gravity="center"
+       android:textColor="@color/mainScreenText"
+       />
+
+</RelativeLayout>
+
+</RelativeLayout>

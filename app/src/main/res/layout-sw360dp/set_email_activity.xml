@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/colorMainPrimary"
+    >
+
+    <android.support.v7.widget.AppCompatImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_above="@+id/set_email_activity_header"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/tenDpDimension"
+        app:srcCompat="@drawable/ic_recover_mail"
+        android:scaleType="fitXY"
+        />
+
+    <TextView
+        android:id="@+id/set_email_activity_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/set_email_activity_header"
+        android:layout_above="@+id/set_email_activity_choose_button"
+        android:layout_centerHorizontal="true"
+        android:padding="@dimen/twentyDpDimension"
+        android:textSize="@dimen/twentySpDimension"
+        android:textColor="@color/white"
+        />
+
+    <Button
+        android:id="@+id/set_email_activity_choose_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/fifteenDpDimension"
+        android:layout_above="@+id/set_email_activity_or_text"
+        android:layout_centerHorizontal="true"
+        android:text="@string/set_email_activity_choose_email"
+        android:background="@color/colorMainAccent"
+        android:textColor="@color/colorMainPrimary"
+        />
+
+    <TextView
+        android:id="@+id/set_email_activity_or_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/white"
+        android:textSize="@dimen/fifteenSpDimension"
+        android:layout_above="@+id/set_email_activity_email_edit"
+        android:layout_marginTop="@dimen/tenDpDimension"
+        android:text="@string/set_email_activity_or_text"
+        />
+
+   <android.support.v7.widget.AppCompatEditText
+       android:id="@+id/set_email_activity_email_edit"
+       android:layout_width="250dp"
+       android:layout_height="wrap_content"
+       android:layout_above="@+id/set_email_activity_info_text"
+       android:layout_centerHorizontal="true"
+       android:padding="15dp"
+       android:textColor="@color/white"
+       android:textSize="@dimen/fifteenSpDimension"
+       android:hint="@string/set_email_activity_add_email_hint"
+       android:textColorHint="@color/viewPagerTabBlue"
+       android:inputType="textEmailAddress"
+       android:maxLines="1"
+       android:imeOptions="actionDone"
+        />
+
+    <TextView
+        android:id="@+id/set_email_activity_info_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/set_email_activity_button"
+        android:gravity="center"
+        android:text="@string/set_email_activity_info"
+        android:padding="@dimen/twentyDpDimension"
+        android:textSize="13sp"
+        android:textColor="@color/white"
+        />
+
+    <Button
+        android:id="@+id/set_email_activity_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorMainAccent"
+        android:text="@string/set_email_activity_add_email"
+        android:textColor="@color/colorMainPrimary"
+        android:padding="@dimen/fifteenDpDimension"
+        android:layout_marginBottom="@dimen/twentyDpDimension"
+        android:layout_centerHorizontal="true"
+        />
+
+</RelativeLayout>

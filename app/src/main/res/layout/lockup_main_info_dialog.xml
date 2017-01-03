@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="5dp"
+    android:layout_gravity="center"
+    >
+<ScrollView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="250dp" android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/lockup_main_dialog_icon"
+            android:layout_width="@dimen/lockup_main_info_lock_size"
+            android:layout_height="@dimen/lockup_main_info_lock_size"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/twentyFiveDpDimension"
+            android:layout_alignParentTop="true"
+            />
+        <TextView
+            android:id="@+id/lockup_main_dialog_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/lockup_main_dialog_icon"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/textDarkGrey"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textAlignment="center"
+            android:maxWidth="200dp"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp"
+            android:paddingBottom="@dimen/fifteenDpDimension"
+            android:layout_marginTop="@dimen/fifteenDpDimension"
+            />
+
+        <View
+            android:id="@+id/lockup_main_dialog_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/lockup_main_dialog_message"
+            android:layout_marginLeft="@dimen/thirtyDpDimension"
+            android:layout_marginRight="@dimen/thirtyDpDimension"
+            android:background="@color/textPrimaryColor"
+            />
+
+        <TextView
+            android:id="@+id/lockup_main_dialog_positive_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/fifteenDpDimension"
+            android:paddingBottom="@dimen/fifteenDpDimension"
+            android:layout_marginEnd="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/lockup_main_dialog_divider"
+            android:textColor="@color/colorMainPrimary"
+            android:textSize="@dimen/fifteenSpDimension"
+            />
+
+    </RelativeLayout>
+</ScrollView>
+</android.support.v7.widget.CardView>
