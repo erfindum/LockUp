@@ -69,26 +69,14 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private void loadPlaceHolderImages(){
         switch(getMediaType()) {
             case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
-                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
-                    placeHolder = ContextCompat.getDrawable(mediaAlbumFragment.getActivity(), R.drawable.ic_vault_image_placeholder_01);
-                    return;
-                }
                 placeHolder = ContextCompat.getDrawable(mediaAlbumFragment.getActivity(), R.drawable.ic_vault_image_placeholder);
                 return;
 
             case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
-                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
-                    placeHolder = ContextCompat.getDrawable(mediaAlbumFragment.getActivity(), R.drawable.ic_vault_video_placeholder_01);
-                    return;
-                }
                 placeHolder = ContextCompat.getDrawable(mediaAlbumFragment.getActivity(), R.drawable.ic_vault_video_placeholder);
                 return;
 
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
-                    placeHolder = ContextCompat.getDrawable(mediaAlbumFragment.getActivity(), R.drawable.ic_vault_audio_placeholder_01);
-                    return;
-                }
                 placeHolder = ContextCompat.getDrawable(mediaAlbumFragment.getActivity(), R.drawable.ic_vault_audio_placeholder);
         }
     }
@@ -261,6 +249,7 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     void closeResources(){
+
         if(mediaAlbumFragment !=null) {
             mediaAlbumFragment = null;
         }

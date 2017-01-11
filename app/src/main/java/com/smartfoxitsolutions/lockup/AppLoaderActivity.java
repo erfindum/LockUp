@@ -2,7 +2,6 @@ package com.smartfoxitsolutions.lockup;
 
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -19,7 +18,6 @@ import android.util.Log;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -40,9 +38,8 @@ public class AppLoaderActivity extends AppCompatActivity {
     public static final String UPDATE_APP_CLOUD_KEY = "update_lockup_app";
     private SharedPreferences prefs;
     private static boolean isFirstLoad;
-    private ArrayList<String> recommendedAppList;
     private TreeMap<String,String> installedAppMap,checkedAppMap;
-    private LinkedHashMap<String,HashMap<String,Boolean>> recommendedAppMap;
+    private LinkedHashMap<String,HashMap<String,Boolean>> recommendedAppMap, recommendedModelMap;
     private AppLockModel appLockModel;
 
     static boolean isLockUpFirstLoad(){
@@ -57,16 +54,6 @@ public class AppLoaderActivity extends AppCompatActivity {
         appLockModel = new AppLockModel(getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE));
         prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
         isFirstLoad = prefs.getBoolean(AppLockModel.LOCK_UP_FIRST_LOAD_PREF_KEY,true);
-        List<String> array1Resource;
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2){
-            String[] array1 = {getResources().getString(R.string.recommended_text_sixteen_down_one)};
-            array1Resource = Arrays.asList(array1);
-        }else{
-            String[] array1 = {getResources().getString(R.string.recommended_text_sixteen_up_one)
-                    ,getResources().getString(R.string.recommended_text_sixteen_up_two)};
-            array1Resource = Arrays.asList(array1);
-        }
-        recommendedAppList = new ArrayList<>(array1Resource);
         if(!isHandled) {
             queryInstalledApps();
         }
@@ -111,39 +98,31 @@ public class AppLoaderActivity extends AppCompatActivity {
         LinkedList<String> recommendedAddedList = new LinkedList<>();
         installedAppMap = appLockModel.getInstalledAppsMap();
         checkedAppMap = appLockModel.getCheckedAppsMap();
-        recommendedAppMap = appLockModel.getRecommendedAppsMap();
-        for(int i=0;i<recommendedAppList.size();i++){
-            if(recommendedAppMap.containsKey(recommendedAppList.get(i))){
-                continue;
-            }
-            HashMap<String,Boolean> stringMap = new HashMap<>();
-
-            if( Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2){
-                if(i==0) {
-                    stringMap.put(getResources().getString(R.string.recommended_text_sixteen_down_one),false);
-                    recommendedAppMap.put(recommendedAppList.get(i),stringMap);
-                }
-            }
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
-                if(i==0 ) {
-                    stringMap.put(getResources().getString(R.string.recommended_text_sixteen_up_one),false);
-                    recommendedAppMap.put(recommendedAppList.get(i), stringMap);
-                }
-                if(i==1){
-                    stringMap.put(getResources().getString(R.string.recommended_text_sixteen_up_two),false);
-                    recommendedAppMap.put(recommendedAppList.get(i),stringMap);
-                }
-            }
+        recommendedModelMap = appLockModel.getRecommendedAppsMap();
+        recommendedAppMap = new LinkedHashMap<>();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
+            HashMap<String,Boolean> tempMap = new HashMap<>();
+            tempMap.put(getResources().getString(R.string.recommended_text_sixteen_up_one),false);
+            recommendedAppMap.put(getResources().getString(R.string.recommended_text_sixteen_up_one), tempMap);
         }
-        List<ResolveInfo> installerPackages = pkgManager.queryIntentActivities(new Intent(Intent.ACTION_INSTALL_PACKAGE)
-                                            .setDataAndType(Uri.parse("file:///"),"application/vnd.android.package-archive")
-                                                                                ,PackageManager.GET_META_DATA);
+
+        Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+        installIntent.addCategory(Intent.CATEGORY_DEFAULT);
+        installIntent.setDataAndType(Uri.parse("file:///"),"application/vnd.android.package-archive");
+        List<ResolveInfo> installerPackages = pkgManager.queryIntentActivities(installIntent,PackageManager.GET_META_DATA);
+
         if(installerPackages!=null && !installerPackages.isEmpty()){
             ResolveInfo installerInfo = installerPackages.get(0);
             String installerPackage = installerInfo.activityInfo.packageName;
+            HashMap<String,Boolean> currentMap= recommendedModelMap.get(installerPackage);
             HashMap<String,Boolean> stringMap = new HashMap<>();
-                stringMap.put("Install/Uninstall Apps",true);
-                recommendedAppMap.put(installerPackage,stringMap);
+            if(currentMap!=null) {
+                ArrayList<Boolean> currentSelection = new ArrayList<>(currentMap.values());
+                stringMap.put("App Installer",currentSelection.get(0));
+            }else{
+                stringMap.put("App Installer",true);
+            }
+            recommendedAppMap.put(installerPackage, stringMap);
             recommendedAddedList.add(installerPackage);
             Log.d("AppLoader","Added Installer " + installerPackage);
         }
@@ -153,12 +132,19 @@ public class AppLoaderActivity extends AppCompatActivity {
         if(settingsPackages!=null && !settingsPackages.isEmpty()){
             try{
                 ResolveInfo settingsInfo = settingsPackages.get(0);
-                    String settingsPackage = settingsInfo.activityInfo.packageName;
-                    ApplicationInfo appNameInfo = pkgManager.getApplicationInfo(settingsPackage, PackageManager.GET_META_DATA);
-                    String settingsAppName = pkgManager.getApplicationLabel(appNameInfo).toString();
-                    HashMap<String,Boolean> recomendTemp = new HashMap<>();
+                String settingsPackage = settingsInfo.activityInfo.packageName;
+                ApplicationInfo appNameInfo = pkgManager.getApplicationInfo(settingsPackage, PackageManager.GET_META_DATA);
+                String settingsAppName = pkgManager.getApplicationLabel(appNameInfo).toString();
+                HashMap<String,Boolean> currentMap= recommendedModelMap.get(settingsPackage);
+                HashMap<String,Boolean> recomendTemp = new HashMap<>();
+                if(currentMap!=null){
+                   ArrayList<Boolean> currentSelection = new ArrayList<>(currentMap.values());
+                    recomendTemp.put(settingsAppName,currentSelection.get(0));
+                }else{
                     recomendTemp.put(settingsAppName,true);
-                    recommendedAppMap.put(settingsPackage,recomendTemp);
+                }
+                recommendedAppMap.put(settingsPackage, recomendTemp);
+
                 recommendedAddedList.add(settingsPackage);
                     Log.d("AppLoader","Added Settings " + settingsPackage);
                 }catch (PackageManager.NameNotFoundException e){
@@ -177,9 +163,16 @@ public class AppLoaderActivity extends AppCompatActivity {
                         String marketPackage = marketInfo.activityInfo.packageName;
                         ApplicationInfo appNameInfo = pkgManager.getApplicationInfo(marketPackage, PackageManager.GET_META_DATA);
                         String marketAppName = pkgManager.getApplicationLabel(appNameInfo).toString();
+                        HashMap<String,Boolean> currentMap= recommendedModelMap.get(marketPackage);
                         HashMap<String, Boolean> recomendTemp = new HashMap<>();
-                        recomendTemp.put(marketAppName, false);
+                        if(currentMap!=null){
+                            ArrayList<Boolean> currentSelection = new ArrayList<>(currentMap.values());
+                            recomendTemp.put(marketAppName, currentSelection.get(0));
+                        }else{
+                            recomendTemp.put(marketAppName, false);
+                        }
                         recommendedAppMap.put(marketPackage, recomendTemp);
+
                         recommendedAddedList.add(marketPackage);
                         Log.d("AppLoader", "Added Installer " + marketPackage);
                     } catch (PackageManager.NameNotFoundException e) {

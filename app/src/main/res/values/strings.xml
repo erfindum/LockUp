@@ -37,6 +37,7 @@
     <!-- SettingsActivity -->
     <string name="settings_activity_toolbar_title">Settings</string>
     <string name="settings_activity_applock_title">APP LOCK</string>
+    <string name="settings_activity_advanced_title">ADVANCED PROTECTION</string>
     <string name="settings_activity_activate_locker_title">Activate App Lock</string>
     <string name="settings_activity_activate_locker_enabled">App lock enabled</string>
     <string name="settings_activity_activate_locker_disabled">App lock disabled</string>
@@ -53,7 +54,9 @@
     <string name="settings_activity_relock_summery">Re-lock apps when screen locked</string>
     <string name="settings_activity_change_pin_summery">PIN enabled</string>
     <string name="settings_activity_change_pattern_summery">Pattern enabled</string>
-
+    <string name="settings_activity_prevent_uninstall_title">Prevent LockUp Uninstall</string>
+    <string name="settings_activity_prevent_uninstall_summery">It is highly recommended to enable this protection. This prevents
+    unauthorized users or apps from uninstalling LockUp </string>
 
     <!-- SettingsActivityDialog -->
     <string name="settings_dialog_finger_negative_header">Unable to switch on</string>
@@ -124,10 +127,12 @@
 
     <!-- MainScreenActivity -->
     <string name="main_screen_activity_lock_button_text">Lock Apps</string>
+    <string name="main_screen_activity_app_lock_button_text">AppLock</string>
     <string name="main_screen_activity_vault_button_text">Vault</string>
     <string name="main_screen_activity_settings_button_text">Settings</string>
     <string name="main_screen_activity_user_profile_button_text">My Profile</string>
     <string name="main_screen_activity_app_name_text">LockUp</string>
+    <string name="main_screen_activity_app_name_summery">Lock Apps and Hide Media</string>
     <string name="main_screen_activity_app_lock_info_On">ON</string>
     <string name="main_screen_activity_app_lock_info_Off">OFF</string>
     <string name="main_screen_activity_installed_info">Installed Apps</string>
@@ -188,11 +193,7 @@
     <string name="appLock_activity_prevent_uninstall_message_text">
         Activate now to prevent unauthorized LockUp un-installation and force stops.
     </string>
-
-    <string name="recommended_text_sixteen_down_one">Prevent LockUp Uninstall</string>
-
     <string name="recommended_text_sixteen_up_one">Hide Notifications</string>
-    <string name="recommended_text_sixteen_up_two">Prevent LockUp Uninstall</string>
     <string name="recommended_unlock_alert_text">
         Unlocking the app will allow unauthorized users to stop app lock or uninstall LockUp completely. Are you sure you want to unlock?
     </string>
@@ -228,7 +229,9 @@
     <string name="facebook_app_id">361979890807218</string>
 
     <!-- Pin Lock Activity -->
-    <string name="pin_lock_activity_ad_unit_id">1c2531f4f8844982a1be67c877dffc92</string>
+    <string name="pin_lock_activity_ad_unit_id">1fa4d60303ff4392a78aab50dac62c5e</string>
+    <string name="pin_lock_original">1c2531f4f8844982a1be67c877dffc92</string>
+    <string name="pin_lock1">1fa4d60303ff4392a78aab50dac62c5e</string>
     
     <!-- Album Picker Activity-->
     <string name="vault_album_picker_load_text">Loading Albums</string>

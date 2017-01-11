@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -24,13 +23,14 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.smartfoxitsolutions.lockup.DimensionConverter;
+import com.bumptech.glide.Glide;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.MediaMoveInDialog;
 
@@ -317,10 +317,14 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
+    private WeakReference<MediaPickerActivity> getWeakReference(){
+        return new WeakReference<>(this);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        contentPickerScreenOffReceiver = new ContentPickerScreenOffReceiver(new WeakReference<>(this));
+        contentPickerScreenOffReceiver = new ContentPickerScreenOffReceiver(getWeakReference());
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         registerReceiver(contentPickerScreenOffReceiver,filter);
     }
@@ -332,7 +336,7 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
             if(mediaPickerAdapter !=null){
                 mediaPickerAdapter.closeAdapter();
             }
-            finishAffinity();
+           finishActivityAffinity();
         }
         if(!shouldTrackUserPresence){
             unregisterReceiver(contentPickerScreenOffReceiver);
@@ -359,6 +363,33 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
+    private void finishActivityAffinity(){
+        Glide.get(this).clearMemory();
+        new Thread(new ClearContentPickerCacheTask(getWeakReference())).start();
+        finishAffinity();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        Glide.get(this).trimMemory(level);
+    }
+
+    static class ClearContentPickerCacheTask implements Runnable
+    {
+        WeakReference<MediaPickerActivity> activityWeakReference;
+        ClearContentPickerCacheTask(WeakReference<MediaPickerActivity> activityReference){
+            this.activityWeakReference = activityReference;
+        }
+
+        @Override
+        public void run() {
+            Log.d("CacheVault","Clear Content Picker Cache Started " + System.currentTimeMillis());
+            Glide.get(activityWeakReference.get()).clearDiskCache();
+            Log.d("CacheVault","Clear Content Picker Cache Complete " + System.currentTimeMillis());
+        }
+    }
+
     static class ContentPickerScreenOffReceiver extends BroadcastReceiver {
 
         WeakReference<MediaPickerActivity> activity;
@@ -369,7 +400,7 @@ public class MediaPickerActivity extends AppCompatActivity implements LoaderMana
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
-                activity.get().finishAffinity();
+                activity.get().finishActivityAffinity();
             }
         }
     }

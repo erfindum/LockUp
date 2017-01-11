@@ -8,4 +8,8 @@ public interface OnPinLockUnlockListener {
     void onPinUnlocked();
 
     void onPinLocked(String packageName);
+
+    void onAdImpressed();
+
+    void onAdClicked();
 }

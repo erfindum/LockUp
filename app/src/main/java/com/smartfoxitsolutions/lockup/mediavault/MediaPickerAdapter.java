@@ -55,11 +55,13 @@ MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> impleme
 
     void loadCursorData(){
         mediaCursor.moveToFirst();
-        do {
-            int idIndex = mediaCursor.getColumnIndex(getIdIndex());
-            mediaIdList.add(mediaCursor.getString(idIndex));
+        if(mediaCursor.getCount()>0) {
+            do {
+                int idIndex = mediaCursor.getColumnIndex(getIdIndex());
+                mediaIdList.add(mediaCursor.getString(idIndex));
 
-        }while(mediaCursor.moveToNext());
+            } while (mediaCursor.moveToNext());
+        }
         notifyDataSetChanged();
         activity.loadingComplete();
     }

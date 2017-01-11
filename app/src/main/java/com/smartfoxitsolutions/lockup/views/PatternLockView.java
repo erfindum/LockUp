@@ -1,5 +1,7 @@
 package com.smartfoxitsolutions.lockup.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -343,7 +345,6 @@ public class PatternLockView extends View {
             return this.nodeSelected;
         }
         private Node(){}
-
     }
 
     /**
@@ -439,7 +440,7 @@ public class PatternLockView extends View {
                     finalNode.nodeSelectedBottom = finalNode.nodeTotalRect.bottom-animatedValue ;
                     finalNode.nodeSelectedRect.set(finalNode.nodeSelectedLeft,finalNode.nodeSelectedTop
                                                     ,finalNode.nodeSelectedRight,finalNode.nodeSelectedBottom);
-                    invalidate();
+                    postInvalidateOnAnimation();
                 }
             });
             node.animator = bounceUp;
@@ -454,7 +455,7 @@ public class PatternLockView extends View {
                     finalNode.nodeSelectedRight = finalNode.nodeTotalRect.right-animatedValue ;
                     finalNode.nodeSelectedTop = finalNode.nodeTotalRect.top+animatedValue;
                     finalNode.nodeSelectedBottom = finalNode.nodeTotalRect.bottom-animatedValue ;
-                    invalidate();
+                    postInvalidateOnAnimation();
                 }
             });
             node.animator=bounceUp;
@@ -673,5 +674,11 @@ public class PatternLockView extends View {
         }
 
         return true;
+    }
+
+    public void closePatternView(){
+        for(Node node: nodeList){
+           node.animator.removeAllUpdateListeners();
+        }
     }
 }

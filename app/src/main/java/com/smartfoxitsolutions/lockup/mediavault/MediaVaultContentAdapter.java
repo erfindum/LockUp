@@ -111,20 +111,22 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
     private void setupContent(Cursor mediaCursor){
         activity.loadingStarted();
         mediaCursor.moveToFirst();
-        do{
-            int vaultMediaPathIndex = mediaCursor.getColumnIndex(MediaVaultModel.VAULT_MEDIA_PATH);
-            int originalFileNameIndex = mediaCursor.getColumnIndex(MediaVaultModel.ORIGINAL_FILE_NAME);
-            int fileExtensionIndex = mediaCursor.getColumnIndex(MediaVaultModel.FILE_EXTENSION);
-            int thumbnailPathIndex = mediaCursor.getColumnIndex(MediaVaultModel.THUMBNAIL_PATH);
-            int vaultIdIndex = mediaCursor.getColumnIndex(MediaVaultModel.ID_COLUMN_NAME);
+        if(mediaCursor.getCount()>0) {
+            do {
+                int vaultMediaPathIndex = mediaCursor.getColumnIndex(MediaVaultModel.VAULT_MEDIA_PATH);
+                int originalFileNameIndex = mediaCursor.getColumnIndex(MediaVaultModel.ORIGINAL_FILE_NAME);
+                int fileExtensionIndex = mediaCursor.getColumnIndex(MediaVaultModel.FILE_EXTENSION);
+                int thumbnailPathIndex = mediaCursor.getColumnIndex(MediaVaultModel.THUMBNAIL_PATH);
+                int vaultIdIndex = mediaCursor.getColumnIndex(MediaVaultModel.ID_COLUMN_NAME);
 
-            vaultIdList.add(mediaCursor.getString(vaultIdIndex));
-            vaultMediaPath.add(mediaCursor.getString(vaultMediaPathIndex));
-            originalFileName.add(mediaCursor.getString(originalFileNameIndex));
-            fileExtension.add(mediaCursor.getString(fileExtensionIndex));
-            thumbnailPath.add(mediaCursor.getString(thumbnailPathIndex));
+                vaultIdList.add(mediaCursor.getString(vaultIdIndex));
+                vaultMediaPath.add(mediaCursor.getString(vaultMediaPathIndex));
+                originalFileName.add(mediaCursor.getString(originalFileNameIndex));
+                fileExtension.add(mediaCursor.getString(fileExtensionIndex));
+                thumbnailPath.add(mediaCursor.getString(thumbnailPathIndex));
+            }
+            while (mediaCursor.moveToNext());
         }
-        while(mediaCursor.moveToNext());
         activity.loadingComplete();
     }
 
@@ -165,7 +167,7 @@ public class MediaVaultContentAdapter extends RecyclerView.Adapter<RecyclerView.
         MediaVaultContentHolder mediaHolder = (MediaVaultContentHolder) holder;
         if(currentFile.exists()) {
             currentFile.renameTo(currentRenameFile);
-            Glide.with(activity.getBaseContext()).load(currentRenameFile).placeholder(getPlaceHolderImages())
+            Glide.with(activity).load(currentRenameFile).placeholder(getPlaceHolderImages())
                     .error(getPlaceHolderImages()).override(getItemSize(), getItemSize())
                     .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                     .into(mediaHolder.getThumbnailView());

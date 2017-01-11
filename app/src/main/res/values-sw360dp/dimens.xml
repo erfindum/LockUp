@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="vault_album_item_size">165dp</dimen>
+    <dimen name="vault_album_item_width">165dp</dimen>
+    <dimen name="vault_album_item_height">195dp</dimen>
     <dimen name="vault_album_thumbnail_width">155dp</dimen>
-    <dimen name="vault_album_thumbnail_height">115dp</dimen>
+    <dimen name="vault_album_thumbnail_height">155dp</dimen>
     <dimen name="vault_album_content_item_size">113dp</dimen>
     <dimen name="vault_album_item_text_width">145dp</dimen>
 
-    <dimen name="main_activity_lock_icon_size">160dp</dimen>
-    <dimen name="main_activity_lock_icon_size_pressed">150dp</dimen>
+    <dimen name="main_activity_lock_icon_size">190dp</dimen>
 
     <dimen name="native_ad_image_width">240dp</dimen>
     <dimen name="native_ad_image_height">130dp</dimen>

@@ -21,6 +21,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
@@ -355,6 +356,10 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
             isConfigChanged = false;
     }
 
+    private WeakReference<VaultAudioPlayerActivity> getWeakReference(){
+        return new WeakReference<>(this);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -370,14 +375,12 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
             audioPlayer.reset();
             audioPlayer.setDataSource(vaultFileList.get(currentPosition) + "." + fileExtensionList.get(currentPosition));
             audioPlayer.prepareAsync();
-        }catch (IOException e){
+        }catch (IOException |IllegalStateException e){
             e.printStackTrace();
-        }catch (IllegalStateException f){
-            f.printStackTrace();
         }
         setTitleText(currentPosition);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        audioPlayerScreenOffReceiver = new AudioPlayerScreenOffReceiver(new WeakReference<>(this));
+        audioPlayerScreenOffReceiver = new AudioPlayerScreenOffReceiver(getWeakReference());
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         registerReceiver(audioPlayerScreenOffReceiver,filter);
     }
@@ -398,7 +401,7 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
     void loadAlbumArt(int position){
         Uri uri = Uri.fromFile(new File(vaultFileList.get(position)
                 +"."+fileExtensionList.get(position)));
-        Glide.with(this).load(new AlbumArtModel(uri,this.getBaseContext()))
+        Glide.with(this).load(new AlbumArtModel(uri,this))
                 .placeholder(placeholder).error(placeholder).centerCrop().crossFade().skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.NONE).override(imageViewWidth,imageViewHeight)
                 .into(albumArtView);
@@ -459,7 +462,7 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
             fileExtensionList = null;
             originalFileNameList = null;
             vaultFileList = null;
-            finishAffinity();
+            finishActivityAffinity();
         }
     }
 
@@ -487,6 +490,27 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
         unregisterReceiver(audioPlayerScreenOffReceiver);
     }
 
+    private void finishActivityAffinity(){
+        Glide.get(this).clearMemory();
+        new Thread(new ClearAudioCacheTask(getWeakReference())).start();
+        finishAffinity();
+    }
+
+    static class ClearAudioCacheTask implements Runnable
+    {
+        WeakReference<VaultAudioPlayerActivity> activityWeakReference;
+        ClearAudioCacheTask(WeakReference<VaultAudioPlayerActivity> activityReference){
+            this.activityWeakReference = activityReference;
+        }
+
+        @Override
+        public void run() {
+            Log.d("CacheVault","Clear Audio Cache Started " + System.currentTimeMillis());
+            Glide.get(activityWeakReference.get()).clearDiskCache();
+            Log.d("CacheVault","Clear Audio Cache Complete " + System.currentTimeMillis());
+        }
+    }
+
     static class AudioPlayerScreenOffReceiver extends BroadcastReceiver {
 
         WeakReference<VaultAudioPlayerActivity> activity;
@@ -497,7 +521,7 @@ public class VaultAudioPlayerActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
-                activity.get().finishAffinity();
+                activity.get().finishActivityAffinity();
             }
         }
     }

@@ -39,6 +39,7 @@ import com.mopub.nativeads.MoPubStaticNativeAdRenderer;
 import com.mopub.nativeads.NativeAd;
 import com.mopub.nativeads.NativeErrorCode;
 import com.mopub.nativeads.ViewBinder;
+import com.mopub.network.Networking;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.DimensionConverter;
 import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
@@ -53,7 +54,7 @@ import java.security.NoSuchAlgorithmException;
  * Created by RAAJA on 26-10-2016.
  */
 
-public class LockPinViewFinger extends FrameLayout implements View.OnClickListener{
+public class LockPinViewFinger extends FrameLayout implements View.OnClickListener,MoPubNative.MoPubNativeNetworkListener{
     Context context;
 
     private ImageView appIconView;
@@ -72,6 +73,8 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
     private boolean isFingerPrintActive;
     int noOfAttempts,noOfNoisyAttempts;
     private ValueAnimator animatorFingerError,animatorMain;
+    private MoPubNative mMoPubNative;
+    private NativeAd moPubNativeAd;
 
     private String selectedPin,pinPassCode,salt;
     private int pinDigitCount;
@@ -233,6 +236,10 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
         clear_pin_button.setOnClickListener(null);
         fingerPrintSwitchButton.setOnClickListener(null);
         pinPatternSwitchButton.setOnClickListener(null);
+        appIconView.setImageDrawable(null);
+        if (moPubNativeAd != null) {
+            moPubNativeAd.setMoPubNativeEventListener(null);
+        }
     }
 
 
@@ -771,39 +778,8 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
     }
 
     void initAds(){
-        MoPubNative.MoPubNativeNetworkListener moPubNativeListener = new MoPubNative.MoPubNativeNetworkListener() {
-            @Override
-            public void onNativeLoad(NativeAd nativeAd) {
-                Log.d("LockUpMopub","Called onNativeLoad Finger");
-                if(context!=null) {
-                    View adViewRender = nativeAd.createAdView(context, null);
-                    addRenderedAd(adViewRender);
-                    nativeAd.renderAdView(adViewRender);
-                    nativeAd.prepare(adViewRender);
-                    nativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
-                        @Override
-                        public void onImpression(View view) {
-
-                        }
-
-                        @Override
-                        public void onClick(View view) {
-
-                            postPinCompleted();
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onNativeFail(NativeErrorCode errorCode) {
-                Log.d("LockUpMopub",errorCode+ " errorcode");
-            }
-
-        };
-
-        MoPubNative mMoPubNative = new MoPubNative(context
-                ,getResources().getString(R.string.pin_lock_activity_ad_unit_id),moPubNativeListener);
+        mMoPubNative = new MoPubNative(context
+                ,getResources().getString(R.string.pin_lock_activity_ad_unit_id),this);
 
         ViewBinder viewBinder = new ViewBinder.Builder(R.layout.native_ad_sample)
                 .mainImageId(R.id.native_ad_main_image)
@@ -816,6 +792,34 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
 
         mMoPubNative.registerAdRenderer(adRenderer);
         mMoPubNative.makeRequest();
+    }
+
+    @Override
+    public void onNativeLoad(NativeAd nativeAd) {
+        Log.d("LockUpMopub","Called onNativeLoad Finger");
+        moPubNativeAd = nativeAd;
+        if(context!=null) {
+            View adViewRender = moPubNativeAd.createAdView(context, null);
+            addRenderedAd(adViewRender);
+            moPubNativeAd.renderAdView(adViewRender);
+            moPubNativeAd.prepare(adViewRender);
+            moPubNativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
+                @Override
+                public void onImpression(View view) {
+
+                }
+
+                @Override
+                public void onClick(View view) {
+                    postPinCompleted();
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onNativeFail(NativeErrorCode errorCode) {
+        Log.d("LockUpMopub",errorCode+ " errorcode");
     }
 
     void addRenderedAd(View adView){
@@ -990,18 +994,6 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        Log.d("AppLock","Called onMeasure");
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        Log.d("AppLock","Called OnLayout");
-    }
-
-    @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if(event.getAction()!=KeyEvent.ACTION_UP && event.getKeyCode() != KeyEvent.KEYCODE_BACK) {
             return super.dispatchKeyEvent(event);
@@ -1012,6 +1004,7 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
 
     public void removeView(){
         unregisterListeners();
+        mMoPubNative.destroy();
         setPinLockUnlockListener(null);
         if(cancelSignal!=null && !cancelSignal.isCanceled()){
             cancelSignal.cancel();

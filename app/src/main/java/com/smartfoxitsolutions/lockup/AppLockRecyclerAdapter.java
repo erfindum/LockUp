@@ -166,58 +166,30 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             headerView.getHeaderText().setText(R.string.appLock_activity_additional_settings_header);
         }
         else if(getItemPositionRange(position)==ITEM_POSITION_RANGE_RECOMMENDED_APPS){
+            AppLockRecyclerViewItem itemView = (AppLockRecyclerViewItem) holder;
+            int listPosition = position - getHeaderOneSize();
             if(Build.VERSION.SDK_INT<Build.VERSION_CODES.JELLY_BEAN_MR2){
-                AppLockRecyclerViewItem itemView = (AppLockRecyclerViewItem) holder;
-                int listPosition = position - getHeaderOneSize();
-                if (listPosition == 0) {
-                    itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
-                    if(AppLockActivity.isDeviceAdminEnabled){
-                        itemView.getAppImage().setImageDrawable(null);
-                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion_selected);
-                        changeLockButtonImage(itemView.getLockButton(), true);
-                    }else{
-                        itemView.getAppImage().setImageDrawable(null);
-                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion);
-                        changeLockButtonImage(itemView.getLockButton(), false);
-                    }
-
+                try {
+                    itemView.getAppImage().setBackgroundResource(0);
+                    Drawable appIcon = packageManager.getApplicationIcon(recommendedAppPackageList.get(listPosition));
+                    itemView.getAppImage().setImageDrawable(appIcon);
+                } catch (PackageManager.NameNotFoundException e){
+                    e.printStackTrace();
+                }
+                itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
+                if (recommendedAppLocked.get(listPosition)) {
+                    changeLockButtonImage(itemView.getLockButton(), true);
                 } else {
-                    try {
-                        itemView.getAppImage().setBackgroundResource(0);
-                        Drawable appIcon = packageManager.getApplicationIcon(recommendedAppPackageList.get(listPosition));
-                        itemView.getAppImage().setImageDrawable(appIcon);
-                    } catch (PackageManager.NameNotFoundException e){
-                        e.printStackTrace();
-                    }
-                    itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
-                    if (recommendedAppLocked.get(listPosition)) {
-                        changeLockButtonImage(itemView.getLockButton(), true);
-                    } else {
-                        changeLockButtonImage(itemView.getLockButton(), false);
-                    }
+                    changeLockButtonImage(itemView.getLockButton(), false);
                 }
             }else {
-                AppLockRecyclerViewItem itemView = (AppLockRecyclerViewItem) holder;
-                int listPosition = position - getHeaderOneSize();
                 if (listPosition == 0) {
                     itemView.getAppImage().setImageDrawable(null);
                     itemView.getAppImage().setBackgroundResource(R.drawable.ic_app_lock_activity_main_hide_notif);
                     itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
                     itemView.getLockButton().setImageResource(0);
                     itemView.getLockButton().setImageResource(R.drawable.ic_app_lock_activity_notif_navigation);
-                } else if (listPosition == 1) {
-                    itemView.getAppName().setText(recommendedAppLockedName.get(listPosition));
-                    if(AppLockActivity.isDeviceAdminEnabled){
-                        itemView.getAppImage().setImageDrawable(null);
-                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion_selected);
-                        changeLockButtonImage(itemView.getLockButton(), true);
-
-                    }else{
-                        itemView.getAppImage().setImageDrawable(null);
-                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion);
-                        changeLockButtonImage(itemView.getLockButton(), false);
-                    }
-                } else {
+                }else {
                     try {
                         itemView.getAppImage().setBackgroundResource(0);
                         Drawable appIcon = packageManager.getApplicationIcon(recommendedAppPackageList.get(listPosition));
@@ -366,52 +338,28 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public void onAppListItemClicked(AppLockRecyclerViewItem itemView, int listItemPosition) {
-
+        if(!AppLockActivity.shouldStartAppLock){
+            activity.startAppLockSwitchOnDialog();
+            return;
+        }
         if(getItemPositionRange(listItemPosition)==ITEM_POSITION_RANGE_RECOMMENDED_APPS){
             int listPosition = listItemPosition-getHeaderOneSize();
-            if(!AppLockActivity.shouldStartAppLock){
-                activity.startAppLockSwitchOnDialog();
-                return;
-            }
             if(Build.VERSION.SDK_INT<Build.VERSION_CODES.JELLY_BEAN_MR2){
                 AppCompatImageButton lockButton = itemView.getLockButton();
                 boolean val = recommendedAppLocked.get(listPosition);
-                if(listPosition == 0) {
-                    if (AppLockActivity.isDeviceAdminEnabled) {
-                        itemView.getLockButtonAnimator().start();
-                        changeLockButtonImage(lockButton, false);
-                        DevicePolicyManager manager = (DevicePolicyManager) activity.getSystemService(Context.DEVICE_POLICY_SERVICE);
-                        manager.removeActiveAdmin(new ComponentName(activity,PreventUninstallReceiver.class));
-                        itemView.getAppImage().setImageDrawable(null);
-                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion);
-                    } else {
-                        itemView.getLockButtonAnimator().start();
-                        changeLockButtonImage(lockButton, true);
-                        Intent enableDeviceIntent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-                        ComponentName componentName = new ComponentName(activity,PreventUninstallReceiver.class);
-                        enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName);
-                        enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                                activity.getResources().getString(R.string.appLock_activity_prevent_uninstall_message_text));
-                        activity.startActivity(enableDeviceIntent);
-                        activity.shouldTrackUserPresence = false;
-                        itemView.getAppImage().setImageDrawable(null);
-                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion_selected);
-                    }
+                if(val){
+                    activity.startRecommendedAlertDialog(itemView,listPosition);
+                    return;
                 }
                 else{
-                    if(val){
-                        activity.startRecommendedAlertDialog(itemView,listPosition);
-                        return;
+                    itemView.getLockButtonAnimator().start();
+                    changeLockButtonImage(lockButton, true);
+                    HashMap<String,Boolean> recommendTempMap = new HashMap<>();
+                    recommendTempMap.put(recommendedAppLockedName.get(listPosition),true);
+                    recommendedAppsMap.put(recommendedAppPackageList.get(listPosition), recommendTempMap);
+                    recommendedAppLocked.set(listPosition,true);
                     }
-                    else{
-                        itemView.getLockButtonAnimator().start();
-                        changeLockButtonImage(lockButton, true);
-                        HashMap<String,Boolean> recommendTempMap = new HashMap<>();
-                        recommendTempMap.put(recommendedAppLockedName.get(listPosition),true);
-                        recommendedAppsMap.put(recommendedAppPackageList.get(listPosition), recommendTempMap);
-                        recommendedAppLocked.set(listPosition,true);
-                    }
-                }
+
             }else {
                 if(listPosition == 0){
                     if(NotificationLockService.isNotificationServiceConnected) {
@@ -427,49 +375,21 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 }
                 boolean val = recommendedAppLocked.get(listPosition);
                 AppCompatImageButton lockButton = itemView.getLockButton();
-                if(listPosition == 1) {
-                    if (AppLockActivity.isDeviceAdminEnabled) {
-                        itemView.getLockButtonAnimator().start();
-                        changeLockButtonImage(lockButton, false);
-                        DevicePolicyManager manager = (DevicePolicyManager) activity.getSystemService(Context.DEVICE_POLICY_SERVICE);
-                        manager.removeActiveAdmin(new ComponentName(activity,PreventUninstallReceiver.class));
-                        itemView.getAppImage().setImageDrawable(null);
-                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion);
-                    } else {
-                        itemView.getLockButtonAnimator().start();
-                        changeLockButtonImage(lockButton, true);
-                        Intent enableDeviceIntent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-                        ComponentName componentName = new ComponentName(activity,PreventUninstallReceiver.class);
-                        enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName);
-                        enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                                activity.getResources().getString(R.string.appLock_activity_prevent_uninstall_message_text));
-                        activity.startActivity(enableDeviceIntent);
-                        activity.shouldTrackUserPresence = false;
-                        itemView.getAppImage().setImageDrawable(null);
-                        itemView.getAppImage().setBackgroundResource(R.drawable.ic_uninstall_prevetion_selected);
-                    }
+                if(val){
+                    activity.startRecommendedAlertDialog(itemView,listPosition);
+                    return;
                 }
-                else {
-                    if(val){
-                            activity.startRecommendedAlertDialog(itemView,listPosition);
-                        return;
-                    }
-                    else{
-                        itemView.getLockButtonAnimator().start();
-                        changeLockButtonImage(lockButton, true);
-                        HashMap<String,Boolean> recommendTempMap = new HashMap<>();
-                        recommendTempMap.put(recommendedAppLockedName.get(listPosition),true);
-                        recommendedAppsMap.put(recommendedAppPackageList.get(listPosition), recommendTempMap);
-                        recommendedAppLocked.set(listPosition,true);
-                    }
+                else{
+                    itemView.getLockButtonAnimator().start();
+                    changeLockButtonImage(lockButton, true);
+                    HashMap<String,Boolean> recommendTempMap = new HashMap<>();
+                    recommendTempMap.put(recommendedAppLockedName.get(listPosition),true);
+                    recommendedAppsMap.put(recommendedAppPackageList.get(listPosition), recommendTempMap);
+                    recommendedAppLocked.set(listPosition,true);
                 }
             }
         }
         else if(!checkedAppsPackage.isEmpty() && getItemPositionRange(listItemPosition)==ITEM_POSITION_RANGE_CHECKED_APPS){
-            if(!AppLockActivity.shouldStartAppLock){
-                activity.startAppLockSwitchOnDialog();
-                return;
-            }
             int listPosition = listItemPosition-getHeaderTwoSize();
             AppCompatImageButton lockButton = itemView.getLockButton();
             if(checkedAppsMap.containsKey(checkedAppsPackage.get(listPosition))) {
@@ -487,14 +407,8 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 checkedAppsMap.put(checkedAppsPackage.get(listPosition),checkedAppsName.get(listPosition));
                 installedAppsMap.remove(checkedAppsPackage.get(listPosition));
             }
-            LockUpMainActivity.installedAppsCount = installedAppsMap.size();
-            LockUpMainActivity.lockedAppsCount = checkedAppsMap.size();
         }
         else if (!installedAppsPackage.isEmpty() && getItemPositionRange(listItemPosition)==ITEM_POSITION_RANGE_INSTALLED_APPS){
-            if(!AppLockActivity.shouldStartAppLock){
-                activity.startAppLockSwitchOnDialog();
-                return;
-            }
             int listPosition = listItemPosition-getHeaderThreeSize();
             AppCompatImageButton lockButton = itemView.getLockButton();
             if(installedAppsMap.containsKey(installedAppsPackage.get(listPosition))) {
@@ -508,8 +422,6 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 installedAppsMap.put(installedAppsPackage.get(listPosition),installedAppsName.get(listPosition));
                 checkedAppsMap.remove(installedAppsPackage.get(listPosition));
             }
-            LockUpMainActivity.installedAppsCount = installedAppsMap.size();
-            LockUpMainActivity.lockedAppsCount = checkedAppsMap.size();
             Log.d(TAG," Item count " + getItemCount() +" "+ installedAppsMap.size()+" "+ checkedAppsMap.size());
         }
     }

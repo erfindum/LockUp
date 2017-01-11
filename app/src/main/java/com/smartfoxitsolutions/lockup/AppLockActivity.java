@@ -41,7 +41,7 @@ public class AppLockActivity extends AppCompatActivity {
     private static final String START_APP_LOG_DIALOG_TAG = "start_app_lock_dialog";
     public static final String APP_LOCK_FIRST_START_PREFERENCE_KEY = "app_lock_first_start";
 
-    public static boolean shouldStartAppLock,isDeviceAdminEnabled;
+    public static boolean shouldStartAppLock;
     boolean shouldCloseAffinity;
     boolean shouldTrackUserPresence;
 
@@ -73,7 +73,6 @@ public class AppLockActivity extends AppCompatActivity {
         displayRecyclerView();
         prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, MODE_PRIVATE);
         boolean isAppLockFirstStart = prefs.getBoolean(APP_LOCK_FIRST_START_PREFERENCE_KEY,true);
-        isDeviceAdminEnabled = prefs.getBoolean(LockUpSettingsActivity.DEVICE_ADMIN_PREFERENCE_KEY,false);
         if(isAppLockFirstStart){
             shouldStartAppLock = true;
             SharedPreferences.Editor edit = prefs.edit();
@@ -94,7 +93,6 @@ public class AppLockActivity extends AppCompatActivity {
     }
 
     void calculateMarginHeader(){
-       DisplayMetrics metrices =  getResources().getDisplayMetrics();
         AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_TEN = Math.round(getResources().getDimension(R.dimen.app_lock_header_margin_left));
         AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_FIFTEEN = Math.round(getResources().getDimension(R.dimen.app_lock_header_margin_top));
         AppLockRecyclerAdapter.HEADER_MARGIN_SIZE_MINUS_SEVEN = Math.round(getResources()

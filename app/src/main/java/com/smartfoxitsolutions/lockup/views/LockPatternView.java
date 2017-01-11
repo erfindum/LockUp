@@ -44,7 +44,8 @@ import java.security.NoSuchAlgorithmException;
  * Created by RAAJA on 06-10-2016.
  */
 
-public class LockPatternView extends FrameLayout implements PatternLockView.OnPatternChangedListener{
+public class LockPatternView extends FrameLayout implements PatternLockView.OnPatternChangedListener,MoPubNative.MoPubNativeNetworkListener
+                ,NativeAd.MoPubNativeEventListener{
     Context context;
     private OnPinLockUnlockListener patternLockListener;
     PatternLockView patternView;
@@ -54,8 +55,11 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
     boolean isVibratorEnabled, shouldHidePatternLine;
     Vibrator patternViewVibrator;
     ValueAnimator patternAnimator;
-    private RelativeLayout patternViewParent;
+    private RelativeLayout patternViewParent, patternAdParent;
     private RectF patternRect;
+    private NativeAd moPubNativeAd;
+    private View nativeAdView;
+
 
     public LockPatternView(Context context, OnPinLockUnlockListener patternLockListener) {
         super(context);
@@ -64,7 +68,8 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         LayoutInflater.from(context).inflate(R.layout.pattern_lock_activity,this,true);
         patternViewParent = (RelativeLayout) findViewById(R.id.pattern_lock_activity_parent_view);
         patternViewVibrator= (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-        initAds();
+        patternAdParent = (RelativeLayout) findViewById(R.id.pattern_lock_activity_ad_parent);
+        //initAds();
         initializeLockView();
     }
 
@@ -144,6 +149,12 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
 
     void unRegisterListeners(){
         patternView.setOnPatternChangedListener(null);
+        patternViewParent.setOnTouchListener(null);
+        patternAnimator.removeAllUpdateListeners();
+        if(moPubNativeAd!=null){
+            moPubNativeAd.setMoPubNativeEventListener(null);
+        }
+        appIconView.setImageDrawable(null);
     }
 
     @Override
@@ -176,37 +187,8 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
     }
 
     void initAds(){
-        MoPubNative.MoPubNativeNetworkListener moPubNativeListener = new MoPubNative.MoPubNativeNetworkListener() {
-            @Override
-            public void onNativeLoad(NativeAd nativeAd) {
-                Log.d("LockUpMopub","Called onNativeLoad Finger");
-                if(context!=null) {
-                    View adViewRender = nativeAd.createAdView(context, null);
-                    addRenderedAd(adViewRender);
-                    nativeAd.renderAdView(adViewRender);
-                    nativeAd.prepare(adViewRender);
-                    nativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
-                        @Override
-                        public void onImpression(View view) {
-                        }
-
-                        @Override
-                        public void onClick(View view) {
-                            postPatternCompleted();
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onNativeFail(NativeErrorCode errorCode) {
-                Log.d("LockUpMopub",errorCode+ " errorcode");
-            }
-
-        };
-
-        MoPubNative mMoPubNative = new MoPubNative(context
-                ,getResources().getString(R.string.pin_lock_activity_ad_unit_id),moPubNativeListener);
+       /* mMoPubNative = new MoPubNative(context
+                ,getResources().getString(R.string.pin_lock_activity_ad_unit_id),this);
 
         ViewBinder viewBinder = new ViewBinder.Builder(R.layout.native_ad_sample)
                 .mainImageId(R.id.native_ad_main_image)
@@ -218,16 +200,52 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         MoPubStaticNativeAdRenderer adRenderer = new MoPubStaticNativeAdRenderer(viewBinder);
 
         mMoPubNative.registerAdRenderer(adRenderer);
-        mMoPubNative.makeRequest();
+        mMoPubNative.makeRequest(); */
     }
 
-    void addRenderedAd(View adView){
-        int marginTop = Math.round(DimensionConverter.convertDpToPixel(20f,context.getApplicationContext()));
-        FrameLayout.LayoutParams parms = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT
-                , ViewGroup.LayoutParams.WRAP_CONTENT);
-        parms.topMargin = marginTop;
-        parms.gravity = Gravity.TOP|Gravity.CENTER;
-        this.addView(adView,parms);
+    @Override
+    public void onNativeLoad(NativeAd nativeAd) {
+      /*  moPubNativeAd = nativeAd;
+        if(context!=null) {
+            View adViewRender = moPubNativeAd.createAdView(context, null);
+            addRenderedAd(adViewRender);
+            nativeAd.renderAdView(adViewRender);
+            nativeAd.prepare(adViewRender);
+            nativeAd.setMoPubNativeEventListener(this);
+        } */
+    }
+
+    @Override
+    public void onNativeFail(NativeErrorCode errorCode) {
+       // Log.d("LockUpMopub",errorCode+ " errorcode");
+    }
+
+    public void addRenderedAd(View adView, NativeAd nativeAd){
+        if(adView !=null && nativeAd != null) {
+            nativeAdView = adView;
+            moPubNativeAd = nativeAd;
+            RelativeLayout.LayoutParams parms = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT
+                    , ViewGroup.LayoutParams.WRAP_CONTENT);
+            parms.addRule(RelativeLayout.CENTER_IN_PARENT);
+            patternAdParent.addView(nativeAdView, parms);
+            moPubNativeAd.renderAdView(adView);
+            moPubNativeAd.prepare(adView);
+            moPubNativeAd.setMoPubNativeEventListener(this);
+        }
+    }
+
+    @Override
+    public void onImpression(View view) {
+        if(patternLockListener!=null){
+            patternLockListener.onAdImpressed();
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        if(patternLockListener!=null){
+            patternLockListener.onAdClicked();
+        }
     }
 
     @Override
@@ -286,7 +304,9 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
     }
 
     private void postPatternCompleted(){
-        patternLockListener.onPinUnlocked();
+        if(patternLockListener!=null) {
+            patternLockListener.onPinUnlocked();
+        }
     }
 
     void startHome(){
@@ -305,18 +325,15 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
         return true;
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-    }
-
     public void removeView(){
         unRegisterListeners();
+        patternView.closePatternView();
+        if(nativeAdView!=null) {
+            patternAdParent.removeView(nativeAdView);
+        }
+        nativeAdView = null;
+        moPubNativeAd = null;
+       // mMoPubNative.destroy();
         setPinLockUnlockListener(null);
         context = null;
     }

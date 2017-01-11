@@ -106,7 +106,7 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
             String selection = MediaVaultModel.MEDIA_TYPE+"=?";
             String[] selectionArgs = {getMediaCursorType(getMediaType())};
             String mediaOrderBy = MediaVaultModel.VAULT_BUCKET_ID + " COLLATE NOCASE";
-            return   new VaultDbCursorLoader(getContext(),1,mediaProjection
+            return   new VaultDbCursorLoader(activity.getBaseContext(),1,mediaProjection
                     ,selection,selectionArgs,mediaOrderBy);
         }
         if(id == 39){
@@ -115,7 +115,7 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
             String selection = MediaVaultModel.MEDIA_TYPE+"=?";
             String[] selectionArgs = {getMediaCursorType(getMediaType())};
             String mediaOrderBy = MediaVaultModel.VAULT_BUCKET_ID + " COLLATE NOCASE";
-            return   new VaultDbCursorLoader(getContext(),1,mediaProjection
+            return   new VaultDbCursorLoader(activity.getBaseContext(),1,mediaProjection
                     ,selection,selectionArgs,mediaOrderBy);
         }
         if(id == 40){
@@ -124,7 +124,7 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
             String selection = MediaVaultModel.MEDIA_TYPE+"=?";
             String[] selectionArgs = {getMediaCursorType(getMediaType())};
             String mediaOrderBy = MediaVaultModel.VAULT_BUCKET_ID + " COLLATE NOCASE";
-            return   new VaultDbCursorLoader(getContext(),1,mediaProjection
+            return   new VaultDbCursorLoader(activity.getBaseContext(),1,mediaProjection
                     ,selection,selectionArgs,mediaOrderBy);
         }
         loadingStarted();

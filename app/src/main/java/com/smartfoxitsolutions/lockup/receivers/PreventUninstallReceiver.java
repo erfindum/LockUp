@@ -21,7 +21,7 @@ public class PreventUninstallReceiver extends DeviceAdminReceiver {
         super.onEnabled(context, intent);
         context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE)
                 .edit().putBoolean(LockUpSettingsActivity.DEVICE_ADMIN_PREFERENCE_KEY,true).apply();
-        AppLockActivity.isDeviceAdminEnabled = true;
+        LockUpSettingsActivity.isPreventUninstallEnabled = true;
         Log.d("LockupDevice","DeviceAdminEnabled");
     }
 
@@ -30,7 +30,7 @@ public class PreventUninstallReceiver extends DeviceAdminReceiver {
         super.onDisabled(context, intent);
         context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE)
                 .edit().putBoolean(LockUpSettingsActivity.DEVICE_ADMIN_PREFERENCE_KEY,false).apply();
-        AppLockActivity.isDeviceAdminEnabled = false;
+        LockUpSettingsActivity.isPreventUninstallEnabled = false;
         Log.d("LockupDevice","DeviceAdminDisabled");
     }
 

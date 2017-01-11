@@ -22,8 +22,10 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 
+import com.bumptech.glide.Glide;
 import com.smartfoxitsolutions.lockup.LockUpMainActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.ExternalStoragePermissionDialog;
@@ -251,10 +253,14 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         }
     }
 
+    private WeakReference<MediaVaultAlbumActivity> getWeakReference(){
+        return new WeakReference<>(this);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        vaultAlbumScreenOffReceiver = new VaultAlbumScreenOffReceiver(new WeakReference<>(this));
+        vaultAlbumScreenOffReceiver = new VaultAlbumScreenOffReceiver(getWeakReference());
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         registerReceiver(vaultAlbumScreenOffReceiver,filter);
     }
@@ -271,10 +277,16 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        Glide.get(this).trimMemory(level);
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         if(shouldCloseAffinity){
-            finishAffinity();
+           finishActivityAffinity();
         }
         if(!shouldTrackUserPresence){
             unregisterReceiver(vaultAlbumScreenOffReceiver);
@@ -298,6 +310,27 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
+    private void finishActivityAffinity(){
+        Glide.get(this).clearMemory();
+        new Thread(new ClearVaultAlbumCacheTask(getWeakReference())).start();
+        finishAffinity();
+    }
+
+    static class ClearVaultAlbumCacheTask implements Runnable
+    {
+        WeakReference<MediaVaultAlbumActivity> activityWeakReference;
+        ClearVaultAlbumCacheTask(WeakReference<MediaVaultAlbumActivity> activityReference){
+            this.activityWeakReference = activityReference;
+        }
+
+        @Override
+        public void run() {
+            Log.d("CacheVault","Clear Vault Album Cache Started " + System.currentTimeMillis());
+            Glide.get(activityWeakReference.get()).clearDiskCache();
+            Log.d("CacheVault","Clear Vault Album Cache Complete " + System.currentTimeMillis());
+        }
+    }
+
     static class VaultAlbumScreenOffReceiver extends BroadcastReceiver {
 
         WeakReference<MediaVaultAlbumActivity> activity;
@@ -308,7 +341,7 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
-                activity.get().finishAffinity();
+                activity.get().finishActivityAffinity();
             }
         }
     }

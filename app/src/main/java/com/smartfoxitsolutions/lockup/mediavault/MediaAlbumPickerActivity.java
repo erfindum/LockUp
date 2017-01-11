@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -19,12 +17,12 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.smartfoxitsolutions.lockup.AppLoaderActivity;
-import com.smartfoxitsolutions.lockup.AppLockModel;
+import com.bumptech.glide.Glide;
 import com.smartfoxitsolutions.lockup.R;
 
 import java.lang.ref.WeakReference;
@@ -97,11 +95,14 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
         noOfColumns = displayWidth/itemWidth;
     }
 
+    private WeakReference<MediaAlbumPickerActivity> getWeakReference(){
+        return new WeakReference<>(this);
+    }
 
     @Override
     protected void onStart() {
         super.onStart();
-        albumPickerScreenOffReceiver = new AlbumPickerScreenOffReceiver(new WeakReference<>(this));
+        albumPickerScreenOffReceiver = new AlbumPickerScreenOffReceiver(getWeakReference());
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         registerReceiver(albumPickerScreenOffReceiver,filter);
     }
@@ -220,6 +221,12 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
     }
 
     @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        Glide.get(this).trimMemory(level);
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         if(shouldCloseAffinity){
@@ -227,7 +234,7 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
                 mediaAdapter.closeResources();
                 mediaAdapter = null;
             }
-            finishAffinity();
+            finishActivityAffinity();
         }
         if(!shouldTrackUserPresence){
             unregisterReceiver(albumPickerScreenOffReceiver);
@@ -246,6 +253,27 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
         }
     }
 
+    private void finishActivityAffinity(){
+        Glide.get(this).clearMemory();
+        new Thread(new ClearAlbumPickerCacheTask(getWeakReference())).start();
+        finishAffinity();
+    }
+
+    static class ClearAlbumPickerCacheTask implements Runnable
+    {
+        WeakReference<MediaAlbumPickerActivity> activityWeakReference;
+        ClearAlbumPickerCacheTask(WeakReference<MediaAlbumPickerActivity> activityReference){
+            this.activityWeakReference = activityReference;
+        }
+
+        @Override
+        public void run() {
+            Log.d("CacheVault","Clear Album Picker Cache Started "+ System.currentTimeMillis());
+            Glide.get(activityWeakReference.get()).clearDiskCache();
+            Log.d("CacheVault","Clear Album Picker Cache Complete "+ System.currentTimeMillis());
+        }
+    }
+
     static class AlbumPickerScreenOffReceiver extends BroadcastReceiver {
 
         WeakReference<MediaAlbumPickerActivity> activity;
@@ -256,7 +284,7 @@ public class MediaAlbumPickerActivity extends AppCompatActivity implements Loade
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
-                activity.get().finishAffinity();
+                activity.get().finishActivityAffinity();
             }
         }
     }

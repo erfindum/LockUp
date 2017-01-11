@@ -22,12 +22,14 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.smartfoxitsolutions.lockup.DimensionConverter;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.MediaDeleteDialog;
@@ -280,7 +282,7 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
             String[] mediaSelectionArgs = {getMediaCursorType(getMediaType()),getBucketId()};
             String mediaOrderBy = MediaVaultModel.VAULT_FILE_NAME+ " DESC";
             loadingStarted();
-            return new VaultDbCursorLoader(getApplicationContext(),1,mediaProjection,mediaSelection
+            return new VaultDbCursorLoader(getBaseContext(),1,mediaProjection,mediaSelection
                                         ,mediaSelectionArgs,mediaOrderBy);
         }
         return null;
@@ -361,10 +363,14 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
         }
     }
 
+    private WeakReference<MediaVaultContentActivity> getWeakReference(){
+        return new WeakReference<>(this);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        vaultContentScreenOffReceiver = new VaultContentScreenOffReceiver(new WeakReference<>(this));
+        vaultContentScreenOffReceiver = new VaultContentScreenOffReceiver(getWeakReference());
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         registerReceiver(vaultContentScreenOffReceiver,filter);
     }
@@ -378,13 +384,19 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
     }
 
     @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        Glide.get(this).trimMemory(level);
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         if(shouldCloseAffinity){
             if(mediaContentAdapter !=null){
                 mediaContentAdapter.closeAdapter();
             }
-            finishAffinity();
+           finishActivityAffinity();
         }
         if(!shouldTrackUserPresence){
             unregisterReceiver(vaultContentScreenOffReceiver);
@@ -402,6 +414,27 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
         }
     }
 
+    private void finishActivityAffinity(){
+        Glide.get(this).clearMemory();
+        new Thread(new ClearVaultContentCacheTask(getWeakReference())).start();
+        finishAffinity();
+    }
+
+    static class ClearVaultContentCacheTask implements Runnable
+    {
+        WeakReference<MediaVaultContentActivity> activityWeakReference;
+        ClearVaultContentCacheTask(WeakReference<MediaVaultContentActivity> activityReference){
+            this.activityWeakReference = activityReference;
+        }
+
+        @Override
+        public void run() {
+            Log.d("CacheVault","Clear Vault Content Cache Started "+ System.currentTimeMillis());
+            Glide.get(activityWeakReference.get()).clearDiskCache();
+            Log.d("CacheVault","Clear Vault Content Cache Complete "+ System.currentTimeMillis());
+        }
+    }
+
     static class VaultContentScreenOffReceiver extends BroadcastReceiver {
 
         WeakReference<MediaVaultContentActivity> activity;
@@ -412,7 +445,7 @@ public class MediaVaultContentActivity extends AppCompatActivity implements Load
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
-                activity.get().finishAffinity();
+                activity.get().finishActivityAffinity();
             }
         }
     }

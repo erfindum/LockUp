@@ -181,26 +181,14 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
     private void loadPlaceHolderImages(){
         switch(getMediaType()) {
             case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
-                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
-                    placeHolder = ContextCompat.getDrawable(mediaAlbumActivity, R.drawable.ic_vault_image_placeholder_01);
-                    return;
-                }
                 placeHolder = ContextCompat.getDrawable(mediaAlbumActivity, R.drawable.ic_vault_image_placeholder);
                 return;
 
             case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
-                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
-                    placeHolder = ContextCompat.getDrawable(mediaAlbumActivity, R.drawable.ic_vault_video_placeholder_01);
-                    return;
-                }
                 placeHolder = ContextCompat.getDrawable(mediaAlbumActivity, R.drawable.ic_vault_video_placeholder);
                 return;
 
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP && Build.VERSION.SDK_INT<Build.VERSION_CODES.M){
-                    placeHolder = ContextCompat.getDrawable(mediaAlbumActivity, R.drawable.ic_vault_audio_placeholder_01);
-                    return;
-                }
                 placeHolder = ContextCompat.getDrawable(mediaAlbumActivity, R.drawable.ic_vault_audio_placeholder);
         }
     }
@@ -245,7 +233,7 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
                     break;
 
                 case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                    Glide.with(mediaAlbumActivity).load(new AlbumArtModel(uri,mediaAlbumActivity.getBaseContext()))
+                    Glide.with(mediaAlbumActivity).load(new AlbumArtModel(uri,mediaAlbumActivity))
                             .placeholder(getPlaceHolderImages())
                             .error(getPlaceHolderImages()).override(viewWidth, viewHeight)
                             .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()

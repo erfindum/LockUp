@@ -208,9 +208,11 @@ public class MainPatternView extends FrameLayout implements PatternLockView.OnPa
     }
 
     void unRegisterListeners(){
+        patternAnimator.removeAllUpdateListeners();
         patternView.setOnPatternChangedListener(null);
         pinPatternSwitchButton.setOnClickListener(null);
         fingerPrintSwitchButton.setOnClickListener(null);
+        patternParent.setOnTouchListener(null);
     }
 
     private void switchToPatternView(){
@@ -485,6 +487,7 @@ public class MainPatternView extends FrameLayout implements PatternLockView.OnPa
     }
 
     public void removeView(){
+        patternView.closePatternView();
         unRegisterListeners();
         setPinLockUnlockListener(null);
         if(cancelSignal!=null && !cancelSignal.isCanceled()){

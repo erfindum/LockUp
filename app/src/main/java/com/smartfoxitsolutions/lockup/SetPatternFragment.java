@@ -220,6 +220,7 @@ public class SetPatternFragment extends Fragment implements PatternLockView.OnPa
 
     @Override
     public void onDestroy() {
+        patternLockView.closePatternView();
         super.onDestroy();
         unregisterViewListeners();
         pinPatternActivity = null;

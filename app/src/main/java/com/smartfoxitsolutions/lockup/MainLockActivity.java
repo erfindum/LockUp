@@ -59,6 +59,16 @@ public class MainLockActivity extends AppCompatActivity implements OnPinLockUnlo
     public void onPinLocked(String packageName) {
     }
 
+    @Override
+    public void onAdImpressed() {
+
+    }
+
+    @Override
+    public void onAdClicked() {
+
+    }
+
     public void startResetActivity(){
         startActivity(new Intent(this,ResetPasswordActivity.class));
         shouldTracUserPresence = false;

@@ -130,6 +130,12 @@ public class SetPinPatternActivity extends AppCompatActivity {
             getFragmentManager().popBackStack();
             return;
         }
+        if(startType == INTENT_APP_LOADER || startType == INTENT_RESET_PASSWORD) {
+            finishAffinity();
+        }
+        if(startType == INTENT_SETTINGS){
+            finish();
+        }
         super.onBackPressed();
 
     }

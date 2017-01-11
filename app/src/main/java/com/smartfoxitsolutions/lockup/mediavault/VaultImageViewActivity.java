@@ -22,6 +22,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.davemorrissey.labs.subscaleview.ImageViewState;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.ImageViewDeleteDialog;
@@ -93,6 +94,10 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
         fileExtensionList.addAll(extensionList);
     }
 
+    private WeakReference<VaultImageViewActivity> getWeakReference(){
+        return new WeakReference<>(this);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -108,7 +113,7 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
             imageAdapter.notifyDataSetChanged();
         }
 
-        imageViewScreenOffReceiver = new ImageViewScreenOffReceiver(new WeakReference<>(this));
+        imageViewScreenOffReceiver = new ImageViewScreenOffReceiver(getWeakReference());
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         registerReceiver(imageViewScreenOffReceiver,filter);
     }
@@ -341,7 +346,7 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
             vaultFileList = null;
             vaultIdList = null;
             fileExtensionList = null;
-            finishAffinity();
+            finishActivityAffinity();
         }
     }
 
@@ -365,6 +370,27 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
         unregisterReceiver(imageViewScreenOffReceiver);
     }
 
+    private void finishActivityAffinity(){
+        Glide.get(this).clearMemory();
+        new Thread(new ClearImageViewCacheTask(getWeakReference())).start();
+        finishAffinity();
+    }
+
+    static class ClearImageViewCacheTask implements Runnable
+    {
+        WeakReference<VaultImageViewActivity> activityWeakReference;
+        ClearImageViewCacheTask(WeakReference<VaultImageViewActivity> activityReference){
+            this.activityWeakReference = activityReference;
+        }
+
+        @Override
+        public void run() {
+            Log.d("CacheVault","Clear Image View Cache Started "+ System.currentTimeMillis());
+            Glide.get(activityWeakReference.get()).clearDiskCache();
+            Log.d("CacheVault","Clear Image View Cache Complete "+ + System.currentTimeMillis());
+        }
+    }
+
     static class ImageViewScreenOffReceiver extends BroadcastReceiver {
 
         WeakReference<VaultImageViewActivity> activity;
@@ -375,7 +401,7 @@ public class VaultImageViewActivity extends AppCompatActivity implements ViewPag
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent.getAction().equals(Intent.ACTION_SCREEN_OFF)){
-                activity.get().finishAffinity();
+                activity.get().finishActivityAffinity();
             }
         }
     }

@@ -3,7 +3,9 @@ package com.smartfoxitsolutions.lockup;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -25,6 +27,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.dialogs.FingerPrintActivateDialog;
+import com.smartfoxitsolutions.lockup.receivers.PreventUninstallReceiver;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
 import com.smartfoxitsolutions.lockup.services.NotificationLockService;
 
@@ -39,12 +42,13 @@ public class LockUpSettingsActivity extends AppCompatActivity {
     private TextView changePinPatternText, activateAppLockText;
     private int appLockMode;
     private SwitchCompat fingerPrintSwitch, activateAppLockSwitch, vibrateSwitch, pinTouchSwitch, patternLineSwitch
-                            ,lockScreenOnSwitch, notificationLockSwitch;
+                            ,lockScreenOnSwitch, notificationLockSwitch, preventUninstallSwitch;
     private SharedPreferences prefs;
     private boolean isFingerPrintActive, shouldAppLockStart,isVibratorEnabled,shouldHidePinTouch, shouldHidePatternLine
                     , shouldLockScreenOn, isAppLockFirstLoad;
+    public static boolean isPreventUninstallEnabled;
     private RelativeLayout activateAppLockItem, vibrateItem, changePinPatternItem,fingerPrintItem, pinTouchItem
-                    , patternLineItem, screenOnLockItem, notificationLockItem;
+                    , patternLineItem, screenOnLockItem, notificationLockItem,preventUninstallItem;
     private FingerPrintActivateDialog fingerprintActivateDialog;
     private ValueAnimator textAnimator;
 
@@ -78,6 +82,7 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         patternLineSwitch = (SwitchCompat) findViewById(R.id.settings_activity_pattern_line_switch);
         lockScreenOnSwitch = (SwitchCompat) findViewById(R.id.settings_activity_relock_switch);
         notificationLockSwitch = (SwitchCompat) findViewById(R.id.settings_activity_notification_lock_switch);
+        preventUninstallSwitch = (SwitchCompat) findViewById(R.id.settings_activity_prevent_uninstall_switch);
 
         activateAppLockItem = (RelativeLayout) findViewById(R.id.settings_activity_activate_lock_group);
         vibrateItem = (RelativeLayout) findViewById(R.id.settings_activity_vibrate_group);
@@ -87,6 +92,7 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         patternLineItem = (RelativeLayout) findViewById(R.id.settings_activity_pattern_line_group);
         screenOnLockItem = (RelativeLayout) findViewById(R.id.settings_activity_relock_group);
         notificationLockItem = (RelativeLayout) findViewById(R.id.settings_activity_notification_lock_group);
+        preventUninstallItem = (RelativeLayout) findViewById(R.id.settings_activity_prevent_uninstall_group);
 
         toolbar = (Toolbar) findViewById(R.id.settings_activity_tool_bar);
         setSupportActionBar(toolbar);
@@ -111,6 +117,7 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         shouldHidePinTouch = prefs.getBoolean(HIDE_PIN_TOUCH_PREFERENCE_KEY,false);
         shouldHidePatternLine = prefs.getBoolean(HIDE_PATTERN_LINE_PREFERENCE_KEY,false);
         shouldLockScreenOn = prefs.getBoolean(LOCK_SCREEN_ON_PREFERENCE_KEY,false);
+        isPreventUninstallEnabled =  prefs.getBoolean(LockUpSettingsActivity.DEVICE_ADMIN_PREFERENCE_KEY,false);
     }
     private void setupViews(){
 
@@ -177,6 +184,12 @@ public class LockUpSettingsActivity extends AppCompatActivity {
             lockScreenOnSwitch.setChecked(false);
         }
 
+        //Prevent Uninstall
+        if(isPreventUninstallEnabled){
+            preventUninstallSwitch.setChecked(true);
+        }else{
+            preventUninstallSwitch.setChecked(false);
+        }
     }
 
     private void setListeners(){
@@ -359,6 +372,26 @@ public class LockUpSettingsActivity extends AppCompatActivity {
                 edit.apply();
             }
         });
+
+        //Prevent Uninstall
+        preventUninstallItem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               if(isPreventUninstallEnabled){
+                   DevicePolicyManager manager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+                   manager.removeActiveAdmin(new ComponentName(getBaseContext(),PreventUninstallReceiver.class));
+                   preventUninstallSwitch.setChecked(false);
+               }else{
+                   Intent enableDeviceIntent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+                   ComponentName componentName = new ComponentName(getBaseContext(),PreventUninstallReceiver.class);
+                   enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName);
+                   enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                           getResources().getString(R.string.appLock_activity_prevent_uninstall_message_text));
+                   startActivity(enableDeviceIntent);
+                   shouldTrackUserPresence = false;
+               }
+            }
+        });
     }
 
     @Override
@@ -410,6 +443,11 @@ public class LockUpSettingsActivity extends AppCompatActivity {
             notificationLockSwitch.setChecked(true);
         }else{
             notificationLockSwitch.setChecked(false);
+        }
+        if(isPreventUninstallEnabled){
+            preventUninstallSwitch.setChecked(true);
+        }else{
+            preventUninstallSwitch.setChecked(false);
         }
         settingsScreenOffReceiver = new SettingsScreenOffReceiver(new WeakReference<>(this));
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);

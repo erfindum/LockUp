@@ -40,6 +40,15 @@
         android:visibility="invisible"
         />
 
+    <RelativeLayout
+        android:id="@+id/pattern_lock_activity_finger_ad_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/pattern_lock_activity_finger_app_icon_view"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/twentyDpDimension"
+        />
+
     <ImageView
         android:id="@+id/pattern_lock_activity_finger_app_icon_view"
         android:layout_width="40dp"
