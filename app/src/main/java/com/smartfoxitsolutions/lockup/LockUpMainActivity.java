@@ -21,16 +21,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.smartfoxitsolutions.lockup.dialogs.GrantUsageAccessDialog;
 import com.smartfoxitsolutions.lockup.dialogs.OverlayPermissionDialog;
+import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusMain;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaVaultAlbumActivity;
 import com.smartfoxitsolutions.lockup.mediavault.services.MediaMoveService;
 import com.smartfoxitsolutions.lockup.mediavault.services.ShareMoveService;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
-import com.smartfoxitsolutions.lockup.userreward.UserRewardInfo;
 
 import java.lang.ref.WeakReference;
 
@@ -47,13 +46,12 @@ public class LockUpMainActivity extends AppCompatActivity {
     private static final String SHOULD_SHOW_APP_LOCK_INFO_KEY = "shouldShowAppLockInfo";
 
     private AppCompatImageButton vaultActivityButton
-                            ,adEarningButton,settingsButton;
+                            , loyaltyBonusButton,settingsButton;
 
     private DialogFragment overlayPermissionDialog,usageDialog;
     private boolean shouldTrackUserPresence, shouldCloseAffinity, shouldStartAppLock, isAppLockFirstLoad;
     private AppCompatImageButton lockButton;
     private ScreenOffReceiver screenOffReceiver;
-    private ImageView mainImage;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,9 +61,9 @@ public class LockUpMainActivity extends AppCompatActivity {
         vaultActivityButton = (AppCompatImageButton) findViewById(R.id.lockup_main_activity_vault_image);
         settingsButton= (AppCompatImageButton) findViewById(R.id.lockup_main_activity_settings_image);
         lockButton = (AppCompatImageButton) findViewById(R.id.lockup_main_activity_app_lock_button);
+        loyaltyBonusButton = (AppCompatImageButton) findViewById(R.id.lockup_main_activity_loyalty_button);
         SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
         isAppLockFirstLoad = prefs.getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,false);
-        mainImage = (ImageView) findViewById(R.id.lockup_main_activity_lock_button);
         setBackground();
         setImageButtonListeners();
     }
@@ -104,13 +102,14 @@ public class LockUpMainActivity extends AppCompatActivity {
             }
         });
 
-        mainImage.setOnClickListener(new View.OnClickListener() {
+        loyaltyBonusButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getBaseContext(), UserRewardInfo.class));
+                startActivity(new Intent(getBaseContext(), LoyaltyBonusMain.class));
                 shouldTrackUserPresence = false;
             }
         });
+
     }
 
     void setBackground(){

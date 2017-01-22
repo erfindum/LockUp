@@ -39,5 +39,14 @@
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 
 -keep class com.smartfoxitsolutions.lockup.ResetPasswordResponse {*;}
+-keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusLoginResponse {*;}
+-keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusRecoveryResponse {*;}
+-keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusResetResponse {*;}
+-keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusSignUpResponse {*;}
+
+
+
+
+
 
 

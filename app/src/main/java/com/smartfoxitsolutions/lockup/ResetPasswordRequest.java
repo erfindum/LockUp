@@ -9,6 +9,7 @@ import retrofit2.http.Query;
  */
 
 public interface ResetPasswordRequest {
+
     @GET("Service.php")
     Call<ResetPasswordResponse> requestRecovery(@Query("action") String action,@Query("email") String email);
 }

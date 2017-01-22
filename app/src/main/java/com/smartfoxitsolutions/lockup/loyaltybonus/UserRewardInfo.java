@@ -1,4 +1,4 @@
-package com.smartfoxitsolutions.lockup.userreward;
+package com.smartfoxitsolutions.lockup.loyaltybonus;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -27,9 +27,9 @@ public class UserRewardInfo extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        SharedPreferences prefs = getSharedPreferences(UserRewardModel.USER_REWARD_PREFERENCE_NAME,MODE_PRIVATE);
-        long currentUserVision = prefs.getLong(UserRewardModel.DAILY_USER_VISION,0);
-        long currentUserPhysic = prefs.getLong(UserRewardModel.DAILY_USER_PHYSIC,0);
+        SharedPreferences prefs = getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE);
+        long currentUserVision = prefs.getLong(LoyaltyBonusModel.DAILY_USER_VISION,0);
+        long currentUserPhysic = prefs.getLong(LoyaltyBonusModel.DAILY_USER_PHYSIC,0);
         userVision.setText(String.valueOf(currentUserVision));
         userPhysic.setText(String.valueOf(currentUserPhysic));
     }

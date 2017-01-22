@@ -36,7 +36,7 @@ import com.smartfoxitsolutions.lockup.FingerPrintActivity;
 import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.receivers.AppLockServiceRestartReceiver;
-import com.smartfoxitsolutions.lockup.userreward.UserRewardModel;
+import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusModel;
 import com.smartfoxitsolutions.lockup.views.LockPatternView;
 import com.smartfoxitsolutions.lockup.views.LockPatternViewFinger;
 import com.smartfoxitsolutions.lockup.views.LockPinView;
@@ -110,9 +110,9 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         checkedAppsMapToken = new TypeToken<TreeMap<String,String>>(){}.getType();
         checkedAppsColorMapToken = new TypeToken<TreeMap<String,Integer>>(){}.getType();
         recommendedAppsMapToken = new TypeToken<LinkedHashMap<String,HashMap<String,Boolean>>>(){}.getType();
-        SharedPreferences prefs = getSharedPreferences(UserRewardModel.USER_REWARD_PREFERENCE_NAME,MODE_PRIVATE);
-        userVision = prefs.getLong(UserRewardModel.DAILY_USER_VISION,0);
-        userPhysic = prefs.getLong(UserRewardModel.DAILY_USER_PHYSIC,0);
+        SharedPreferences prefs = getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE);
+        userVision = prefs.getLong(LoyaltyBonusModel.DAILY_USER_VISION,0);
+        userPhysic = prefs.getLong(LoyaltyBonusModel.DAILY_USER_PHYSIC,0);
         checkedAppColorMap = new TreeMap<>();
         scheduleAppQuery();
         appLockReceiver = new AppLockReceiver();
@@ -128,6 +128,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         void setWindowLayoutParams(){
         params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        params.flags = 769;
         params.height = WindowManager.LayoutParams.MATCH_PARENT;
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.gravity = Gravity.TOP| Gravity.START;
@@ -376,9 +377,9 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     public void onAdImpressed() {
         userVision++;
         long currentUserVision = userVision;
-       SharedPreferences.Editor edit =  getSharedPreferences(UserRewardModel.USER_REWARD_PREFERENCE_NAME,MODE_PRIVATE)
+       SharedPreferences.Editor edit =  getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE)
                                         .edit();
-        edit.putLong(UserRewardModel.DAILY_USER_VISION,currentUserVision);
+        edit.putLong(LoyaltyBonusModel.DAILY_USER_VISION,currentUserVision);
         edit.apply();
     }
 
@@ -386,9 +387,9 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     public void onAdClicked() {
         userPhysic++;
         long currentUserPhysic = userPhysic;
-        SharedPreferences.Editor edit =  getSharedPreferences(UserRewardModel.USER_REWARD_PREFERENCE_NAME,MODE_PRIVATE)
+        SharedPreferences.Editor edit =  getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE)
                 .edit();
-        edit.putLong(UserRewardModel.DAILY_USER_PHYSIC,currentUserPhysic);
+        edit.putLong(LoyaltyBonusModel.DAILY_USER_PHYSIC,currentUserPhysic);
         edit.apply();
     }
 
@@ -444,6 +445,12 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
             String action = intent.getAction();
             if(action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)){
                 if(hasLockDisplayed) {
+                    String reason = intent.getStringExtra("reason");
+                    if(reason!=null && reason.equals("homekey")){
+                        removeView();
+                        hasLockDisplayed = false;
+                        Log.d("AppLock"," Got System Home Key");
+                    }
                //     removeView();
                 }
             }

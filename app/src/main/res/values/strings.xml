@@ -130,6 +130,7 @@
     <string name="main_screen_activity_app_lock_button_text">AppLock</string>
     <string name="main_screen_activity_vault_button_text">Vault</string>
     <string name="main_screen_activity_settings_button_text">Settings</string>
+    <string name="main_screen_activity_loyalty_button_text">Loyalty Bonus</string>
     <string name="main_screen_activity_user_profile_button_text">My Profile</string>
     <string name="main_screen_activity_app_name_text">LockUp</string>
     <string name="main_screen_activity_app_name_summery">Lock Apps and Hide Media</string>
@@ -229,7 +230,7 @@
     <string name="facebook_app_id">361979890807218</string>
 
     <!-- Pin Lock Activity -->
-    <string name="pin_lock_activity_ad_unit_id">1fa4d60303ff4392a78aab50dac62c5e</string>
+    <string name="pin_lock_activity_ad_unit_id">1c2531f4f8844982a1be67c877dffc92</string>
     <string name="pin_lock_original">1c2531f4f8844982a1be67c877dffc92</string>
     <string name="pin_lock1">1fa4d60303ff4392a78aab50dac62c5e</string>
     
@@ -287,5 +288,70 @@
     <string name="vault_move_dialog_delete_positive">DELETE</string>
     <string name="vault_move_dialog_move_negative">NOT NOW</string>
     <string name="vault_share_dialog_negative">CLOSE</string>
+
+    <!-- Loyalty Bonus Login -->
+    <string name="loyalty_bonus_signin_button">Sign In</string>
+    <string name="loyalty_bonus_signin_info">Sign In and win loyalty bonus</string>
+    <string name="loyalty_bonus_signin_email_hint">E-Mail</string>
+    <string name="loyalty_bonus_signin_password_hint">Password</string>
+    <string name="loyalty_bonus_signin_forgot_password">Forgot Password?</string>
+    <string name="loyalty_bonus_signin_email_error">Enter a valid email</string>
+    <string name="loyalty_bonus_signin_email_empty_error">Email cannot be empty</string>
+    <string name="loyalty_bonus_signin_password_empty_error">Password cannot be empty</string>
+
+    <!-- Loyalty Bonus SignUp -->
+    <string name="loyalty_bonus_signup_first_name">First Name</string>
+    <string name="loyalty_bonus_signup_last_name">Last Name</string>
+    <string name="loyalty_bonus_signup_confirm_password">Confirm Password</string>
+    <string name="loyalty_bonus_signup_country">Country</string>
+    <string name="loyalty_bonus_signup_gender">Gender</string>
+    <string name="loyalty_bonus_signup_info">Start getting your bonus</string>
+    <string name="loyalty_bonus_signup_signin_button">Already have an account? Sign In</string>
+    <string name="loyalty_bonus_signup_dob_hint">Choose Date Of Birth</string>
+    <string name="loyalty_bonus_signup_button">Sign Up</string>
+    <string name="loyalty_bonus_signup_error_header">Sing Up Error</string>
+    <string name="loyalty_bonus_signup_first_name_error">First Name cannot be empty</string>
+    <string name="loyalty_bonus_signup_last_name_error">Last Name cannot be empty</string>
+    <string name="loyalty_bonus_signup_email_error">Enter a valid email</string>
+    <string name="loyalty_bonus_signup_email_empty_error">Email cannot be empty</string>
+    <string name="loyalty_bonus_signup_password_error">Passwords do not match</string>
+    <string name="loyalty_bonus_signup_password_empty_error">Passwords cannot be empty</string>
+    <string name="loyalty_bonus_signup_date_error">Choose a valid birth date</string>
+    <string name="loyalty_bonus_signup_wait_text">Please Wait</string>
+
+    <string name="loyalty_bonus_signup_no_connection">Network Connection Unavailable</string>
+    <string name="loyalty_bonus_signup_unknown_error">Unknown Error Occurred</string>
+    <string name="loyalty_bonus_signup_success_message">Successfully registered</string>
+    <string name="loyalty_bonus_signup_success_positive">LOGIN</string>
+
+
+
+
+    <string-array name="gender_list">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Transgendered</item>
+    </string-array>
+
+    <!-- Loyalty Password Recovery -->
+    <string name="loyalty_password_recovery_step_one_info">STEP 1: Send recovery code to registered email</string>
+    <string name="loyalty_password_recovery_step_two_info">STEP 2: Enter recovery code to reset Password</string>
+    <string name="loyalty_password_recovery_reset_text">RESET PASSWORD</string>
+    <string name="loyalty_password_recovery_toolbar_title">Forgot Password</string>
+    <string name="loyalty_password_recovery_enter_email_hint">Enter registered email</string>
+    <string name="loyalty_password_recovery_code_error">Recovery Code cannot be empty</string>
+    <string name="loyalty_password_recovery_reset_info">Resetting your password</string>
+    <string name="loyalty_password_recovery_reset_error">Password Reset Failed</string>
+    <string name="loyalty_password_recovery_reset_password_length_error">Password cannot be less than 8 characters long</string>
+    <string name="loyalty_password_recovery_reset_message">Password Reset Successful</string>
+    <string name="loyalty_password_recovery_reset_positive">LOGIN</string>
+
+
+    <!-- Loyalty Password Reset -->
+    <string name="loyalty_password_reset_one_hint">Enter new password</string>
+    <string name="loyalty_password_reset_two_hint">Confirm new password</string>
+
+
+
 
 </resources>

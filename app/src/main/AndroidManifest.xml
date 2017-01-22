@@ -121,8 +121,15 @@
             />
         <activity android:name="com.mopub.mobileads.MraidVideoPlayerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
+        <activity android:name=".loyaltybonus.LoyaltyBonusMain"
+            android:excludeFromRecents="true"
+            android:screenOrientation="portrait"
+            />
+        <activity android:name=".loyaltybonus.LoyaltyBonusUserMain"
+            android:excludeFromRecents="true"
+            android:screenOrientation="portrait"/>
 
-        <activity android:name=".userreward.UserRewardInfo"
+        <activity android:name=".loyaltybonus.UserRewardInfo"
             android:excludeFromRecents="true"/>
         <service android:name=".services.AppLockingService" android:persistent="true" android:priority="1000">
         </service>

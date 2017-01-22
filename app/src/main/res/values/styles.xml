@@ -19,7 +19,7 @@
     </style>
     <style name="EditTextWhiteTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/white</item>
-        <item name="colorPrimaryDark">@color/white</item>
+        <item name="colorPrimaryDark">@color/mainScreenDarkBlue</item>
         <item name="colorAccent">@color/colorMainAccent</item>
     </style>
 

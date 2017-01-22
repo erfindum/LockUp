@@ -81,7 +81,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if(actionId == EditorInfo.IME_ACTION_DONE){
                    // Log.d("ResetEmail","Request Code " + securityEdit.getText().toString());
-                    resetPassword(securityEdit.getText().toString());
+                    validateResetCode(securityEdit.getText().toString());
                     return false;
                 }
                 return false;
@@ -98,7 +98,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                // Log.d("ResetEmail","Request Code " + securityEdit.getText().toString());
-                resetPassword(securityEdit.getText().toString());
+                validateResetCode(securityEdit.getText().toString());
             }
         });
     }
@@ -111,7 +111,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
             String pauseRequest = getString(R.string.reset_pin_pattern_pause_request);
             long interval = intervalEnd - System.currentTimeMillis();
             int minutes = (((int) interval/ (1000*60)) % 60);
-            int seconds = ((int) interval/ 1000) % 60 ;
+            int seconds = ((int) interval/ 1000) % 60;
             Toast.makeText(getBaseContext(),pauseRequest+" "+minutes+":"+seconds + " minutes",Toast.LENGTH_LONG)
                     .show();
             return;
@@ -144,20 +144,6 @@ public class ResetPasswordActivity extends AppCompatActivity {
                 public void onResponse(Call<ResetPasswordResponse> call, Response<ResetPasswordResponse> response) {
                     if(response.isSuccessful()) {
                         ResetPasswordResponse resetResponse = response.body();
-                        if(resetResponse!=null){
-                            if(resetResponse.code!=null){
-                                Log.d("EmailResponse",resetResponse.code);
-                            }
-                            if(resetResponse.status!=null){
-                                Log.d("EmailResponse",resetResponse.status);
-                            }
-                            if(resetResponse.pin!=null){
-                                Log.d("EmailResponse",resetResponse.pin);
-                            }
-                            if(resetResponse.email!=null){
-                                Log.d("EmailResponse",resetResponse.email);
-                            }
-                        }
                         if(resetResponse!=null && resetResponse.code.equals("200")){
                             long salt = System.currentTimeMillis();
                             byte[] pinByte = (resetResponse.pin+String.valueOf(salt)).getBytes();
@@ -239,7 +225,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
         securityEdit.setEnabled(false);
     }
 
-    private void resetPassword(String pin){
+    private void validateResetCode(String pin){
         SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
         String salt = String.valueOf(prefs.getLong(RESET_PASSWORD_TIME_INTERVAL_KEY,0));
         String originalRequestCode = prefs.getString(RESET_PASSWORD_PIN_KEY,"noCode");
