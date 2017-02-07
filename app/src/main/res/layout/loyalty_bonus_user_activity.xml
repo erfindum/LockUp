@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/loyalty_bonus_user_activity_tool_bar"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:background="@color/colorMainPrimary"
+        android:elevation="0dp"
+        android:layout_alignParentTop="true"
+        app:theme="@style/DarkActivityTheme"
+        app:popupTheme="@style/Theme.AppCompat.Light"
+        />
+
+    <RelativeLayout
+        android:id="@+id/loyalty_bonus_user_activity_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/loyalty_bonus_user_activity_tool_bar"
+        />
+</RelativeLayout>

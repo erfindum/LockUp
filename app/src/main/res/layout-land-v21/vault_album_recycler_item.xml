@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#fff"
+    app:cardCornerRadius="@dimen/fiveDpDimension"
+    android:layout_marginBottom="@dimen/fiveDpDimension"
+    >
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/vault_album_picker_recycler_item_thumbnail"
+        android:layout_width="@dimen/vault_album_thumbnail_width"
+        android:layout_height="@dimen/vault_album_thumbnail_height"
+        android:scaleType="fitXY"
+        />
+    <TextView
+        android:id="@+id/vault_album_picker_recycler_item_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/vault_album_picker_recycler_item_thumbnail"
+        android:layout_marginTop="@dimen/twoDpDimension"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textColor="@color/textDarkGrey"
+        android:textSize="@dimen/fifteenSpDimension"
+        android:layout_marginRight="@dimen/fiveDpDimension"
+        android:layout_marginEnd="@dimen/fiveDpDimension"
+        android:layout_marginLeft="@dimen/fiveDpDimension"
+        android:layout_marginStart="@dimen/fiveDpDimension"
+        />
+
+        <TextView
+            android:id="@+id/vault_album_picker_recycler_item_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/vault_album_picker_recycler_item_text"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/textDarkGrey"
+            android:textSize="@dimen/twelveSpDimension"
+            android:layout_marginRight="@dimen/fiveDpDimension"
+            android:layout_marginEnd="@dimen/fiveDpDimension"
+            android:layout_marginLeft="@dimen/fiveDpDimension"
+            android:layout_marginStart="@dimen/fiveDpDimension"
+            android:layout_marginBottom="@dimen/threeDpDimension"
+            />
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>
