@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content" android:layout_height="wrap_content"
-    android:background="@color/white"
+    android:background="#26FFFFFF"
     >
 
     <ImageView
@@ -26,7 +26,7 @@
         android:layout_alignLeft="@+id/native_ad_main_image"
         android:layout_alignStart="@+id/native_ad_main_image"
         android:layout_below="@+id/native_ad_main_image"
-        android:textColor="@color/textPrimaryColor"
+        android:textColor="@color/white"
         android:textSize="13sp"
         android:gravity="start"
         android:ellipsize="end"
@@ -40,7 +40,7 @@
         android:layout_toStartOf="@+id/native_ad_call_to_action"
         android:layout_alignLeft="@+id/native_ad_main_image"
         android:layout_alignStart="@+id/native_ad_main_image"
-        android:textColor="@color/textPrimaryColor"
+        android:textColor="@color/white"
         android:textSize="12sp"
         android:ellipsize="end"
         android:maxLines="1"
@@ -53,14 +53,30 @@
         android:layout_below="@+id/native_ad_main_image"
         android:layout_alignRight="@+id/native_ad_main_image"
         android:layout_alignEnd="@+id/native_ad_main_image"
-        android:background="#4CAF50"
+        android:background="@drawable/img_ad_call_to_action"
         android:textColor="@color/white"
-        android:textSize="12sp"
-        android:paddingTop="@dimen/fiveDpDimension"
-        android:paddingBottom="@dimen/fiveDpDimension"
-        android:paddingStart="@dimen/tenDpDimension"
-        android:paddingEnd="@dimen/tenDpDimension"
+        android:textSize="10sp"
+        android:paddingTop="@dimen/threeDpDimension"
+        android:paddingBottom="@dimen/threeDpDimension"
+        android:paddingStart="@dimen/threeDpDimension"
+        android:paddingEnd="@dimen/threeDpDimension"
         android:layout_marginStart="@dimen/fiveDpDimension"
         android:layout_marginLeft="@dimen/fiveDpDimension"
+        />
+
+    <TextView
+        android:id="@+id/native_ad_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/native_ad_call_to_action"
+        android:layout_marginTop="@dimen/twoDpDimension"
+        android:layout_marginBottom="@dimen/twoDpDimension"
+        android:layout_alignRight="@+id/native_ad_call_to_action"
+        android:layout_alignEnd="@+id/native_ad_call_to_action"
+        android:textSize="10sp"
+        android:padding="@dimen/threeDpDimension"
+        android:textColor="@color/white"
+        android:background="@color/textDarkGrey"
+        android:text="Ad"
         />
 </RelativeLayout>

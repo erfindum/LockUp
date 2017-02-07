@@ -11,10 +11,12 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaScannerConnection;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.StatFs;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -53,6 +55,7 @@ public class ShareMoveTask implements Runnable {
     private MimeTypeMap mimeTypeMap;
     private String currentVaultMediaFile, currentThumbnailMediaFile;
     private int currentPosition;
+    private boolean shouldPostInsufficientSpace;
 
 
     public ShareMoveTask(Context context, Handler.Callback callback) {
@@ -175,9 +178,11 @@ public class ShareMoveTask implements Runnable {
         for(Uri uri:fileUriList){
             moveFileToVault(uri,uri.getScheme());
         }
-        mssg = uiHandler.obtainMessage();
-        mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
-        mssg.sendToTarget();
+        if(!shouldPostInsufficientSpace) {
+            mssg = uiHandler.obtainMessage();
+            mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
+            mssg.sendToTarget();
+        }
     }
 
     private void moveFileToVault(Uri uri, String scheme){
@@ -214,14 +219,17 @@ public class ShareMoveTask implements Runnable {
         if(mediaCursor!=null && mediaCursor.getCount()>0) {
             mediaCursor.moveToFirst();
             int dataIndex = mediaCursor.getColumnIndex(getDataIndex(mediaType));
-            int bucketNameIndex = mediaCursor.getColumnIndex(getBucketNameIndex(mediaType));
             String dataPath = mediaCursor.getString(dataIndex);
-            String uniqueBucketName = mediaCursor.getString(bucketNameIndex);
+            if(dataPath==null){
+                return;
+            }
+            String uniqueBucketName = "";
             String uniqueBucketId = "";
             if (mediaType.equals(ShareMoveService.TYPE_AUDIO_MEDIA)) {
                 uniqueBucketName = getAudioBucketName(dataPath);
                 uniqueBucketId = getBucketId(uniqueBucketName);
             } else {
+                uniqueBucketName = getBucketName(dataPath);
                 uniqueBucketId = getBucketId(dataPath.substring(0, dataPath.lastIndexOf(File.separator)));
             }
             String originalFileName = dataPath.substring(dataPath.lastIndexOf(File.separator) + 1, dataPath.lastIndexOf("."));
@@ -243,9 +251,17 @@ public class ShareMoveTask implements Runnable {
                     + File.separator + vaultFileName;
             currentVaultMediaFile = destPathDummy;
             currentThumbnailMediaFile = thumbnailPathDummy;
-
+            boolean isFileSpaceAvailable = getFileSpaceAvailability(dataPath);
             boolean mediaCopied = false;
-            mediaCopied = copyMediaFile(dataPath, destPathDummy);
+            if(isFileSpaceAvailable) {
+                mediaCopied = copyMediaFile(dataPath, destPathDummy);
+            }else{
+                shouldPostInsufficientSpace = true;
+                mssg = uiHandler.obtainMessage();
+                mssg.what = MediaMoveService.MOVE_INSUFFICIENT_SPACE;
+                mssg.sendToTarget();
+                return;
+            }
             boolean thumbnailCopied = false;
             Log.d("VaultMedia", String.valueOf(mediaCopied) + " mediacopied");
             if (mediaCopied) {
@@ -321,7 +337,7 @@ public class ShareMoveTask implements Runnable {
     }
 
     private void moveFileScheme(Uri uri) throws IOException{
-        String extType = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+        String extType = MimeTypeMap.getFileExtensionFromUrl(uri.toString()).toLowerCase();
         String mimeType = mimeTypeMap.getMimeTypeFromExtension(extType);
         if(mimeType == null || mimeType.isEmpty()){
             return;
@@ -362,8 +378,17 @@ public class ShareMoveTask implements Runnable {
         currentVaultMediaFile = destPathDummy;
         currentThumbnailMediaFile = thumbnailPathDummy;
 
+        boolean isFileSpaceAvailable = getFileSpaceAvailability(dataPath);
         boolean mediaCopied = false;
-        mediaCopied = copyMediaFile(dataPath, destPathDummy);
+        if(isFileSpaceAvailable) {
+            mediaCopied = copyMediaFile(dataPath, destPathDummy);
+        }else{
+            shouldPostInsufficientSpace = true;
+            mssg = uiHandler.obtainMessage();
+            mssg.what = MediaMoveService.MOVE_INSUFFICIENT_SPACE;
+            mssg.sendToTarget();
+            return;
+        }
         boolean thumbnailCopied = false;
         Log.d("VaultMedia", String.valueOf(mediaCopied) + " mediacopied");
         if (mediaCopied) {
@@ -435,6 +460,34 @@ public class ShareMoveTask implements Runnable {
         mssg.arg2 = fileUriList.size();
         mssg.sendToTarget();
 
+    }
+
+    boolean getFileSpaceAvailability(String path){
+        StatFs fileStats = new StatFs(path);
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2){
+            File originalFile = new File(path);
+            if(originalFile.exists()) {
+                if (fileStats.getAvailableBytes() > (originalFile.length() + 10_24_000)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }else{
+                return true;
+            }
+        }else{
+            File originalFile = new File(path);
+            if(originalFile.exists()) {
+                long availableBytes = fileStats.getAvailableBlocks() * fileStats.getBlockSize();
+                if (availableBytes > (originalFile.length() + 10_24_000)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }else{
+                return true;
+            }
+        }
     }
 
     private boolean copyMediaFile(String mediaPath, String destPath) throws IOException {

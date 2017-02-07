@@ -13,10 +13,12 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaScannerConnection;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.StatFs;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -236,6 +238,7 @@ public class MediaMoveInTask implements Runnable {
     }
 
    private void moveMediaToVault(Cursor cursor) throws IOException{
+       boolean shouldPostInsufficientSpace = false;
         cursor.moveToFirst();
            do {
                int dataIndex = cursor.getColumnIndex(getDataIndex(mediaType));
@@ -267,8 +270,15 @@ public class MediaMoveInTask implements Runnable {
                currentVaultMediaFile = destPathDummy;
                currentVaultThumbnailFile = thumbnailPathDummy;
 
+               boolean isFileSpaceAvailable = getFileSpaceAvailability(dataPath);
+
                boolean mediaCopied = false;
-               mediaCopied = copyMediaFile(dataPath, destPathDummy);
+               if(isFileSpaceAvailable) {
+                   mediaCopied = copyMediaFile(dataPath, destPathDummy);
+               }else{
+                   shouldPostInsufficientSpace = true;
+                   break;
+               }
                boolean thumbnailCopied = false;
                Log.d("VaultMedia", String.valueOf(mediaCopied) + " mediacopied");
                if (mediaCopied) {
@@ -355,13 +365,36 @@ public class MediaMoveInTask implements Runnable {
                }
                Log.d("VaultMedia", String.valueOf(uiHandler == null) + " uiHandler null?");
            } while (cursor.moveToNext());
-       SelectedMediaModel.getInstance().getSelectedMediaIdList().clear();
-       SelectedMediaModel.getInstance().getSelectedMediaFileNameList().clear();
-       mssg = uiHandler.obtainMessage();
-           mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
-           mssg.sendToTarget();
 
+            completeMoveTask(shouldPostInsufficientSpace);
+    }
 
+    boolean getFileSpaceAvailability(String path){
+        StatFs fileStats = new StatFs(path);
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2){
+            File originalFile = new File(path);
+            if(originalFile.exists()) {
+                if (fileStats.getAvailableBytes() > (originalFile.length() + 10_24_000)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }else{
+                return true;
+            }
+        }else{
+            File originalFile = new File(path);
+            if(originalFile.exists()) {
+                long availableBytes = fileStats.getAvailableBlocks() * fileStats.getBlockSize();
+                if (availableBytes > (originalFile.length() + 10_24_000)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }else{
+                return true;
+            }
+        }
     }
 
     private boolean copyMediaFile(String mediaPath, String destPath) throws IOException{
@@ -530,6 +563,23 @@ public class MediaMoveInTask implements Runnable {
         context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,Uri.parse("file://"+Environment.getExternalStorageDirectory())));
         return true;
     }
+
+    private void completeMoveTask(boolean isInsufficientSpace){
+        if(isInsufficientSpace){
+            SelectedMediaModel.getInstance().getSelectedMediaIdList().clear();
+            SelectedMediaModel.getInstance().getSelectedMediaFileNameList().clear();
+            mssg = uiHandler.obtainMessage();
+            mssg.what = MediaMoveService.MOVE_INSUFFICIENT_SPACE;
+            mssg.sendToTarget();
+        }else{
+            SelectedMediaModel.getInstance().getSelectedMediaIdList().clear();
+            SelectedMediaModel.getInstance().getSelectedMediaFileNameList().clear();
+            mssg = uiHandler.obtainMessage();
+            mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
+            mssg.sendToTarget();
+        }
+    }
+
      void closeTask(){
         if(context!=null){
             context = null;

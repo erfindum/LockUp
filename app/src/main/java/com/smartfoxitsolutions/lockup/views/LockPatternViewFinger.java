@@ -52,7 +52,8 @@ import java.security.NoSuchAlgorithmException;
  * Created by RAAJA on 27-10-2016.
  */
 
-public class LockPatternViewFinger extends FrameLayout implements PatternLockView.OnPatternChangedListener,NativeAd.MoPubNativeEventListener, MoPubNative.MoPubNativeNetworkListener{
+public class LockPatternViewFinger extends FrameLayout implements PatternLockView.OnPatternChangedListener
+        ,NativeAd.MoPubNativeEventListener{
     Context context;
     private OnPinLockUnlockListener patternLockListener;
     private OnFingerScannerCancelListener fingerCanceledListener;
@@ -74,7 +75,6 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
     private int noOfAttempts,noOfNoisyAttempts;
     private ValueAnimator animatorMain, animatorFingerError;
     private RectF patternRect;
-    private MoPubNative mMoPubNative;
     private NativeAd moPubNativeAd;
     private View nativeAdView;
 
@@ -91,7 +91,6 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
         patternViewVibrator= (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         fingerprintManager = FingerprintManagerCompat.from(context);
         cancelSignal = new CancellationSignal();
-       // initAds();
         initializeLockView();
     }
 
@@ -266,41 +265,6 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
                 resetPatternData();
             }
         });
-    }
-
-    void initAds(){
-        mMoPubNative = new MoPubNative(context
-                ,getResources().getString(R.string.pin_lock_activity_ad_unit_id),this);
-
-        ViewBinder viewBinder = new ViewBinder.Builder(R.layout.native_ad_sample)
-                .mainImageId(R.id.native_ad_main_image)
-                .titleId(R.id.native_ad_title)
-                .textId(R.id.native_ad_text)
-                .callToActionId(R.id.native_ad_call_to_action)
-                .build();
-
-        MoPubStaticNativeAdRenderer adRenderer = new MoPubStaticNativeAdRenderer(viewBinder);
-
-        mMoPubNative.registerAdRenderer(adRenderer);
-        mMoPubNative.makeRequest();
-    }
-
-    @Override
-    public void onNativeLoad(NativeAd nativeAd) {
-      /*  Log.d("LockUpMopub","Called onNativeLoad Finger");
-        moPubNativeAd = nativeAd;
-        if(context!=null) {
-            View adViewRender = moPubNativeAd.createAdView(context, null);
-            addRenderedAd(adViewRender);
-            moPubNativeAd.renderAdView(adViewRender);
-            moPubNativeAd.prepare(adViewRender);
-            moPubNativeAd.setMoPubNativeEventListener(this);
-        } */
-    }
-
-    @Override
-    public void onNativeFail(NativeErrorCode errorCode) {
-       // Log.d("LockUpMopub",errorCode+ " errorcode");
     }
 
     public void addRenderedAd(View adView, NativeAd nativeAd){

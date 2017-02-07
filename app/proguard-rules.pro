@@ -40,9 +40,13 @@
 
 -keep class com.smartfoxitsolutions.lockup.ResetPasswordResponse {*;}
 -keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusLoginResponse {*;}
+-keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusLoginData {*;}
 -keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusRecoveryResponse {*;}
 -keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusResetResponse {*;}
 -keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusSignUpResponse {*;}
+-keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusSignUpData {*;}
+-keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusInitialPointResponse {*;}
+-keep class com.smartfoxitsolutions.lockup.loyaltybonus.services.UserLoyaltyReportResponse {*;}
 
 
 

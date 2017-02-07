@@ -10,6 +10,6 @@ public class LoyaltyBonusSignUpResponse {
     String status;
     String message;
     String code;
-    List<LoyaltyBonusSignUpData> data;
+    LoyaltyBonusSignUpData data;
 }
 

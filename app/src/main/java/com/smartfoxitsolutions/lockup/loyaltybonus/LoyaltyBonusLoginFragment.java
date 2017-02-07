@@ -1,12 +1,16 @@
 package com.smartfoxitsolutions.lockup.loyaltybonus;
 
+import android.app.AlarmManager;
 import android.app.Fragment;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatEditText;
@@ -21,8 +25,12 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.smartfoxitsolutions.lockup.AppLockModel;
+import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.loyaltybonus.receivers.UserReportBroadcastReceiver;
 
+import java.util.Calendar;
 import java.util.regex.Pattern;
 
 import retrofit2.Call;
@@ -104,24 +112,28 @@ public class LoyaltyBonusLoginFragment extends Fragment {
         int[][] editState = new int[][]{
                 new int[]{android.R.attr.state_focused},
                 new int[]{android.R.attr.state_pressed},
-                new int[]{android.R.attr.state_enabled}
+                new int[]{android.R.attr.state_enabled},
+                new int[]{-android.R.attr.state_enabled}
         };
 
         int[] editColors = new int[]{
                 Color.parseColor("#f7e830"),
                 Color.parseColor("#f7e830"),
+                Color.WHITE,
                 Color.WHITE
         };
         ColorStateList colorStateList = new ColorStateList(editState,editColors);
         emailEdit.setSupportBackgroundTintList(colorStateList);
         passwordEdit.setSupportBackgroundTintList(colorStateList);
+
+        emailEdit.setText(activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE)
+                .getString(LockUpSettingsActivity.RECOVERY_EMAIL_PREFERENCE_KEY,"No Email Registered"));
     }
 
     void validateLogin(){
         progress.setVisibility(View.VISIBLE);
         loginInfo.setVisibility(View.INVISIBLE);
         passwordEdit.setEnabled(false);
-        emailEdit.setEnabled(false);
         shouldValidateLogin = false;
         Pattern emailMatcher = Patterns.EMAIL_ADDRESS;
         if(emailEdit.getText().toString().isEmpty()){
@@ -141,13 +153,17 @@ public class LoyaltyBonusLoginFragment extends Fragment {
         shouldValidateLogin = true;
         loginInfo.setText(message);
         passwordEdit.setEnabled(true);
-        emailEdit.setEnabled(true);
     }
 
     void loginUser(){
         final SharedPreferences preferences = activity.getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,Context.MODE_PRIVATE);
 
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if(networkInfo == null){
+            postError(getString(R.string.loyalty_bonus_signup_no_connection));
+            return;
+        }
+
         if(networkInfo.isConnected()){
 
             LoyaltyBonusRequest loginRequest = LoyaltyServiceGenerator.createService(LoyaltyBonusRequest.class);
@@ -159,16 +175,20 @@ public class LoyaltyBonusLoginFragment extends Fragment {
                     if(response.isSuccessful()) {
                         LoyaltyBonusLoginResponse loginResponse = response.body();
                         if (loginResponse != null && loginResponse.code.equals("200")) {
-                            LoyaltyBonusLoginData data = loginResponse.data.get(0);
-                            SharedPreferences.Editor edit = preferences.edit();
-                            edit.putString(LoyaltyBonusModel.LOGIN_EMAIL_KEY,data.emailId);
-                            edit.putString(LoyaltyBonusModel.LOGIN_USER_NAME_KEY,data.fullname);
-                            edit.putBoolean(LoyaltyBonusModel.LOGIN_USER_LOGGED_IN_KEY,true);
-                            edit.apply();
-                            activity.startLoyaltyUserMain();
-                            Log.d("LoyaltyBonus","User name " + data.fullname);
-                            Log.d("LoyaltyBonus","E-mail " + data.emailId);
-                        } else {
+                            if(activity!=null) {
+                                LoyaltyBonusLoginData data = loginResponse.data.get(0);
+                                SharedPreferences.Editor edit = preferences.edit();
+                                edit.putString(LoyaltyBonusModel.LOGIN_EMAIL_KEY, data.emailId);
+                                edit.putString(LoyaltyBonusModel.LOGIN_USER_NAME_KEY, data.fullname);
+                                edit.putBoolean(LoyaltyBonusModel.LOGIN_USER_LOGGED_IN_KEY, true);
+                                edit.putString(LoyaltyBonusModel.LOYALTY_SEND_REQUEST, data.auth_code);
+                                edit.apply();
+                                activity.startLoyaltyUserMain();
+                                Log.d("LoyaltyBonus", "User name " + data.fullname);
+                                Log.d("LoyaltyBonus", "E-mail " + data.emailId);
+                            }
+                        }
+                        else {
                             postError("Invalid Credentials");
                         }
                     }else{

@@ -38,6 +38,7 @@ public class MediaMoveService extends Service implements Handler.Callback{
 
     public static final int MEDIA_SUCCESSFULLY_MOVED = 4;
     public static final int MEDIA_MOVE_COMPLETED = 5;
+    public static final int MOVE_INSUFFICIENT_SPACE = 6;
 
     private static String MEDIA_TYPE = MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA;
 
@@ -195,40 +196,60 @@ public class MediaMoveService extends Service implements Handler.Callback{
                     e.printStackTrace();
                 }
             }
-            notifManager.cancel(3542124);
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(getBaseContext());
-            if(moveType == MediaMoveActivity.MOVE_TYPE_INTO_VAULT) {
-                builder.setContentTitle(getResources().getString(R.string.vault_move_activity_move_complete));
+            postCompleteNotification(getResources().getString(R.string.vault_move_activity_move_complete));
+            closeService();
+            return true;
+        }
+        if(msg.what == MOVE_INSUFFICIENT_SPACE){
+            if(activityMessenger!=null && activityMessenger.getBinder().isBinderAlive()){
+                Message mssg = Message.obtain();
+                mssg.what = msg.what;
+                mssg.obj = mediaType;
+                try {
+                    activityMessenger.send(mssg);
+                }
+                catch (RemoteException e){
+                    e.printStackTrace();
+                }
             }
-            if(moveType == MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT){
-                builder.setContentTitle(getResources().getString(R.string.vault_move_activity_move_complete));
-            }
-            if (moveType == MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT){
-                builder.setContentTitle(getResources().getString(R.string.vault_move_activity_delete_complete));
-            }
-            MEDIA_TYPE = mediaType;
-            builder.setContentText(getResources().getString(R.string.vault_move_activity_vault_redirect_message))
-                    .setOngoing(false)
-                    .setAutoCancel(true)
-                    .setLargeIcon(getLauncherIcon())
-                    .setContentIntent(PendingIntent.getActivity(getBaseContext(),29,new Intent(getBaseContext()
-                                    , MainLockActivity.class)
-                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                            ,PendingIntent.FLAG_UPDATE_CURRENT))
-                    .setOnlyAlertOnce(true)
-                    .setColor(Color.parseColor("#2874F0"));
-            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
-                builder.setSmallIcon(R.drawable.ic_notification_small);
-            }else{
-                builder.setSmallIcon(R.mipmap.ic_launcher);
-            }
-            notifManager.notify(7549682, builder.build());
+            postCompleteNotification(getResources().getString(R.string.vault_move_activity_insufficient_space));
             closeService();
             return true;
         }
 
         return false;
+    }
+
+    void postCompleteNotification(String message){
+        notifManager.cancel(3542124);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getBaseContext());
+        if(moveType == MediaMoveActivity.MOVE_TYPE_INTO_VAULT) {
+            builder.setContentTitle(message);
+        }
+        if(moveType == MediaMoveActivity.MOVE_TYPE_OUT_OF_VAULT){
+            builder.setContentTitle(message);
+        }
+        if (moveType == MediaMoveActivity.MOVE_TYPE_DELETE_FROM_VAULT){
+            builder.setContentTitle(message);
+        }
+        MEDIA_TYPE = mediaType;
+        builder.setContentText(getResources().getString(R.string.vault_move_activity_vault_redirect_message))
+                .setOngoing(false)
+                .setAutoCancel(true)
+                .setLargeIcon(getLauncherIcon())
+                .setContentIntent(PendingIntent.getActivity(getBaseContext(),29,new Intent(getBaseContext()
+                                , MainLockActivity.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        ,PendingIntent.FLAG_UPDATE_CURRENT))
+                .setOnlyAlertOnce(true)
+                .setColor(Color.parseColor("#2874F0"));
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+            builder.setSmallIcon(R.drawable.ic_notification_small);
+        }else{
+            builder.setSmallIcon(R.mipmap.ic_launcher);
+        }
+        notifManager.notify(7549682, builder.build());
     }
 
     void closeService(){

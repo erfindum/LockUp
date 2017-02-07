@@ -49,6 +49,7 @@
                 android:maxLines="1"
                 android:imeOptions="actionNext"
                 android:layout_marginBottom="@dimen/tenDpDimension"
+                android:enabled="false"
                 />
 
             <android.support.v7.widget.AppCompatEditText

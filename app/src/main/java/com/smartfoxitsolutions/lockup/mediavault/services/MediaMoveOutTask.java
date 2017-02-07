@@ -6,10 +6,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.StatFs;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -123,6 +125,7 @@ public class MediaMoveOutTask implements Runnable {
     }
 
     private void moveMediaToStorage(Cursor cursor) throws IOException{
+        boolean shouldPostInsufficientSpace = false;
         cursor.moveToFirst();
         try {
             do {
@@ -138,8 +141,14 @@ public class MediaMoveOutTask implements Runnable {
                 String vaultId = cursor.getString(vaultIdIndex);
                 String extension = cursor.getString(extensionIndex);
 
+                boolean isFileSpaceAvailable = getFileSpaceAvailability(vaultMediaPath,extension);
                 boolean mediaCopied = false;
-                mediaCopied = copyMediaFile(vaultMediaPath, originalFilePath,extension);
+                if(isFileSpaceAvailable) {
+                    mediaCopied = copyMediaFile(vaultMediaPath, originalFilePath, extension);
+                }else{
+                    shouldPostInsufficientSpace = true;
+                    break;
+                }
                 Log.d("VaultMedia", String.valueOf(mediaCopied) + " mediacopied");
                 if (mediaCopied) {
                     File vaultFile = new File(vaultMediaPath);
@@ -190,12 +199,42 @@ public class MediaMoveOutTask implements Runnable {
                 mssg.arg2 = cursor.getCount();
                 mssg.sendToTarget();
             } while (cursor.moveToNext());
-            SelectedMediaModel.getInstance().getSelectedMediaIdList().clear();
-            mssg = uiHandler.obtainMessage();
-            mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
-            mssg.sendToTarget();
+
+            completeMoveTask(shouldPostInsufficientSpace);
         }catch (Exception e){
             e.printStackTrace();
+        }
+    }
+
+    private boolean getFileSpaceAvailability(String path, String extension){
+        File vaultFile = new File(path);
+        if(vaultFile.exists()){
+            return validateFileSpace(vaultFile);
+        }else{
+            File alternateVaultFile = new File(path+"."+extension);
+            if(alternateVaultFile.exists()){
+                return validateFileSpace(alternateVaultFile);
+            }else{
+                return true;
+            }
+        }
+    }
+
+    private boolean validateFileSpace(File path){
+        StatFs fileStats = new StatFs(path.getPath());
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2){
+            if (fileStats.getAvailableBytes() > (path.length() + 10_24_000)) {
+                return true;
+            } else {
+                return false;
+            }
+        }else{
+            long availableBytes = fileStats.getAvailableBlocks() * fileStats.getBlockSize();
+            if (availableBytes > (path.length() + 10_24_000)) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
@@ -277,6 +316,20 @@ public class MediaMoveOutTask implements Runnable {
     private boolean sendScanBroadcast(){
         context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED,Uri.parse("file://"+Environment.getExternalStorageDirectory())));
         return true;
+    }
+
+    private void completeMoveTask(boolean isInsufficientSpace){
+        if(isInsufficientSpace){
+            SelectedMediaModel.getInstance().getSelectedMediaIdList().clear();
+            mssg = uiHandler.obtainMessage();
+            mssg.what = MediaMoveService.MOVE_INSUFFICIENT_SPACE;
+            mssg.sendToTarget();
+        }else{
+            SelectedMediaModel.getInstance().getSelectedMediaIdList().clear();
+            mssg = uiHandler.obtainMessage();
+            mssg.what = MediaMoveService.MEDIA_MOVE_COMPLETED;
+            mssg.sendToTarget();
+        }
     }
 
     void closeTask(){

@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyUserProfileFragment;
 import com.smartfoxitsolutions.lockup.receivers.PreventUninstallReceiver;
 import com.smartfoxitsolutions.lockup.services.NotificationLockService;
 
@@ -358,7 +359,10 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     recommendTempMap.put(recommendedAppLockedName.get(listPosition),true);
                     recommendedAppsMap.put(recommendedAppPackageList.get(listPosition), recommendTempMap);
                     recommendedAppLocked.set(listPosition,true);
+                    if(listItemPosition>0){
+                        LoyaltyUserProfileFragment.lockedRecommendApps+=1;
                     }
+                }
 
             }else {
                 if(listPosition == 0){
@@ -386,6 +390,9 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     recommendTempMap.put(recommendedAppLockedName.get(listPosition),true);
                     recommendedAppsMap.put(recommendedAppPackageList.get(listPosition), recommendTempMap);
                     recommendedAppLocked.set(listPosition,true);
+                    if(listPosition>1){
+                        LoyaltyUserProfileFragment.lockedRecommendApps+=1;
+                    }
                 }
             }
         }
@@ -424,6 +431,7 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             }
             Log.d(TAG," Item count " + getItemCount() +" "+ installedAppsMap.size()+" "+ checkedAppsMap.size());
         }
+        LoyaltyUserProfileFragment.lockedApps = checkedAppsMap.size();
     }
 
     private void changeLockButtonImage(AppCompatImageButton button,boolean checked){
@@ -445,6 +453,15 @@ public class AppLockRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         recommendTempMap.put(recommendedAppLockedName.get(position),false);
         recommendedAppsMap.put(recommendedAppPackageList.get(position), recommendTempMap);
         recommendedAppLocked.set(position,false);
+        if(Build.VERSION.SDK_INT<Build.VERSION_CODES.JELLY_BEAN_MR2){
+            if(position>0) {
+                LoyaltyUserProfileFragment.lockedRecommendApps-=1;
+            }
+        }else {
+            if (position > 1) {
+                LoyaltyUserProfileFragment.lockedRecommendApps-=1;
+            }
+        }
     }
 
     void loadNotificationAppsMap(){

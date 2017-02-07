@@ -315,6 +315,16 @@ public class MediaMoveActivity extends AppCompatActivity {
                 }
                 if (msg.what == MediaMoveService.MEDIA_MOVE_COMPLETED) {
                     activity.get().moveInfoText.setText(R.string.vault_move_activity_move_complete);
+                    activity.get().countProgress.setVisibility(View.INVISIBLE);
+                    activity.get().isOperationComplete = true;
+                    activity.get().setDoneButton();
+                    activity.get().mediaType = (String) msg.obj;
+                }
+                if(msg.what == MediaMoveService.MOVE_INSUFFICIENT_SPACE){
+                    activity.get().countText.setText(R.string.vault_move_activity_insufficient_space);
+                    activity.get().countText.setVisibility(View.VISIBLE);
+                    activity.get().moveInfoText.setVisibility(View.INVISIBLE);
+                    activity.get().countProgress.setVisibility(View.INVISIBLE);
                     activity.get().isOperationComplete = true;
                     activity.get().setDoneButton();
                     activity.get().mediaType = (String) msg.obj;
@@ -347,7 +357,7 @@ public class MediaMoveActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
+    protected void onStop() {
         super.onPause();
         if(MediaMoveService.SERVICE_STARTED){
             MediaMoveService.updateMoveMessenger(null);

@@ -6,6 +6,16 @@
     android:paddingLeft="@dimen/tenDpDimension"
     android:paddingRight="@dimen/tenDpDimension"
     android:id="@+id/pin_lock_activity_parent">
+
+    <RelativeLayout
+        android:id="@+id/pin_lock_activity_ad_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/pin_lock_activity_app_icon_view"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/twentyDpDimension"
+        />
+
         <ImageView
             android:id="@+id/pin_lock_activity_app_icon_view"
             android:layout_width="40dp"

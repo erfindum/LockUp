@@ -35,6 +35,7 @@ import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.FingerPrintActivity;
 import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.loyaltybonus.UserLoyaltyReport;
 import com.smartfoxitsolutions.lockup.receivers.AppLockServiceRestartReceiver;
 import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusModel;
 import com.smartfoxitsolutions.lockup.views.LockPatternView;
@@ -48,6 +49,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Executors;
@@ -74,10 +76,11 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     private AppLockQueryTask appLockQueryTask;
     private Gson gson;
     private Type checkedAppsMapToken, checkedAppsColorMapToken, recommendedAppsMapToken;
+    private Type userReportMapToken;
     private ArrayList<String> checkedAppsList, recommendedAppsList;
     private AppLockReceiver appLockReceiver;
     private int appLockMode;
-    private long adRefreshInterval,userVision,userPhysic;
+    private long adRefreshInterval;
     private TreeMap<String,Integer> checkedAppColorMap;
     private WindowManager windowManager;
     private WindowManager.LayoutParams params;
@@ -85,11 +88,12 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     private LockPinViewFinger lockPinViewFinger;
     private LockPatternView patternLockView;
     private LockPatternViewFinger patternLockViewFinger;
-    private boolean isFingerPrintLockActive, hasLockDisplayed ;
+    private boolean isFingerPrintLockActive, hasLockDisplayed ,isUserLoggedIn;
     private boolean stopAppLock, shouldLockOnScreenOn, isScreenOn;
     private MoPubNative moPubNative;
     private NativeAd moPubNativeAd;
     private View adView;
+    private UserLoyaltyReport userLoyaltyReport;
     int displayHeight;
 
     @Nullable
@@ -110,9 +114,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         checkedAppsMapToken = new TypeToken<TreeMap<String,String>>(){}.getType();
         checkedAppsColorMapToken = new TypeToken<TreeMap<String,Integer>>(){}.getType();
         recommendedAppsMapToken = new TypeToken<LinkedHashMap<String,HashMap<String,Boolean>>>(){}.getType();
-        SharedPreferences prefs = getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE);
-        userVision = prefs.getLong(LoyaltyBonusModel.DAILY_USER_VISION,0);
-        userPhysic = prefs.getLong(LoyaltyBonusModel.DAILY_USER_PHYSIC,0);
+        userReportMapToken = new TypeToken<LinkedHashMap<String,UserLoyaltyReport>>(){}.getType();
         checkedAppColorMap = new TreeMap<>();
         scheduleAppQuery();
         appLockReceiver = new AppLockReceiver();
@@ -186,6 +188,15 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                 stopSelf();
             }
         }
+        SharedPreferences loyaltyPrefs = getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE);
+        String userReportString = loyaltyPrefs.getString(LoyaltyBonusModel.USER_LOYALTY_REPORT,null);
+        LinkedHashMap<String,UserLoyaltyReport> userLoyaltyReportMap = gson.fromJson(userReportString, userReportMapToken);
+        if(userLoyaltyReportMap!=null && !userLoyaltyReportMap.isEmpty()){
+            ArrayList<String> dateKeyList = new ArrayList<>(userLoyaltyReportMap.keySet());
+            String dateKey = dateKeyList.get(dateKeyList.size()-1);
+            userLoyaltyReport = userLoyaltyReportMap.get(dateKey);
+        }
+        isUserLoggedIn = loyaltyPrefs.getBoolean(LoyaltyBonusModel.LOGIN_USER_LOGGED_IN_KEY,false);
         return START_STICKY;
     }
 
@@ -205,7 +216,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         moPubNative = new MoPubNative(this
                 ,getResources().getString(R.string.pin_lock_activity_ad_unit_id),this);
 
-        ViewBinder viewBinder = new ViewBinder.Builder(R.layout.native_ad_sample)
+        ViewBinder viewBinder = new ViewBinder.Builder(R.layout.lock_native_ad)
                 .mainImageId(R.id.native_ad_main_image)
                 .titleId(R.id.native_ad_title)
                 .textId(R.id.native_ad_text)
@@ -232,11 +243,15 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
             if (System.currentTimeMillis() > adRefreshInterval) {
                 requestAd();
             }
+
             if(checkedAppPackage[0]!=null && checkedAppPackage[1]!=null) {
                 if (!checkedAppsList.contains(checkedAppPackage[0]) && !recommendedAppsList.contains(checkedAppPackage[0])) {
                     if(checkedAppPackage[0].equals(checkedAppPackage[1])) {
                         recentlyLockedApp = NIL_APPS_LOCKED;
                         Log.d("AppLock",checkedAppPackage[0] + " FOREGROUND " + checkedAppPackage[1] + " BACKGROUND ");
+                        if(hasLockDisplayed){
+                            removeView();
+                        }
                         return true;
                     }
                 }
@@ -298,6 +313,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                                 lockPinViewFinger = new LockPinViewFinger(getBaseContext(), this, this, isFingerPrintLockActive);
                                 lockPinViewFinger.setPackageName(checkedAppPackage[0]);
                                 lockPinViewFinger.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
+                                lockPinViewFinger.addRenderedAd(adView, moPubNativeAd);
                                 windowManager.addView(lockPinViewFinger, params);
                                 hasLockDisplayed = true;
                                 if (isFingerPrintLockActive) {
@@ -314,6 +330,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                             lockPinView = new LockPinView(getBaseContext(), this);
                             lockPinView.setPackageName(checkedAppPackage[0]);
                             lockPinView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
+                            lockPinView.addRenderedAd(adView, moPubNativeAd);
                             windowManager.addView(lockPinView, params);
                             hasLockDisplayed = true;
                         }
@@ -349,6 +366,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                         lockPinView = new LockPinView(getBaseContext(), this);
                         lockPinView.setPackageName(checkedAppPackage);
                         lockPinView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage), displayHeight);
+                        lockPinView.addRenderedAd(adView, moPubNativeAd);
                         windowManager.addView(lockPinView, params);
                         hasLockDisplayed = true;
                     }
@@ -375,22 +393,36 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
 
     @Override
     public void onAdImpressed() {
-        userVision++;
-        long currentUserVision = userVision;
-       SharedPreferences.Editor edit =  getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE)
-                                        .edit();
-        edit.putLong(LoyaltyBonusModel.DAILY_USER_VISION,currentUserVision);
-        edit.apply();
+        if(isUserLoggedIn) {
+            userLoyaltyReport.setTotalImpression(Integer.valueOf(userLoyaltyReport.getTotalImpression()) + 1);
+            SharedPreferences loyaltyPrefs = getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE);
+            String userReportCurrentString = loyaltyPrefs.getString(LoyaltyBonusModel.USER_LOYALTY_REPORT,null);
+            LinkedHashMap<String,UserLoyaltyReport> userLoyaltyReportMap = gson.fromJson(userReportCurrentString, userReportMapToken);
+            if(userLoyaltyReportMap!=null && !userLoyaltyReportMap.isEmpty()){
+                userLoyaltyReportMap.put(userLoyaltyReport.getReportDate(),userLoyaltyReport);
+            }
+            SharedPreferences.Editor edit = loyaltyPrefs.edit();
+            String userReportUpdateString = gson.toJson(userLoyaltyReportMap, userReportMapToken);
+            edit.putString(LoyaltyBonusModel.USER_LOYALTY_REPORT,userReportUpdateString);
+            edit.apply();
+        }
     }
 
     @Override
     public void onAdClicked() {
-        userPhysic++;
-        long currentUserPhysic = userPhysic;
-        SharedPreferences.Editor edit =  getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE)
-                .edit();
-        edit.putLong(LoyaltyBonusModel.DAILY_USER_PHYSIC,currentUserPhysic);
-        edit.apply();
+        if(isUserLoggedIn) {
+            userLoyaltyReport.setTotalClicked(Integer.valueOf(userLoyaltyReport.getTotalClicked()) + 1);
+            SharedPreferences loyaltyPrefs = getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE);
+            String userReportCurrentString = loyaltyPrefs.getString(LoyaltyBonusModel.USER_LOYALTY_REPORT,null);
+            LinkedHashMap<String,UserLoyaltyReport> userLoyaltyReportMap = gson.fromJson(userReportCurrentString, userReportMapToken);
+            if(userLoyaltyReportMap!=null && !userLoyaltyReportMap.isEmpty()){
+                userLoyaltyReportMap.put(userLoyaltyReport.getReportDate(),userLoyaltyReport);
+            }
+            SharedPreferences.Editor edit = loyaltyPrefs.edit();
+            String userReportUpdateString = gson.toJson(userLoyaltyReportMap, userReportMapToken);
+            edit.putString(LoyaltyBonusModel.USER_LOYALTY_REPORT,userReportUpdateString);
+            edit.apply();
+        }
     }
 
     void removeView(){
@@ -445,13 +477,13 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
             String action = intent.getAction();
             if(action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)){
                 if(hasLockDisplayed) {
-                    String reason = intent.getStringExtra("reason");
+                 /*   String reason = intent.getStringExtra("reason");
                     if(reason!=null && reason.equals("homekey")){
                         removeView();
                         hasLockDisplayed = false;
                         Log.d("AppLock"," Got System Home Key");
                     }
-               //     removeView();
+               //     removeView(); */
                 }
             }
             if(action.equals(Intent.ACTION_SCREEN_OFF)){

@@ -187,6 +187,8 @@
     <string name="appLock_activity_should_start_dialog_info">
         App Lock is disabled would you like to enable app lock ?
     </string>
+    <string name="appLock_activity_toggle_text">Find Lockup and switch on</string>
+
     <string name="appLock_activity_should_start_dialog_permit">START</string>
     <string name="appLock_activity_should_start_dialog_cancel">NOT NOW</string>
     <string name="appLock_activity_prevent_uninstall_info_text">Deactivating may cause LockUp to be uninstalled or
@@ -270,6 +272,7 @@
     <string name="vault_move_activity_cancel_notif">CANCEL</string>
     <string name="vault_move_activity_move_complete">Operation Complete</string>
     <string name="vault_move_activity_delete_complete">Operation Complete</string>
+    <string name="vault_move_activity_insufficient_space">Insufficient Space Available</string>
     <string name="vault_move_activity_vault_redirect_message">Touch to open LockUp Vault</string>
     <string name="vault_move_activity_move_background">Move in background</string>
 
@@ -300,8 +303,8 @@
     <string name="loyalty_bonus_signin_password_empty_error">Password cannot be empty</string>
 
     <!-- Loyalty Bonus SignUp -->
-    <string name="loyalty_bonus_signup_first_name">First Name</string>
-    <string name="loyalty_bonus_signup_last_name">Last Name</string>
+    <string name="loyalty_bonus_signup_first_name">Full Name</string>
+    <string name="loyalty_bonus_signup_password_hint">Password (min 8 chars)</string>
     <string name="loyalty_bonus_signup_confirm_password">Confirm Password</string>
     <string name="loyalty_bonus_signup_country">Country</string>
     <string name="loyalty_bonus_signup_gender">Gender</string>
@@ -317,15 +320,13 @@
     <string name="loyalty_bonus_signup_password_error">Passwords do not match</string>
     <string name="loyalty_bonus_signup_password_empty_error">Passwords cannot be empty</string>
     <string name="loyalty_bonus_signup_date_error">Choose a valid birth date</string>
+    <string name="loyalty_bonus_signup_max_date_error">You must be 13 years of age to Sign-up</string>
     <string name="loyalty_bonus_signup_wait_text">Please Wait</string>
 
     <string name="loyalty_bonus_signup_no_connection">Network Connection Unavailable</string>
     <string name="loyalty_bonus_signup_unknown_error">Unknown Error Occurred</string>
     <string name="loyalty_bonus_signup_success_message">Successfully registered</string>
     <string name="loyalty_bonus_signup_success_positive">LOGIN</string>
-
-
-
 
     <string-array name="gender_list">
         <item>Male</item>
@@ -351,7 +352,47 @@
     <string name="loyalty_password_reset_one_hint">Enter new password</string>
     <string name="loyalty_password_reset_two_hint">Confirm new password</string>
 
+    <!-- Loyalty User Main -->
+    <string name="loyalty_user_main_hello">Hello </string>
+    <string name="loyalty_user_main_points_head">Your Points</string>
+    <string name="loyalty_user_main_lock_head">App Lock</string>
+    <string name="loyalty_user_main_lock_info_one"> protected apps</string>
+    <string name="loyalty_user_main_lock_info_two">Lock more apps to get more points</string>
+    <string name="loyalty_user_main_points_info_one">1000 points = 1$</string>
+    <string name="loyalty_user_main_points_info_two">Points will be updated once a day</string>
+    <string name="loyalty_user_main_redeem_text">Redeem with</string>
+    <string name="loyalty_user_main_logout">Logout</string>
+    <string name="loyalty_user_main_title">Loyalty Bonus</string>
 
+
+    <!-- Loyalty Bonus Redeem -->
+    <string name="loyalty_bonus_redeem_text">Redeemable Points</string>
+    <string name="loyalty_bonus_redeem_head">Choose a required denomination to redeem</string>
+    <string name="loyalty_bonus_redeem_one_credit">$2</string>
+    <string name="loyalty_bonus_redeem_two_credit">$3</string>
+    <string name="loyalty_bonus_redeem_three_credit">$5</string>
+    <string name="loyalty_bonus_redeem_four_credit">$10</string>
+    <string name="loyalty_bonus_redeem_five_credit">$50</string>
+    <string name="loyalty_bonus_redeem_six_credit">$100</string>
+    <string name="loyalty_bonus_redeem_seven_credit">$200</string>
+    <string name="loyalty_bonus_redeem_one_points">2,000</string>
+    <string name="loyalty_bonus_redeem_two_points">3,000</string>
+    <string name="loyalty_bonus_redeem_three_points">5,000</string>
+    <string name="loyalty_bonus_redeem_four_points">10,000</string>
+    <string name="loyalty_bonus_redeem_five_points">50,000</string>
+    <string name="loyalty_bonus_redeem_six_points">100,000</string>
+    <string name="loyalty_bonus_redeem_seven_points">200,000</string>
+    <string name="loyalty_bonus_redeem_button">Redeem Now</string>
+    <string name="loyalty_bonus_redeem_title">Select Redeem Points</string>
+
+    <!-- Loyalty Redeem Final -->
+    <string name="loyalty_redeem_final_selected_info">Selected Denomination</string>
+    <string name="loyalty_redeem_final_paypal_info">Enter your Paypal ID</string>
+    <string name="loyalty_redeem_final_paytm_info">Enter your Paytm wallet ID</string>
+    <string name="loyalty_redeem_final_paypal_hint">Paypal ID</string>
+    <string name="loyalty_redeem_final_paytm_hint">Paytm ID</string>
+    <string name="loyalty_redeem_final_redeem_button">Redeem Points</string>
+    <string name="loyalty_redeem_final_redeem_title">Redeem Bonus</string>
 
 
 </resources>

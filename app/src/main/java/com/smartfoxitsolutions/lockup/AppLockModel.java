@@ -101,7 +101,7 @@ public class AppLockModel {
         }
     }
 
-    TreeMap<String,String> getCheckedAppsMap(){
+    public TreeMap<String,String> getCheckedAppsMap(){
         if(checkedAppsMap ==null){
             return new TreeMap<>();
         }else{
@@ -117,7 +117,7 @@ public class AppLockModel {
         }
     }
 
-    LinkedHashMap<String,HashMap<String,Boolean>> getRecommendedAppsMap(){
+    public LinkedHashMap<String,HashMap<String,Boolean>> getRecommendedAppsMap(){
         if(recommendedAppsMap==null){
             return new LinkedHashMap<>();
         }else{

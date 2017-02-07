@@ -22,6 +22,8 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.smartfoxitsolutions.lockup.AppLockModel;
+import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.dialogs.NetworkProcessDialog;
 import com.smartfoxitsolutions.lockup.loyaltybonus.dialogs.OperationSuccessDialog;
@@ -83,20 +85,12 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
     public void onStart() {
         super.onStart();
         SharedPreferences prefs = activity.getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME, Context.MODE_PRIVATE);
-        String emailString = prefs.getString(LoyaltyBonusModel.RECOVERY_CODE_EMAIL_KEY,
-                getString(R.string.loyalty_password_recovery_enter_email_hint));
-        if(emailString.equals(getString(R.string.loyalty_password_recovery_enter_email_hint))){
-            sendRecoveryEdit.setText("");
-        }else{
-            sendRecoveryEdit.setText(emailString);
-        }
+        String emailString = activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE)
+                .getString(LockUpSettingsActivity.RECOVERY_EMAIL_PREFERENCE_KEY,"No Registered Email");
+        sendRecoveryEdit.setText(emailString);
+        sendRecoveryEdit.setEnabled(false);
         long intervalStart = prefs.getLong(LoyaltyBonusModel.RECOVERY_CODE_TIME_INTERVAL,0);
         long intervalEnd = intervalStart+(30*1000);
-        if(System.currentTimeMillis()>intervalEnd){
-            sendRecoveryEdit.setEnabled(true);
-        }else{
-            sendRecoveryEdit.setEnabled(false);
-        }
 
         if(System.currentTimeMillis()<intervalEnd){
             resetPasswordEdit.setEnabled(true);
@@ -107,17 +101,6 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
             passwordEdit.setEnabled(false);
             confirmPasswordEdit.setEnabled(false);
         }
-
-        sendRecoveryEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if(actionId== EditorInfo.IME_ACTION_DONE){
-                    sendRecoveryCode();
-                    return false;
-                }
-                return false;
-            }
-        });
 
         confirmPasswordEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -166,7 +149,19 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
         }
 
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if(networkInfo!=null && networkInfo.isConnected()) {
+
+        if(networkInfo == null){
+            if(networkProcessDialog !=null){
+                networkProcessDialog.dismiss();
+            }
+            displayCompleteDialog(getString(R.string.reset_pin_pattern_network_failed_header)
+                    ,getString(R.string.reset_pin_pattern_network_failed)
+                    ,getString(R.string.reset_pin_pattern_network_failed_negative)
+                    ,"networkConnectionFailed");
+            return;
+        }
+
+        if(networkInfo.isConnected()) {
             if (networkProcessDialog != null) {
                 networkProcessDialog.dismiss();
             }
@@ -195,7 +190,6 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
                         if(resetResponse!=null && resetResponse.code.equals("200")){
                             SharedPreferences.Editor edit = prefs.edit();
                             edit.putLong(LoyaltyBonusModel.RECOVERY_CODE_TIME_INTERVAL,System.currentTimeMillis());
-                            edit.putString(LoyaltyBonusModel.RECOVERY_CODE_EMAIL_KEY,resetResponse.email);
                             edit.apply();
                             if(networkProcessDialog!=null){
                                 networkProcessDialog.dismiss();
@@ -209,7 +203,6 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
                             resetPasswordEdit.setEnabled(true);
                             passwordEdit.setEnabled(true);
                             confirmPasswordEdit.setEnabled(true);
-                            sendRecoveryEdit.setEnabled(false);
                         }
                         if(resetResponse!=null && resetResponse.code.equals("100")){
                             if(networkProcessDialog!=null){
@@ -277,7 +270,7 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
                     ,getString(R.string.reset_pin_pattern_network_failed_negative),
                     "resetPasswordError");
         }else{
-            resetNewPassword(passwordEdit.getText().toString());
+            resetNewPassword(resetPasswordEdit.getText().toString());
         }
 
     }
@@ -285,6 +278,17 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
     void resetNewPassword(final String pin){
         final SharedPreferences prefs = activity.getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,Context.MODE_PRIVATE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if(networkInfo == null){
+            if(networkProcessDialog !=null){
+                networkProcessDialog.dismiss();
+            }
+            displayCompleteDialog(getString(R.string.reset_pin_pattern_network_failed_header)
+                    ,getString(R.string.reset_pin_pattern_network_failed)
+                    ,getString(R.string.reset_pin_pattern_network_failed_negative)
+                    ,"networkConnectionFailed");
+            return;
+        }
+
         if(networkInfo!=null && networkInfo.isConnected()) {
             if (networkProcessDialog != null) {
                 networkProcessDialog.dismiss();
@@ -303,8 +307,10 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
             networkProcessDialog.show(fragmentTransaction, "resetLoading");
 
             final LoyaltyBonusRequest resetPasswordRequest = LoyaltyServiceGenerator.createService(LoyaltyBonusRequest.class);
+            String email = activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE)
+                    .getString(LockUpSettingsActivity.RECOVERY_EMAIL_PREFERENCE_KEY,"No Email Registered");
             Call<LoyaltyBonusResetResponse> resetCall = resetPasswordRequest.requestResetPassword("ChangePassword",
-                    prefs.getString(LoyaltyBonusModel.RECOVERY_CODE_EMAIL_KEY,"noEmail"),
+                    email,
                     passwordEdit.getText().toString(),pin);
 
             resetCall.enqueue(new Callback<LoyaltyBonusResetResponse>() {
@@ -323,10 +329,7 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
                             resetPasswordEdit.setEnabled(false);
                             passwordEdit.setEnabled(false);
                             confirmPasswordEdit.setEnabled(false);
-                            sendRecoveryEdit.setEnabled(true);
                             SharedPreferences.Editor edit = prefs.edit();
-                            edit.putString(LoyaltyBonusModel.RECOVERY_CODE_EMAIL_KEY,
-                                    getString(R.string.loyalty_password_recovery_enter_email_hint));
                             edit.putLong(LoyaltyBonusModel.RECOVERY_CODE_TIME_INTERVAL,0);
                             edit.apply();
                         }

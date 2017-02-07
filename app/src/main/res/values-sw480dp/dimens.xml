@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="native_ad_image_width">260dp</dimen>
-    <dimen name="native_ad_image_height">150dp</dimen>
+    <dimen name="native_ad_image_width">280dp</dimen>
+    <dimen name="native_ad_image_height">170dp</dimen>
 </resources>

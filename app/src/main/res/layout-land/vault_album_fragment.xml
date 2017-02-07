@@ -10,8 +10,6 @@
         android:id="@+id/vault_fragment_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/tenDpDimension"
-        android:layout_marginStart="@dimen/tenDpDimension"
         />
     <ProgressBar
         android:id="@+id/vault_fragment_progress"

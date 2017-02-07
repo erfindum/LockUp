@@ -2,15 +2,15 @@ package com.smartfoxitsolutions.lockup.loyaltybonus;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatSpinner;
 import android.util.Log;
@@ -24,13 +24,15 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.smartfoxitsolutions.lockup.AppLockModel;
+import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.loyaltybonus.dialogs.LoyaltyBonusDatePicker;
 import com.smartfoxitsolutions.lockup.loyaltybonus.dialogs.OnUserSignUpListener;
-import com.smartfoxitsolutions.lockup.loyaltybonus.dialogs.OperationSuccessDialog;
 import com.smartfoxitsolutions.lockup.loyaltybonus.dialogs.SignUpErrorDialog;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -48,7 +50,7 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
 ,OnUserSignUpListener {
 
     private AppCompatSpinner genderSpinner, countrySpinner;
-    private AppCompatEditText firstName,lastName,email,password,confirmPassword;
+    private AppCompatEditText fullName,email,password,confirmPassword;
     private Button signInButton,signUpButton;
     private LoyaltyBonusMain activity;
     private TextView datePicker, signUpInfo;
@@ -66,8 +68,7 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
         View parent = inflater.inflate(R.layout.loyalty_bonus_signup,container,false);
         genderSpinner = (AppCompatSpinner) parent.findViewById(R.id.loyalty_bonus_signup_gender);
         countrySpinner = (AppCompatSpinner) parent.findViewById(R.id.loyalty_bonus_signup_country);
-        firstName = (AppCompatEditText) parent.findViewById(R.id.loyalty_bonus_signup_first_edit);
-        lastName = (AppCompatEditText) parent.findViewById(R.id.loyalty_bonus_signup_last_edit);
+        fullName = (AppCompatEditText) parent.findViewById(R.id.loyalty_bonus_signup_name_edit);
         email = (AppCompatEditText) parent.findViewById(R.id.loyalty_bonus_signup_email_edit);
         password = (AppCompatEditText) parent.findViewById(R.id.loyalty_bonus_signup_password_edit);
         confirmPassword = (AppCompatEditText) parent.findViewById(R.id.loyalty_bonus_signup_confirm_password_edit);
@@ -89,13 +90,11 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
                                                             ,R.layout.loyalty_spinner);
         genderAdapter.setDropDownViewResource(R.layout.loyalty_spinner_dropdown);
         genderSpinner.setAdapter(genderAdapter);
-        Locale[] localeList = Locale.getAvailableLocales();
+        String[] localeList = Locale.getISOCountries();
         ArrayList<String> countryList = new ArrayList<>();
-        for(Locale locale:localeList){
-            String country = locale.getDisplayCountry();
-            if(country.length()>0 && !countryList.contains(country)){
-                countryList.add(country);
-            }
+        for(String countryCode:localeList){
+            Locale countryLoacale = new Locale("",countryCode);
+            countryList.add(countryLoacale.getDisplayCountry());
         }
         Collections.sort(countryList,String.CASE_INSENSITIVE_ORDER);
         ArrayAdapter<String> countryAdapter = new ArrayAdapter<>(getActivity(),R.layout.loyalty_spinner,countryList);
@@ -121,25 +120,27 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
         int[][] editState = new int[][]{
              new int[]{android.R.attr.state_focused},
              new int[]{android.R.attr.state_pressed},
-             new int[]{android.R.attr.state_enabled}
+             new int[]{android.R.attr.state_enabled},
+             new int[]{-android.R.attr.state_enabled}
         };
 
         int[] editColors = new int[]{
                 Color.parseColor("#f7e830"),
                 Color.parseColor("#f7e830"),
+                Color.WHITE,
                 Color.WHITE
         };
         ColorStateList colorStateList = new ColorStateList(editState,editColors);
         genderSpinner.setSupportBackgroundTintList(colorStateList);
         countrySpinner.setSupportBackgroundTintList(colorStateList);
-        firstName.setSupportBackgroundTintList(colorStateList);
-        lastName.setSupportBackgroundTintList(colorStateList);
+        fullName.setSupportBackgroundTintList(colorStateList);
         email.setSupportBackgroundTintList(colorStateList);
         password.setSupportBackgroundTintList(colorStateList);
         confirmPassword.setSupportBackgroundTintList(colorStateList);
 
+        email.setText(activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE)
+        .getString(LockUpSettingsActivity.RECOVERY_EMAIL_PREFERENCE_KEY,"No Email Registered"));
         setListeners();
-
     }
 
     void setListeners(){
@@ -227,13 +228,10 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
 
         Pattern emailPattern = Patterns.EMAIL_ADDRESS;
 
-        if(firstName.getText().toString().isEmpty()){
+        if(fullName.getText().toString().isEmpty()){
             displayErrorDialog(getString(R.string.loyalty_bonus_signup_first_name_error));
         }
-        else
-        if(lastName.getText().toString().isEmpty()){
-            displayErrorDialog(getString(R.string.loyalty_bonus_signup_last_name_error));
-        }else if(email.getText().toString().isEmpty()){
+        else if(email.getText().toString().isEmpty()){
             displayErrorDialog(getString(R.string.loyalty_bonus_signup_email_empty_error));
         }else if(!emailPattern.matcher(email.getText()).matches()){
             displayErrorDialog(getString(R.string.loyalty_bonus_signup_email_error));
@@ -245,9 +243,20 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
             displayErrorDialog(getString(R.string.loyalty_bonus_signup_password_error));
         }else if(day<=0 || month<=0 || year<=0){
             displayErrorDialog(getString(R.string.loyalty_bonus_signup_date_error));
+        }else if(!getValidBirthDate(month,year,day)){
+            displayErrorDialog(getString(R.string.loyalty_bonus_signup_max_date_error));
         }else{
             completeSignUp();
         }
+    }
+
+    private boolean getValidBirthDate(int month, int year, int day){
+        Calendar cal = Calendar.getInstance();
+        cal.set(year-1,month,day);
+        long selectedDate = cal.getTimeInMillis();
+        long substractDate = 1000*60*60*24*4749L;
+        long maximumDate = System.currentTimeMillis()-substractDate;
+        return selectedDate<=maximumDate;
     }
 
     void displayErrorDialog(String errorMessage){
@@ -262,30 +271,38 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
     }
 
     void completeSignUp(){
-        final String emailText = email.getText().toString();
+        final SharedPreferences preferences = activity.getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,
+                Context.MODE_PRIVATE);
         NetworkInfo connectInfo = connectivityManager.getActiveNetworkInfo();
-        if(connectInfo!=null && connectInfo.isConnected()){
+        if(connectInfo==null){
+            displayErrorDialog(getString(R.string.loyalty_bonus_signup_no_connection));
+            return;
+        }
 
+        if(connectInfo.isConnected()){
+            String deviceId =Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.ANDROID_ID);
             LoyaltyBonusRequest signupRequest = LoyaltyServiceGenerator.createService(LoyaltyBonusRequest.class);
             Call<LoyaltyBonusSignUpResponse> signUpCall = signupRequest.requestSignUp("register",
-                    firstName.getText().toString()+" "+lastName.getText().toString(),password.getText().toString()
-            ,getFormattedDate(year,month,day),countryText,genderText,email.getText().toString());
-
+                    fullName.getText().toString(),password.getText().toString()
+            ,getFormattedDate(year,month,day),countryText,genderText,email.getText().toString()
+            , deviceId);
             signUpCall.enqueue(new Callback<LoyaltyBonusSignUpResponse>() {
                 @Override
                 public void onResponse(Call<LoyaltyBonusSignUpResponse> call, Response<LoyaltyBonusSignUpResponse> response) {
                     if(response.isSuccessful()){
                         LoyaltyBonusSignUpResponse signUpResponse = response.body();
-                        if(signUpResponse!=null && signUpResponse.status.equals("success")){
-                            List<LoyaltyBonusSignUpData> dataList = signUpResponse.data;
-                            LoyaltyBonusSignUpData data = dataList.get(0);
-                            if(data.emailId.equals(emailText)){
-                                displaySuccessDialog(getString(R.string.loyalty_bonus_signup_success_message),
-                                        getString(R.string.loyalty_bonus_signup_success_positive),"signUp Success");
-                            }
+                        if(signUpResponse!=null && signUpResponse.code.equals("200")){
+                            LoyaltyBonusSignUpData data = signUpResponse.data;
+                            SharedPreferences.Editor edit = preferences.edit();
+                            edit.putString(LoyaltyBonusModel.LOGIN_EMAIL_KEY,data.emailId);
+                            edit.putString(LoyaltyBonusModel.LOGIN_USER_NAME_KEY,data.fullname);
+                            edit.putBoolean(LoyaltyBonusModel.LOGIN_USER_LOGGED_IN_KEY,true);
+                            edit.putString(LoyaltyBonusModel.LOYALTY_SEND_REQUEST,data.auth_code);
+                            edit.apply();
+                            getInitialBonus();
                             return;
                         }
-                        if(signUpResponse!=null && signUpResponse.status.equals("error")){
+                        if(signUpResponse!=null && signUpResponse.code.equals("100")){
                             displayErrorDialog(signUpResponse.message);
                         }
 
@@ -300,7 +317,6 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
                 }
             });
 
-
         }else{
            displayErrorDialog(getString(R.string.loyalty_bonus_signup_no_connection));
         }
@@ -310,22 +326,41 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
         return year+"-"+month+"-"+date;
     }
 
-    private void displaySuccessDialog(String message, String negative, String tag){
-        operationSuccessDialog = new OperationSuccessDialog();
-        Bundle bundle = new Bundle();
-        bundle.putInt(OperationSuccessDialog.OPERATION_TYPE_KEY,OperationSuccessDialog.OPERATION_TYPE_SINGUP_SUCCESS);
-        bundle.putString(OperationSuccessDialog.NETWORK_INFO_MESSAGE
-                ,message);
-        bundle.putString(OperationSuccessDialog.NETWORK_INFO_BUTTON
-                ,negative);
-        operationSuccessDialog.setArguments(bundle);
-        FragmentManager fragmentManager = activity.getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction =fragmentManager.beginTransaction();
-        fragmentTransaction.addToBackStack(tag);
-        operationSuccessDialog.show(fragmentTransaction,tag);
-        signUpInfo.setVisibility(View.INVISIBLE);
-        signUpProgress.setVisibility(View.INVISIBLE);
-        signUpButton.setText(getString(R.string.loyalty_bonus_signup_button));
+    private void getInitialBonus(){
+        final SharedPreferences preferences = activity.getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,
+                Context.MODE_PRIVATE);
+        NetworkInfo connectInfo = connectivityManager.getActiveNetworkInfo();
+        if(connectInfo!=null && connectInfo.isConnected()){
+            LoyaltyBonusRequest initialPointRequest = LoyaltyServiceGenerator.createService(LoyaltyBonusRequest.class);
+            Call<LoyaltyBonusInitialPointResponse> signUpCall = initialPointRequest.requestInitialPoints("getTotalpoint",
+                    preferences.getString(LoyaltyBonusModel.LOGIN_EMAIL_KEY,"noEmail")
+                    , preferences.getString(LoyaltyBonusModel.LOYALTY_SEND_REQUEST,"noRequest"));
+            signUpCall.enqueue(new Callback<LoyaltyBonusInitialPointResponse>() {
+                @Override
+                public void onResponse(Call<LoyaltyBonusInitialPointResponse> call, Response<LoyaltyBonusInitialPointResponse> response) {
+                    if(response.isSuccessful()){
+                        LoyaltyBonusInitialPointResponse initialPointResponse = response.body();
+                        if(initialPointResponse!=null && initialPointResponse.code.equals("200")){
+                            SharedPreferences.Editor edit = preferences.edit();
+                            edit.putString(LoyaltyBonusModel.USER_LOYALTY_BONUS,initialPointResponse.totalpoint);
+                            edit.apply();
+                        }
+
+                    }
+                    if(activity!=null) {
+                        activity.signUpSuccess();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<LoyaltyBonusInitialPointResponse> call, Throwable t) {
+                    if(activity!=null) {
+                        activity.signUpSuccess();
+                    }
+                }
+            });
+
+        }
     }
 
     @Override

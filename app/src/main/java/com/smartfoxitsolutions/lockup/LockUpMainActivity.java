@@ -49,7 +49,8 @@ public class LockUpMainActivity extends AppCompatActivity {
                             , loyaltyBonusButton,settingsButton;
 
     private DialogFragment overlayPermissionDialog,usageDialog;
-    private boolean shouldTrackUserPresence, shouldCloseAffinity, shouldStartAppLock, isAppLockFirstLoad;
+    private boolean shouldTrackUserPresence, shouldCloseAffinity, shouldStartAppLock,
+            isAppLockFirstLoad, hasPermissionReturned,stopTrackAfterPermission;
     private AppCompatImageButton lockButton;
     private ScreenOffReceiver screenOffReceiver;
 
@@ -63,7 +64,7 @@ public class LockUpMainActivity extends AppCompatActivity {
         lockButton = (AppCompatImageButton) findViewById(R.id.lockup_main_activity_app_lock_button);
         loyaltyBonusButton = (AppCompatImageButton) findViewById(R.id.lockup_main_activity_loyalty_button);
         SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
-        isAppLockFirstLoad = prefs.getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,false);
+        isAppLockFirstLoad = prefs.getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,true);
         setBackground();
         setImageButtonListeners();
     }
@@ -126,8 +127,14 @@ public class LockUpMainActivity extends AppCompatActivity {
                 if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
                         checkAndSetOverlayPermission();
                 }else{
-                    startActivity(new Intent(getBaseContext(),AppLockActivity.class));
-                    shouldTrackUserPresence =false;
+                    if(!hasPermissionReturned) {
+                        shouldTrackUserPresence = false;
+                        startActivity(new Intent(getBaseContext(), AppLockActivity.class));
+                    }else{
+                        shouldTrackUserPresence = false;
+                        stopTrackAfterPermission = true;
+                        startActivity(new Intent(getBaseContext(), AppLockActivity.class));
+                    }
                 }
                 Log.d(AppLockingService.TAG,String.valueOf(opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS
                         , Process.myUid(), getPackageName())
@@ -142,15 +149,24 @@ public class LockUpMainActivity extends AppCompatActivity {
     @TargetApi(23)
     void checkAndSetOverlayPermission(){
         if(Settings.canDrawOverlays(this)){
-            startActivity(new Intent(getBaseContext(),AppLockActivity.class));
-            shouldTrackUserPresence = false;
+            if(!hasPermissionReturned) {
+                shouldTrackUserPresence = false;
+                startActivity(new Intent(getBaseContext(), AppLockActivity.class));
+            }else{
+                shouldTrackUserPresence = false;
+                stopTrackAfterPermission = true;
+                startActivity(new Intent(getBaseContext(), AppLockActivity.class));
+            }
         }else{
             startOverlayPermissionDialog();
         }
     }
 
     void startUsagePermissionDialog(){
+        Bundle usageBundle = new Bundle();
+        usageBundle.putString("grandUsageStartType","appLockStart");
         usageDialog = new GrantUsageAccessDialog();
+        usageDialog.setArguments(usageBundle);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction =fragmentManager.beginTransaction();
         fragmentTransaction.addToBackStack(USAGE_ACCESS_DIALOG_TAG);
@@ -158,7 +174,10 @@ public class LockUpMainActivity extends AppCompatActivity {
     }
 
     void startOverlayPermissionDialog(){
+        Bundle overlayBundle = new Bundle();
+        overlayBundle.putString("overlayStartType","appLockStart");
         overlayPermissionDialog = new OverlayPermissionDialog();
+        overlayPermissionDialog.setArguments(overlayBundle);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction =fragmentManager.beginTransaction();
         fragmentTransaction.addToBackStack(OVERLAY_ACCESS_DIALOG_TAG);
@@ -182,18 +201,23 @@ public class LockUpMainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == USAGE_ACCESS_PERMISSION_REQUEST){
             checkAndSetUsagePermissions();
-            shouldTrackUserPresence = true;
+            hasPermissionReturned =true;
         }else
         if(requestCode == OVERLAY_PERMISSION_REQUEST){
             checkAndSetOverlayPermission();
-            shouldTrackUserPresence = true;
+            hasPermissionReturned = true;
         }
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        shouldTrackUserPresence = true;
+        if(!stopTrackAfterPermission) {
+            shouldTrackUserPresence = true;
+        }else{
+            stopTrackAfterPermission = false;
+            hasPermissionReturned = false;
+        }
     }
 
     @Override

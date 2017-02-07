@@ -28,12 +28,13 @@ import java.lang.ref.WeakReference;
 public class LoyaltyBonusMain extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener{
 
     private static final String LOYALTY_BONUS_SIGNUP_TAG = "loyalty_bonus_signup";
+    static final int USER_LOGGED_OUT = 25;
 
 
     private FragmentManager fragmentManager;
     private OnUserSignUpListener userSignUpListener;
     boolean shouldTrackUserPresence, shouldCloseAffinity;
-    boolean isRecoverySent;
+    boolean isRecoverySent, isSignInDisplayedOnce;
     private LoyaltyMainScreenOffReceiver loyaltyMainScreenOffReceiver;
 
 
@@ -55,16 +56,22 @@ public class LoyaltyBonusMain extends AppCompatActivity implements FragmentManag
         super.onStart();
         SharedPreferences preferences = getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE);
         boolean isLoggedIn = preferences.getBoolean(LoyaltyBonusModel.LOGIN_USER_LOGGED_IN_KEY,false);
-        if(isLoggedIn){
-            shouldTrackUserPresence = false;
-            startActivity(new Intent(getBaseContext(),LoyaltyBonusUserMain.class));
-            finish();
-        }else{
-            FragmentTransaction fragTransaction = fragmentManager.beginTransaction();
-            fragTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            fragTransaction.add(R.id.loyalty_bonus_main_activity_container, new LoyaltyBonusSignUpFragment(),LOYALTY_BONUS_SIGNUP_TAG);
-            fragTransaction.addToBackStack(LOYALTY_BONUS_SIGNUP_TAG);
-            fragTransaction.commit();
+        int startType = getIntent().getIntExtra("userLoggedOut",0);
+        if(startType == USER_LOGGED_OUT && !isSignInDisplayedOnce){
+            isSignInDisplayedOnce =true;
+            startSignIn();
+        }else {
+            if (isLoggedIn) {
+                shouldTrackUserPresence = false;
+                startActivity(new Intent(this, LoyaltyUserActivity.class));
+                finish();
+            } else if (!isRecoverySent) {
+                FragmentTransaction fragTransaction = fragmentManager.beginTransaction();
+                fragTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                fragTransaction.add(R.id.loyalty_bonus_main_activity_container, new LoyaltyBonusSignUpFragment(), LOYALTY_BONUS_SIGNUP_TAG);
+                fragTransaction.addToBackStack(LOYALTY_BONUS_SIGNUP_TAG);
+                fragTransaction.commit();
+            }
         }
         loyaltyMainScreenOffReceiver = new LoyaltyMainScreenOffReceiver(new WeakReference<>(this));
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
@@ -98,8 +105,9 @@ public class LoyaltyBonusMain extends AppCompatActivity implements FragmentManag
     }
 
     public void signUpSuccess(){
-        fragmentManager.popBackStack();
-        startSignIn();
+        shouldTrackUserPresence = false;
+        startActivity(new Intent(this,LoyaltyUserActivity.class));
+        finish();
     }
 
     public void passwordResetSuccess(){
@@ -108,7 +116,7 @@ public class LoyaltyBonusMain extends AppCompatActivity implements FragmentManag
 
     void startLoyaltyUserMain(){
         shouldTrackUserPresence = false;
-        startActivity(new Intent(getBaseContext(),LoyaltyBonusUserMain.class));
+        startActivity(new Intent(this,LoyaltyUserActivity.class));
         finish();
     }
 

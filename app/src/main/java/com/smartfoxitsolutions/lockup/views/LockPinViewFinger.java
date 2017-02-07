@@ -54,7 +54,8 @@ import java.security.NoSuchAlgorithmException;
  * Created by RAAJA on 26-10-2016.
  */
 
-public class LockPinViewFinger extends FrameLayout implements View.OnClickListener,MoPubNative.MoPubNativeNetworkListener{
+public class LockPinViewFinger extends FrameLayout implements View.OnClickListener
+                    {
     Context context;
 
     private ImageView appIconView;
@@ -66,15 +67,15 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
     private Vibrator pinDigitVibrator;
     private FingerprintManagerCompat fingerprintManager;
     private CancellationSignal cancelSignal;
-    private RelativeLayout pinViewParent;
+    private RelativeLayout pinViewParent, pinAdParent;
     private AppCompatImageView fingerPrintIcon;
     private TextView fingerPrintInfoText;
     private AppCompatImageButton fingerPrintSwitchButton, pinPatternSwitchButton;
     private boolean isFingerPrintActive;
     int noOfAttempts,noOfNoisyAttempts;
     private ValueAnimator animatorFingerError,animatorMain;
-    private MoPubNative mMoPubNative;
     private NativeAd moPubNativeAd;
+    private View nativeAdView;
 
     private String selectedPin,pinPassCode,salt;
     private int pinDigitCount;
@@ -98,10 +99,10 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
         setFingerCanceledListener(fingerScannerCancelListener);
         LayoutInflater.from(context).inflate(R.layout.pin_lock_activity_finger,this,true);
         pinViewParent = (RelativeLayout) findViewById(R.id.pin_lock_activity_finger_parent);
+        pinAdParent = (RelativeLayout) findViewById(R.id.pin_lock_activity_finger_ad_parent);
         pinDigitVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         fingerprintManager = FingerprintManagerCompat.from(context);
         cancelSignal = new CancellationSignal();
-        initAds();
         initializeLockView();
     }
 
@@ -777,60 +778,6 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
         }
     }
 
-    void initAds(){
-        mMoPubNative = new MoPubNative(context
-                ,getResources().getString(R.string.pin_lock_activity_ad_unit_id),this);
-
-        ViewBinder viewBinder = new ViewBinder.Builder(R.layout.native_ad_sample)
-                .mainImageId(R.id.native_ad_main_image)
-                .titleId(R.id.native_ad_title)
-                .textId(R.id.native_ad_text)
-                .callToActionId(R.id.native_ad_call_to_action)
-                .build();
-
-        MoPubStaticNativeAdRenderer adRenderer = new MoPubStaticNativeAdRenderer(viewBinder);
-
-        mMoPubNative.registerAdRenderer(adRenderer);
-        mMoPubNative.makeRequest();
-    }
-
-    @Override
-    public void onNativeLoad(NativeAd nativeAd) {
-        Log.d("LockUpMopub","Called onNativeLoad Finger");
-        moPubNativeAd = nativeAd;
-        if(context!=null) {
-            View adViewRender = moPubNativeAd.createAdView(context, null);
-            addRenderedAd(adViewRender);
-            moPubNativeAd.renderAdView(adViewRender);
-            moPubNativeAd.prepare(adViewRender);
-            moPubNativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
-                @Override
-                public void onImpression(View view) {
-
-                }
-
-                @Override
-                public void onClick(View view) {
-                    postPinCompleted();
-                }
-            });
-        }
-    }
-
-    @Override
-    public void onNativeFail(NativeErrorCode errorCode) {
-        Log.d("LockUpMopub",errorCode+ " errorcode");
-    }
-
-    void addRenderedAd(View adView){
-        int marginTop = Math.round(DimensionConverter.convertDpToPixel(20f,context.getApplicationContext()));
-        FrameLayout.LayoutParams parms = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT
-                , ViewGroup.LayoutParams.WRAP_CONTENT);
-        parms.topMargin = marginTop;
-        parms.gravity = Gravity.TOP|Gravity.CENTER;
-        this.addView(adView,parms);
-    }
-
     @TargetApi(23)
     void analyzeFingerPrint(){
         final Resources res = getResources();
@@ -986,6 +933,36 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
         pinLockListener.onPinUnlocked();
     }
 
+    public void addRenderedAd(View adView, NativeAd nativeAd){
+        if(adView !=null && nativeAd != null) {
+            nativeAdView = adView;
+            moPubNativeAd = nativeAd;
+            RelativeLayout.LayoutParams parms = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT
+                    , ViewGroup.LayoutParams.WRAP_CONTENT);
+            parms.addRule(RelativeLayout.CENTER_IN_PARENT);
+            pinAdParent.addView(nativeAdView, parms);
+            moPubNativeAd.renderAdView(adView);
+            moPubNativeAd.prepare(adView);
+            moPubNativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
+                @Override
+                public void onImpression(View view) {
+                    if(pinLockListener!=null){
+                        pinLockListener.onAdImpressed();
+                    }
+                    Log.d("LockUpMopub","LockUP Impression Tracked");
+                }
+
+                @Override
+                public void onClick(View view) {
+                    Log.d("LockUpMopub","LockUP Click Tracked");
+                    if(pinLockListener!=null){
+                        pinLockListener.onAdClicked();
+                    }
+                }
+            });
+        }
+    }
+
     void startHome(){
         context.startActivity(new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME)
@@ -1004,7 +981,11 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
 
     public void removeView(){
         unregisterListeners();
-        mMoPubNative.destroy();
+        if(nativeAdView!=null) {
+            pinAdParent.removeView(nativeAdView);
+        }
+        nativeAdView = null;
+        moPubNativeAd = null;
         setPinLockUnlockListener(null);
         if(cancelSignal!=null && !cancelSignal.isCanceled()){
             cancelSignal.cancel();

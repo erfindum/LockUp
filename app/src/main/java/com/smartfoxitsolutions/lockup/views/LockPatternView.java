@@ -44,7 +44,7 @@ import java.security.NoSuchAlgorithmException;
  * Created by RAAJA on 06-10-2016.
  */
 
-public class LockPatternView extends FrameLayout implements PatternLockView.OnPatternChangedListener,MoPubNative.MoPubNativeNetworkListener
+public class LockPatternView extends FrameLayout implements PatternLockView.OnPatternChangedListener
                 ,NativeAd.MoPubNativeEventListener{
     Context context;
     private OnPinLockUnlockListener patternLockListener;
@@ -184,40 +184,6 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
                 resetPatternData();
             }
         });
-    }
-
-    void initAds(){
-       /* mMoPubNative = new MoPubNative(context
-                ,getResources().getString(R.string.pin_lock_activity_ad_unit_id),this);
-
-        ViewBinder viewBinder = new ViewBinder.Builder(R.layout.native_ad_sample)
-                .mainImageId(R.id.native_ad_main_image)
-                .titleId(R.id.native_ad_title)
-                .textId(R.id.native_ad_text)
-                .callToActionId(R.id.native_ad_call_to_action)
-                .build();
-
-        MoPubStaticNativeAdRenderer adRenderer = new MoPubStaticNativeAdRenderer(viewBinder);
-
-        mMoPubNative.registerAdRenderer(adRenderer);
-        mMoPubNative.makeRequest(); */
-    }
-
-    @Override
-    public void onNativeLoad(NativeAd nativeAd) {
-      /*  moPubNativeAd = nativeAd;
-        if(context!=null) {
-            View adViewRender = moPubNativeAd.createAdView(context, null);
-            addRenderedAd(adViewRender);
-            nativeAd.renderAdView(adViewRender);
-            nativeAd.prepare(adViewRender);
-            nativeAd.setMoPubNativeEventListener(this);
-        } */
-    }
-
-    @Override
-    public void onNativeFail(NativeErrorCode errorCode) {
-       // Log.d("LockUpMopub",errorCode+ " errorcode");
     }
 
     public void addRenderedAd(View adView, NativeAd nativeAd){

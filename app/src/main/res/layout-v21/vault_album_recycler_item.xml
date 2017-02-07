@@ -5,19 +5,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#fff"
     app:cardCornerRadius="@dimen/fiveDpDimension"
-    app:cardPreventCornerOverlap="false"
-    android:layout_marginBottom="@dimen/tenDpDimension"
+    android:layout_marginBottom="@dimen/fiveDpDimension"
     >
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/vault_album_item_height"
-        android:layout_marginBottom="@dimen/fiveDpDimension"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         >
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/vault_album_picker_recycler_item_thumbnail"
         android:layout_width="@dimen/vault_album_thumbnail_width"
         android:layout_height="@dimen/vault_album_thumbnail_height"
-        android:layout_alignParentTop="true"
         android:scaleType="fitXY"
         />
     <TextView
@@ -49,6 +46,7 @@
             android:layout_marginEnd="@dimen/fiveDpDimension"
             android:layout_marginLeft="@dimen/fiveDpDimension"
             android:layout_marginStart="@dimen/fiveDpDimension"
+            android:layout_marginBottom="@dimen/threeDpDimension"
             />
     </RelativeLayout>
 

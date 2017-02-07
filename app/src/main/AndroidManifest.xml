@@ -125,12 +125,11 @@
             android:excludeFromRecents="true"
             android:screenOrientation="portrait"
             />
-        <activity android:name=".loyaltybonus.LoyaltyBonusUserMain"
+        <activity android:name=".loyaltybonus.LoyaltyUserActivity"
             android:excludeFromRecents="true"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            />
 
-        <activity android:name=".loyaltybonus.UserRewardInfo"
-            android:excludeFromRecents="true"/>
         <service android:name=".services.AppLockingService" android:persistent="true" android:priority="1000">
         </service>
         <service android:name=".services.AppLockForegroundService"/>
@@ -149,7 +148,8 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
-
+        <service android:name=".loyaltybonus.services.UserReportIntentService"
+        />
 
         <receiver android:name=".receivers.AppLockServiceRestartReceiver"
             android:enabled="true"
@@ -183,6 +183,7 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
             </intent-filter>
         </receiver>
+        <receiver android:name=".loyaltybonus.receivers.UserReportBroadcastReceiver"/>
     </application>
 
 </manifest>

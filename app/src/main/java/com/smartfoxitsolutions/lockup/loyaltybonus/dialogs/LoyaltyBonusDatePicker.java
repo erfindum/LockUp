@@ -35,8 +35,11 @@ public class LoyaltyBonusDatePicker extends DialogFragment  implements DatePicke
             month = argBundle.getInt("month");
             day = argBundle.getInt("date");
         }
-
-        return new DatePickerDialog(getContext(),this,year,month,day);
+        DatePickerDialog dateDialog = new DatePickerDialog(getContext(),this,year,month,day);
+        long substartValue = (1000*60*60*24)*4749L;
+        long maximumDate = System.currentTimeMillis() - substartValue;
+        dateDialog.getDatePicker().setMaxDate(maximumDate);
+        return dateDialog;
     }
 
     @Override

@@ -117,7 +117,18 @@ public class ResetPasswordActivity extends AppCompatActivity {
             return;
         }
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if(networkInfo!=null && networkInfo.isConnected()) {
+        if(networkInfo==null){
+            if(networkProcessDialog !=null){
+                networkProcessDialog.dismiss();
+            }
+            displayCompleteDialog(getString(R.string.reset_pin_pattern_network_failed_header)
+                    ,getString(R.string.reset_pin_pattern_network_failed)
+                    ,getString(R.string.reset_pin_pattern_network_failed_negative)
+                    ,"networkConnectionFailed");
+            return;
+        }
+
+        if(networkInfo.isConnected()) {
             if(networkProcessDialog !=null){
                 networkProcessDialog.dismiss();
             }

@@ -44,7 +44,7 @@ import java.security.NoSuchAlgorithmException;
  * Created by RAAJA on 06-10-2016.
  */
 
-public class LockPinView extends FrameLayout implements View.OnClickListener,MoPubNative.MoPubNativeNetworkListener{
+public class LockPinView extends FrameLayout implements View.OnClickListener{
     Context context;
 
     private ImageView appIconView;
@@ -53,9 +53,9 @@ public class LockPinView extends FrameLayout implements View.OnClickListener,MoP
     private ImageView img_trigger_one,img_trigger_two,img_trigger_three,img_trigger_four;
     private Typeface digitTypFace;
     private Vibrator pinDigitVibrator;
-    private RelativeLayout pinViewParent;
-    private MoPubNative mMoPubNative;
+    private RelativeLayout pinViewParent, pinAdParent;
     private NativeAd moPubNativeAd;
+    private View nativeAdView;
 
     private String selectedPin, pinPassCode,salt;
     private int pinDigitCount;
@@ -73,8 +73,8 @@ public class LockPinView extends FrameLayout implements View.OnClickListener,MoP
         setPinLockUnlockListener(pinLockListener);
         LayoutInflater.from(context).inflate(R.layout.pin_lock_activity,this,true);
         pinViewParent = (RelativeLayout) findViewById(R.id.pin_lock_activity_parent);
+        pinAdParent = (RelativeLayout) findViewById(R.id.pin_lock_activity_ad_parent);
         pinDigitVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-        initAds();
         initializeLockView();
     }
 
@@ -689,61 +689,38 @@ public class LockPinView extends FrameLayout implements View.OnClickListener,MoP
         }
     }
 
-    void initAds(){
-        mMoPubNative = new MoPubNative(context
-                ,getResources().getString(R.string.pin_lock_activity_ad_unit_id),this);
-
-        ViewBinder viewBinder = new ViewBinder.Builder(R.layout.native_ad_sample)
-                .mainImageId(R.id.native_ad_main_image)
-                .titleId(R.id.native_ad_title)
-                .textId(R.id.native_ad_text)
-                .callToActionId(R.id.native_ad_call_to_action)
-                .build();
-
-        MoPubStaticNativeAdRenderer adRenderer = new MoPubStaticNativeAdRenderer(viewBinder);
-
-        mMoPubNative.registerAdRenderer(adRenderer);
-        mMoPubNative.makeRequest();
+    private void postPinCompleted(){
+        pinLockListener.onPinUnlocked();
     }
 
-    @Override
-    public void onNativeLoad(NativeAd nativeAd) {
-        Log.d("LockUpMopub","Called onNativeLoad Finger");
-        moPubNativeAd = nativeAd;
-        if(context!=null) {
-            View adViewRender = moPubNativeAd.createAdView(context, null);
-            addRenderedAd(adViewRender);
-            nativeAd.renderAdView(adViewRender);
-            nativeAd.prepare(adViewRender);
-            nativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
+    public void addRenderedAd(View adView, NativeAd nativeAd){
+        if(adView !=null && nativeAd != null) {
+            nativeAdView = adView;
+            moPubNativeAd = nativeAd;
+            RelativeLayout.LayoutParams parms = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT
+                    , ViewGroup.LayoutParams.WRAP_CONTENT);
+            parms.addRule(RelativeLayout.CENTER_IN_PARENT);
+            pinAdParent.addView(nativeAdView, parms);
+            moPubNativeAd.renderAdView(adView);
+            moPubNativeAd.prepare(adView);
+            moPubNativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
                 @Override
                 public void onImpression(View view) {
+                    if(pinLockListener!=null){
+                        pinLockListener.onAdImpressed();
+                    }
+                    Log.d("LockUpMopub","LockUP Impression Tracked");
                 }
 
                 @Override
                 public void onClick(View view) {
-                    postPinCompleted();
+                    Log.d("LockUpMopub","LockUP Click Tracked");
+                    if(pinLockListener!=null){
+                        pinLockListener.onAdClicked();
+                    }
                 }
             });
         }
-    }
-
-    @Override
-    public void onNativeFail(NativeErrorCode errorCode) {
-        Log.d("LockUpMopub",errorCode+ " errorcode");
-    }
-
-    void addRenderedAd(View adView){
-        int marginTop = Math.round(DimensionConverter.convertDpToPixel(20f,context.getApplicationContext()));
-        FrameLayout.LayoutParams parms = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT
-                , ViewGroup.LayoutParams.WRAP_CONTENT);
-        parms.topMargin = marginTop;
-        parms.gravity = Gravity.TOP|Gravity.CENTER;
-        this.addView(adView,parms);
-    }
-
-    private void postPinCompleted(){
-        pinLockListener.onPinUnlocked();
     }
 
     void startHome(){
@@ -764,7 +741,11 @@ public class LockPinView extends FrameLayout implements View.OnClickListener,MoP
 
     public void removeView(){
         unregisterListeners();
-        mMoPubNative.destroy();
+        if(nativeAdView!=null) {
+            pinAdParent.removeView(nativeAdView);
+        }
+        nativeAdView = null;
+        moPubNativeAd = null;
         setPinLockUnlockListener(null);
         context = null;
     }

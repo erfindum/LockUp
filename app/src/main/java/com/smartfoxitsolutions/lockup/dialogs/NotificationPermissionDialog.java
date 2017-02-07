@@ -32,12 +32,12 @@ public class NotificationPermissionDialog extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View parent = inflater.inflate(R.layout.lockup_default_dialog,container,false);
-        dialogIcon = (AppCompatImageView) parent.findViewById(R.id.lockup_default_dialog_image);
-        infoText = (TextView) parent.findViewById(R.id.lockup_default_dialog_info_text);
-        infoTextSub = (TextView) parent.findViewById(R.id.lockup_default_dialog_info_text_sub);
-        positiveButton = (TextView) parent.findViewById(R.id.lockup_default_dialog_positive_button);
-        negativeButton = (TextView) parent.findViewById(R.id.lockup_default_dialog_negative_button);
+        View parent = inflater.inflate(R.layout.lockup_permission_dialog,container,false);
+        dialogIcon = (AppCompatImageView) parent.findViewById(R.id.lockup_permission_dialog_image);
+        infoText = (TextView) parent.findViewById(R.id.lockup_permission_dialog_info_text);
+        infoTextSub = (TextView) parent.findViewById(R.id.lockup_permission_dialog_info_text_sub);
+        positiveButton = (TextView) parent.findViewById(R.id.lockup_permission_dialog_positive_button);
+        negativeButton = (TextView) parent.findViewById(R.id.lockup_permission_dialog_negative_button);
         dialogIcon.setImageResource(R.drawable.ic_lock_notif_permission_icon);
         infoText.setText(R.string.appLock_activity_notif_dialog_message);
         infoTextSub.setText(R.string.appLock_activity_notif_dialog_message_two);

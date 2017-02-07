@@ -5,5 +5,5 @@ package com.smartfoxitsolutions.lockup.loyaltybonus;
  */
 
 public class LoyaltyBonusLoginData {
-    String fullname,emailId;
+    String fullname,emailId, auth_code;
 }

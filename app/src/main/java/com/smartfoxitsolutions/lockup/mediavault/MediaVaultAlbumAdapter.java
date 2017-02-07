@@ -1,9 +1,11 @@
 package com.smartfoxitsolutions.lockup.mediavault;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.StatFs;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -188,6 +190,7 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         File thumbnailFile = new File(bucketThumbnailPathList.get(position));
         File renamedFile = new File(bucketThumbnailPathList.get(position)+".jpg");
         if(thumbnailFile.exists()) {
+            printSize(thumbnailFile);
             thumbnailFile.renameTo(renamedFile);
             Glide.with(mediaAlbumFragment.getContext()).load(renamedFile).placeholder(getPlaceHolderImages())
                     .error(getPlaceHolderImages()).override(viewWidth, viewHeight)
@@ -260,4 +263,16 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             holder.setOnGridItemSelectedListener(null);
         } */
     }
+
+    @TargetApi(18)
+    void printSize(File path){
+        StatFs stats = new StatFs(path.getPath());
+        Log.d("LockUpFile","Start ----------------------------");
+        Log.d("LockUpFile",stats.getAvailableBytes() + " Available bytes");
+        Log.d("LockUpFile",path.length() + " File Size");
+        boolean isSizeMatch = stats.getAvailableBytes()/(1024*1024) < path.length()/(1024*1024);
+        Log.d("LockUpFile",String.valueOf(isSizeMatch) + " Size Match");
+        Log.d("LockUpFile","---------------------------- Stop");
+    }
+
 }

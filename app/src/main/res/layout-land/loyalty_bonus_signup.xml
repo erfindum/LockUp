@@ -75,7 +75,7 @@
                 />
 
             <android.support.v7.widget.AppCompatEditText
-                android:id="@+id/loyalty_bonus_signup_first_edit"
+                android:id="@+id/loyalty_bonus_signup_name_edit"
                 android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -92,29 +92,11 @@
                 />
 
             <android.support.v7.widget.AppCompatEditText
-                android:id="@+id/loyalty_bonus_signup_last_edit"
-                android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@+id/loyalty_bonus_signup_first_edit"
-                android:padding="15dp"
-                android:textColor="@color/white"
-                android:textSize="@dimen/fifteenSpDimension"
-                android:hint="@string/loyalty_bonus_signup_last_name"
-                android:textColorHint="@color/viewPagerTabBlue"
-                android:inputType="textPersonName"
-                android:maxLines="1"
-                android:imeOptions="actionNext"
-                android:layout_marginBottom="@dimen/tenDpDimension"
-                app:theme="@style/EditTextWhiteTheme"
-                />
-
-            <android.support.v7.widget.AppCompatEditText
                 android:id="@+id/loyalty_bonus_signup_email_edit"
                 android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_below="@+id/loyalty_bonus_signup_last_edit"
+                android:layout_below="@+id/loyalty_bonus_signup_name_edit"
                 android:padding="15dp"
                 android:textColor="@color/white"
                 android:textSize="@dimen/fifteenSpDimension"
@@ -122,8 +104,8 @@
                 android:textColorHint="@color/viewPagerTabBlue"
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
-                android:imeOptions="actionNext"
                 android:layout_marginBottom="@dimen/tenDpDimension"
+                android:enabled="false"
                 />
             <android.support.v7.widget.AppCompatEditText
                 android:id="@+id/loyalty_bonus_signup_password_edit"
@@ -134,7 +116,7 @@
                 android:padding="15dp"
                 android:textColor="@color/white"
                 android:textSize="@dimen/fifteenSpDimension"
-                android:hint="@string/loyalty_bonus_signin_password_hint"
+                android:hint="@string/loyalty_bonus_signup_password_hint"
                 android:textColorHint="@color/viewPagerTabBlue"
                 android:inputType="textWebPassword"
                 android:maxLines="1"

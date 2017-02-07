@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.StatFs;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -263,6 +264,20 @@ public class MediaVaultAlbumActivity extends AppCompatActivity {
         vaultAlbumScreenOffReceiver = new VaultAlbumScreenOffReceiver(getWeakReference());
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         registerReceiver(vaultAlbumScreenOffReceiver,filter);
+        printSize();
+    }
+
+    @TargetApi(18)
+    void printSize(){
+        StatFs stats = new StatFs(Environment.getExternalStorageDirectory().getPath());
+        Log.d("LockUpFile","Start ----------------------------");
+        Log.d("LockUpFile",stats.getAvailableBlocksLong() + " Available blocks");
+        Log.d("LockUpFile",stats.getAvailableBytes() + " Available bytes");
+        Log.d("LockUpFile",stats.getBlockCountLong() + " Block Count");
+        Log.d("LockUpFile",stats.getBlockSizeLong() + " Block Size");
+        Log.d("LockUpFile",Environment.getExternalStorageDirectory().getFreeSpace() + " Free Space");
+        Log.d("LockUpFile",Environment.getExternalStorageDirectory().getTotalSpace() + " Total Space");
+        Log.d("LockUpFile","---------------------------- Stop");
     }
 
     @Override

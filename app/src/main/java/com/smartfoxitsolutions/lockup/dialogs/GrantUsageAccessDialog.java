@@ -4,12 +4,14 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.AppCompatImageView;
+import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,25 +21,32 @@ import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.LockUpMainActivity;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyUserActivity;
 
 /**
  * Created by RAAJA on 11-09-2016.
  */
 public class GrantUsageAccessDialog extends DialogFragment {
 
-    AppCompatImageView dialogIcon;
-    TextView infoText,infoTextSub, positiveButton, negativeButton;
+    private AppCompatImageView dialogIcon;
+    private TextView infoText,infoTextSub, positiveButton, negativeButton;
+    private String startType;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View parent = inflater.inflate(R.layout.lockup_default_dialog,container,false);
-        dialogIcon = (AppCompatImageView) parent.findViewById(R.id.lockup_default_dialog_image);
-        infoText = (TextView) parent.findViewById(R.id.lockup_default_dialog_info_text);
-        infoTextSub = (TextView) parent.findViewById(R.id.lockup_default_dialog_info_text_sub);
-        positiveButton = (TextView) parent.findViewById(R.id.lockup_default_dialog_positive_button);
-        negativeButton = (TextView) parent.findViewById(R.id.lockup_default_dialog_negative_button);
+        View parent = inflater.inflate(R.layout.lockup_permission_dialog,container,false);
+        dialogIcon = (AppCompatImageView) parent.findViewById(R.id.lockup_permission_dialog_image);
+        infoText = (TextView) parent.findViewById(R.id.lockup_permission_dialog_info_text);
+        infoTextSub = (TextView) parent.findViewById(R.id.lockup_permission_dialog_info_text_sub);
+        positiveButton = (TextView) parent.findViewById(R.id.lockup_permission_dialog_positive_button);
+        negativeButton = (TextView) parent.findViewById(R.id.lockup_permission_dialog_negative_button);
         dialogIcon.setImageResource(R.drawable.ic_lock_usage_permission_icon);
+        if(getArguments()!=null){
+            startType = getArguments().getString("grandUsageStartType");
+        }else{
+            startType = "appLockStart";
+        }
         infoText.setText(R.string.appLock_activity_usage_dialog_message);
         infoTextSub.setVisibility(View.GONE);
         positiveButton.setText(R.string.appLock_activity_usage_dialog_permit_text);
@@ -53,7 +62,6 @@ public class GrantUsageAccessDialog extends DialogFragment {
         super.onStart();
 
         final View dialogView = getDialog().getWindow().getDecorView();
-        final LockUpMainActivity activity = (LockUpMainActivity) getActivity();
         ObjectAnimator displayAnimator = ObjectAnimator.ofPropertyValuesHolder(
                 dialogView,
                 PropertyValuesHolder.ofFloat("scaleX",0.0f,1.1f),
@@ -73,7 +81,7 @@ public class GrantUsageAccessDialog extends DialogFragment {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
-                        activity.startUsageAccessSettingActivity();
+                        startUsageAccessSettingActivity();
                         dismiss();
                     }
                 });
@@ -98,5 +106,16 @@ public class GrantUsageAccessDialog extends DialogFragment {
                 dismissAnimator.start();
             }
         });
+    }
+
+    void startUsageAccessSettingActivity(){
+        if(startType.equals("appLockStart")) {
+            final LockUpMainActivity activity = (LockUpMainActivity) getActivity();
+            activity.startUsageAccessSettingActivity();
+        }else
+        if(startType.equals("loyaltyBonusStart")){
+            final LoyaltyUserActivity activity = (LoyaltyUserActivity) getActivity();
+            activity.startUsageAccessSettingActivity();
+        }
     }
 }

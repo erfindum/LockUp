@@ -173,31 +173,51 @@ public class ShareMoveService extends Service implements Handler.Callback{
                     e.printStackTrace();
                 }
             }
-            notifManager.cancel(541895);
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(getBaseContext());
-            builder.setContentTitle(getResources().getString(R.string.vault_move_activity_move_complete))
-                    .setContentText(getResources().getString(R.string.vault_move_activity_vault_redirect_message))
-                    .setOngoing(false)
-                    .setAutoCancel(true)
-                    .setLargeIcon(getLauncherIcon())
-                    .setContentIntent(PendingIntent.getActivity(getBaseContext(),29,new Intent(getBaseContext()
-                                        , MainLockActivity.class)
-                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                            ,0))
-                    .setOnlyAlertOnce(true)
-                    .setColor(Color.parseColor("#2874F0"));
-            if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
-                builder.setSmallIcon(R.drawable.ic_notification_small);
-            }else{
-                builder.setSmallIcon(R.mipmap.ic_launcher);
+            postCompleteNotification(getResources().getString(R.string.vault_move_activity_move_complete));
+            closeService();
+            return true;
+        }
+
+        if(msg.what == MediaMoveService.MOVE_INSUFFICIENT_SPACE){
+            if(activityMessenger!=null && activityMessenger.getBinder().isBinderAlive()){
+                Message mssg = Message.obtain();
+                mssg.what = msg.what;
+                try {
+                    activityMessenger.send(mssg);
+                }
+                catch (RemoteException e){
+                    e.printStackTrace();
+                }
             }
-            notifManager.notify(7549682, builder.build());
+            postCompleteNotification(getResources().getString(R.string.vault_move_activity_insufficient_space));
             closeService();
             return true;
         }
 
         return false;
+    }
+
+    void postCompleteNotification(String message){
+        notifManager.cancel(541895);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getBaseContext());
+        builder.setContentTitle(message)
+                .setContentText(getResources().getString(R.string.vault_move_activity_vault_redirect_message))
+                .setOngoing(false)
+                .setAutoCancel(true)
+                .setLargeIcon(getLauncherIcon())
+                .setContentIntent(PendingIntent.getActivity(getBaseContext(),29,new Intent(getBaseContext()
+                                , MainLockActivity.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        ,0))
+                .setOnlyAlertOnce(true)
+                .setColor(Color.parseColor("#2874F0"));
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+            builder.setSmallIcon(R.drawable.ic_notification_small);
+        }else{
+            builder.setSmallIcon(R.mipmap.ic_launcher);
+        }
+        notifManager.notify(7549682, builder.build());
     }
 
     void closeService(){
