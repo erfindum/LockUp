@@ -63,7 +63,7 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
 
     public LockPatternView(Context context, OnPinLockUnlockListener patternLockListener) {
         super(context);
-        this.context = context;
+        this.context = getContext();
         setPinLockUnlockListener(patternLockListener);
         LayoutInflater.from(context).inflate(R.layout.pattern_lock_activity,this,true);
         patternViewParent = (RelativeLayout) findViewById(R.id.pattern_lock_activity_parent_view);
@@ -276,7 +276,7 @@ public class LockPatternView extends FrameLayout implements PatternLockView.OnPa
     }
 
     void startHome(){
-        context.startActivity(new Intent(Intent.ACTION_MAIN)
+        getContext().startActivity(new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         );

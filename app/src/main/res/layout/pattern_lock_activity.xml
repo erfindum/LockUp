@@ -39,8 +39,8 @@
                app:nodeCellSize="@dimen/seventyDpDimension"
                app:nodeCornerSize="3dp"
                app:nodeSelectedCornerSize="5dp"
-               app:nodeColor="@array/nodeColors"
-               app:nodeSelectedColor="@array/nodeSelectedColors"
+               app:nodeDefaultColor="#FFFFFF"
+               app:nodeSelectedDefaultColor="#FFFFFF"
                app:patternLineStroke="@dimen/sevenDpDimension"
                app:patternLineColor="@color/white"
                />

@@ -135,10 +135,12 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         }
 
         //Notification Lock On/Off
-        if(NotificationLockService.isNotificationServiceConnected){
-            notificationLockSwitch.setChecked(true);
-        }else{
-            notificationLockSwitch.setChecked(false);
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            if (NotificationLockService.isNotificationServiceConnected) {
+                notificationLockSwitch.setChecked(true);
+            } else {
+                notificationLockSwitch.setChecked(false);
+            }
         }
 
         //Vibration
@@ -216,22 +218,24 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         });
 
         //Notification Lock On/Off
-        notificationLockItem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(NotificationLockService.isNotificationServiceConnected){
-                    startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS),
-                            AppLockActivity.NOTIFICATION_PERMISSION_REQUEST);
-                    notificationLockSwitch.setChecked(false);
-                    shouldTrackUserPresence = false;
-                }else{
-                    startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS),
-                            AppLockActivity.NOTIFICATION_PERMISSION_REQUEST);
-                    notificationLockSwitch.setChecked(true);
-                    shouldTrackUserPresence = false;
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            notificationLockItem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (NotificationLockService.isNotificationServiceConnected) {
+                        startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS),
+                                AppLockActivity.NOTIFICATION_PERMISSION_REQUEST);
+                        notificationLockSwitch.setChecked(false);
+                        shouldTrackUserPresence = false;
+                    } else {
+                        startActivityForResult(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS),
+                                AppLockActivity.NOTIFICATION_PERMISSION_REQUEST);
+                        notificationLockSwitch.setChecked(true);
+                        shouldTrackUserPresence = false;
+                    }
                 }
-            }
-        });
+            });
+        }
 
         //Vibration
         vibrateItem.setOnClickListener(new View.OnClickListener() {
@@ -439,10 +443,12 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         });
         textAnimator = ValueAnimator.ofFloat(0.0f,1.0f);
         textAnimator.setDuration(400).setInterpolator(new AccelerateDecelerateInterpolator());
-        if(NotificationLockService.isNotificationServiceConnected){
-            notificationLockSwitch.setChecked(true);
-        }else{
-            notificationLockSwitch.setChecked(false);
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            if (NotificationLockService.isNotificationServiceConnected) {
+                notificationLockSwitch.setChecked(true);
+            } else {
+                notificationLockSwitch.setChecked(false);
+            }
         }
         if(isPreventUninstallEnabled){
             preventUninstallSwitch.setChecked(true);

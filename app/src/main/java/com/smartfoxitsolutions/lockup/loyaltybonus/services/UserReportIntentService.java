@@ -20,6 +20,7 @@ import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusModel;
 import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusRequest;
 import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyServiceGenerator;
 import com.smartfoxitsolutions.lockup.loyaltybonus.UserLoyaltyReport;
+import com.smartfoxitsolutions.lockup.loyaltybonus.UserLoyaltyReportResponse;
 import com.smartfoxitsolutions.lockup.loyaltybonus.receivers.UserReportBroadcastReceiver;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
 
@@ -28,11 +29,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.TimeZone;
 
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
@@ -49,107 +48,49 @@ public class UserReportIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(final Intent intent) {
+        setReportAlarm(getBaseContext(),intent);
+    }
+
+    private void setReportAlarm(Context context, Intent intent){
         SharedPreferences preferences = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
-        shouldStartAppLockOn = preferences
-                .getBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
-        isAppLockFirstLoad = preferences
-                .getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,true);
+        shouldStartAppLockOn = preferences.getBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
+        isAppLockFirstLoad = preferences.getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,true);
 
-        final SharedPreferences loyaltyPreference = getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME
-                                                    ,MODE_PRIVATE);
-        final boolean isUserLoggedIn = loyaltyPreference.getBoolean(LoyaltyBonusModel.LOGIN_USER_LOGGED_IN_KEY,false);
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        final Gson gson = new Gson();
-        final Type userReportToken = new TypeToken<LinkedHashMap<String, UserLoyaltyReport>>() {
-        }.getType();
-        NetworkInfo connectivityInfo = connectivityManager.getActiveNetworkInfo();
-        final Calendar calendar = getReportCalendarInstance();
-        if(connectivityInfo != null) {
-            if (connectivityInfo.isConnected()) {
-                String userReportMapCurrentString = loyaltyPreference.getString(LoyaltyBonusModel.USER_LOYALTY_REPORT, null);
-                LinkedHashMap<String, UserLoyaltyReport> userReportCurrentMap = gson.fromJson(userReportMapCurrentString, userReportToken);
-                if (userReportCurrentMap != null && !userReportCurrentMap.isEmpty()) {
-                    for(UserLoyaltyReport report : userReportCurrentMap.values()){
-                        Log.d("LockupUserReport",report.getReportDate()+" Impressions: " + report.getTotalImpression()+" Clicks: "+ report.getTotalClicked());
-                    }
-                    Type reportDataToken = new TypeToken<ArrayList<UserLoyaltyReport>>(){}.getType();
-                    String reportDataString = gson.toJson(new ArrayList<>(userReportCurrentMap.values()),reportDataToken);
-                    LoyaltyBonusRequest userReportRequest = LoyaltyServiceGenerator.createService(LoyaltyBonusRequest.class);
-                    Call<UserLoyaltyReportResponse> userReportCall = userReportRequest.sendUserLoyaltyReport(
-                            "Report_add",
-                            preferences.getString(LockUpSettingsActivity.RECOVERY_EMAIL_PREFERENCE_KEY,"nomail"),
-                            loyaltyPreference.getString(LoyaltyBonusModel.LOYALTY_SEND_REQUEST,"noCode"),
-                            reportDataString
-                    );
-
-                    try {
-                        Log.d("LockupUserReport",userReportCall.request().url().toString());
-                        Response<UserLoyaltyReportResponse> report = userReportCall.execute();
-                        UserLoyaltyReportResponse reportResponse = report.body();
-                        if(reportResponse.code.equals("200")){
-                            Log.d("LockupUserReport","Report Success --------" + " " + reportResponse.totalPoint);
-                            String reportDate = String.valueOf(calendar.get(Calendar.YEAR)+"-"+(calendar.get(Calendar.MONTH)+1)+"-"
-                                    +calendar.get(Calendar.DAY_OF_MONTH));
-                            Log.d("LockupUserReport",reportDate);
-                            createNewUserReport(reportDate, gson, userReportToken, loyaltyPreference);
-                            if (isUserLoggedIn) {
-                                setAlarm(calendar);
-                            }
-                            closeReportService(intent);
-                        }else
-                        if(reportResponse.code.equals("100")){
-                            addNewUserReport(loyaltyPreference, calendar);
-                            if(isUserLoggedIn) {
-                                setAlarm(calendar);
-                            }
-                            Log.d("LockupUserReport","Report Failure --------");
-                            closeReportService(intent);
-                        }
-                    }catch (IOException e){
-                        e.printStackTrace();
-                        addNewUserReport(loyaltyPreference, calendar);
-                        if(isUserLoggedIn) {
-                            setAlarm(calendar);
-                        }
-                        closeReportService(intent);
-                    }
-                }
-
-            } else {
-                addNewUserReport(loyaltyPreference, calendar);
-                if(isUserLoggedIn) {
-                    setAlarm(calendar);
-                }
-                closeReportService(intent);
-            }
-        }else{
-            addNewUserReport(loyaltyPreference,calendar);
-            if(isUserLoggedIn) {
-                setAlarm(calendar);
-            }
-            closeReportService(intent);
-        }
-
-        Log.d("LockupUserReport","Report Complete --------");
-    }
-
-    private Calendar getReportCalendarInstance(){
-        Calendar calendar = Calendar.getInstance();
-        if(calendar.get(Calendar.HOUR_OF_DAY)>21 && calendar.get(Calendar.MINUTE)>0 &&
-                    calendar.get(Calendar.SECOND)>0) {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        if(calendar.get(Calendar.HOUR_OF_DAY)>=14 && calendar.get(Calendar.MINUTE)>=0 &&
+                calendar.get(Calendar.SECOND)>0) {
             calendar.add(Calendar.DATE, 1);
-            calendar.set(Calendar.HOUR_OF_DAY, 21);
-            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.HOUR_OF_DAY, 14);
+            calendar.set(Calendar.MINUTE, 1);
             calendar.set(Calendar.SECOND, 0);
         }else{
-            calendar.set(Calendar.HOUR_OF_DAY, 21);
-            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.HOUR_OF_DAY, 14);
+            calendar.set(Calendar.MINUTE, 1);
             calendar.set(Calendar.SECOND, 0);
         }
-        return calendar;
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        PendingIntent reportPendingIntent = PendingIntent.getBroadcast(
+                context,23,new Intent(context,UserReportBroadcastReceiver.class),0
+        );
+        alarmManager.cancel(reportPendingIntent);
+        Log.d("LockupUserReport","Report Alarm Cancelled --------");
+        checkAndSaveNewUserReport(context,calendar);
+        if(Build.VERSION.SDK_INT<Build.VERSION_CODES.KITKAT){
+            alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),reportPendingIntent);
+        }else{
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),reportPendingIntent);
+        }
+        Log.d("LockupUserReport","Report Alarm Set --------");
+
+        if(shouldStartAppLockOn && !isAppLockFirstLoad){
+            startService(new Intent(getBaseContext(), AppLockingService.class));
+        }
+        UserReportBroadcastReceiver.completeWakefulIntent(intent);
     }
 
-    private void addNewUserReport(SharedPreferences preferences, Calendar calendar){
+    private void checkAndSaveNewUserReport(Context context, Calendar calendar){
+        SharedPreferences preferences = context.getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME
+                ,Context.MODE_PRIVATE);
         String reportDate = String.valueOf(calendar.get(Calendar.YEAR)+"-"+(calendar.get(Calendar.MONTH)+1)+"-"
                 +calendar.get(Calendar.DAY_OF_MONTH));
         Log.d("LockupUserReport",reportDate);
@@ -158,24 +99,29 @@ public class UserReportIntentService extends IntentService {
         String userReportMapCurrentString = preferences.getString(LoyaltyBonusModel.USER_LOYALTY_REPORT,null);
         LinkedHashMap<String,UserLoyaltyReport> userReportCurrentMap = gson.fromJson(userReportMapCurrentString,userReportToken);
         if(userReportCurrentMap!=null && !userReportCurrentMap.isEmpty()){
-            UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate);
-            userReport.setTotalImpression(0);
-            userReport.setTotalClicked(0);
-            userReportCurrentMap.put(reportDate,userReport);
-            saveUserReportMap(userReportCurrentMap,gson,preferences,userReportToken);
-
+            ArrayList<String> dateKeyList = new ArrayList<>(userReportCurrentMap.keySet());
+            String dateKey = dateKeyList.get(dateKeyList.size()-1);
+            UserLoyaltyReport userCurrentReport = userReportCurrentMap.get(dateKey);
+            if(!reportDate.equals(userCurrentReport.getReportDate())){
+                UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate);
+                userReport.setTotalImpression(0);
+                userReport.setTotalClicked(0);
+                userReportCurrentMap.put(reportDate,userReport);
+                saveUserReportMap(userReportCurrentMap,gson,preferences,userReportToken);
+                Log.d("LockupUserReport","New Report Saved --------");
+            }
         }else{
             createNewUserReport(reportDate,gson,userReportToken,preferences);
         }
     }
 
-    private void createNewUserReport(String reportDate, Gson gson, Type userReportToken, SharedPreferences preferences){
+    private void createNewUserReport(String reportDate, Gson gson, Type reportToken, SharedPreferences preferences){
         UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate);
         userReport.setTotalImpression(0);
         userReport.setTotalClicked(0);
         LinkedHashMap<String,UserLoyaltyReport> userReportNewMap = new LinkedHashMap<>();
         userReportNewMap.put(reportDate,userReport);
-        saveUserReportMap(userReportNewMap,gson,preferences,userReportToken);
+        saveUserReportMap(userReportNewMap,gson,preferences,reportToken);
     }
 
     private void saveUserReportMap(LinkedHashMap<String,UserLoyaltyReport> userReportMap, Gson gson, SharedPreferences preferences
@@ -184,26 +130,5 @@ public class UserReportIntentService extends IntentService {
         SharedPreferences.Editor edit = preferences.edit();
         edit.putString(LoyaltyBonusModel.USER_LOYALTY_REPORT,userReportMapNewString);
         edit.apply();
-    }
-
-    private void setAlarm(Calendar calendar){
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        PendingIntent reportPendingIntent = PendingIntent.getBroadcast(
-                this,23,new Intent(this,UserReportBroadcastReceiver.class),0
-        );
-        alarmManager.cancel(reportPendingIntent);
-        if(Build.VERSION.SDK_INT<Build.VERSION_CODES.KITKAT){
-            alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),reportPendingIntent);
-        }else{
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),reportPendingIntent);
-        }
-        Log.d("LockupUserReport","Report Alarm Set --------");
-    }
-
-    private void closeReportService(Intent intent){
-        if(shouldStartAppLockOn && !isAppLockFirstLoad){
-            startService(new Intent(getBaseContext(), AppLockingService.class));
-        }
-        UserReportBroadcastReceiver.completeWakefulIntent(intent);
     }
 }

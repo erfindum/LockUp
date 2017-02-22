@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
+import java.util.TimeZone;
 
 
 /**
@@ -46,10 +47,10 @@ public class AppLockServiceBootReceiver extends BroadcastReceiver {
             try {
                 if (shouldStartAppLock && !isAppLockFirstLoad) {
                     if(!AppLockingService.isAppLockRunning) {
-                        context.startService(new Intent(context, AppLockingService.class));
                         if (isUserLoggedIn) {
                             setReportAlarm(context);
                         }
+                        context.startService(new Intent(context, AppLockingService.class));
                         Log.d("LockupUserReport","AppLock Service Started --------");
                     }
                 }
@@ -61,16 +62,16 @@ public class AppLockServiceBootReceiver extends BroadcastReceiver {
     }
 
     private void setReportAlarm(Context context){
-        Calendar calendar = Calendar.getInstance();
-        if(calendar.get(Calendar.HOUR_OF_DAY)>21 && calendar.get(Calendar.MINUTE)>0 &&
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        if(calendar.get(Calendar.HOUR_OF_DAY)>=14 && calendar.get(Calendar.MINUTE)>=0 &&
                 calendar.get(Calendar.SECOND)>0) {
             calendar.add(Calendar.DATE, 1);
-            calendar.set(Calendar.HOUR_OF_DAY, 21);
-            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.HOUR_OF_DAY, 14);
+            calendar.set(Calendar.MINUTE, 1);
             calendar.set(Calendar.SECOND, 0);
         }else{
-            calendar.set(Calendar.HOUR_OF_DAY, 21);
-            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.HOUR_OF_DAY, 14);
+            calendar.set(Calendar.MINUTE, 1);
             calendar.set(Calendar.SECOND, 0);
         }
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -110,7 +111,18 @@ public class AppLockServiceBootReceiver extends BroadcastReceiver {
                 saveUserReportMap(userReportCurrentMap,gson,preferences,userReportToken);
                 Log.d("LockupUserReport","New Report Saved --------");
             }
+        }else{
+            createNewUserReport(reportDate,gson,userReportToken,preferences);
         }
+    }
+
+    private void createNewUserReport(String reportDate, Gson gson, Type reportToken, SharedPreferences preferences){
+        UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate);
+        userReport.setTotalImpression(0);
+        userReport.setTotalClicked(0);
+        LinkedHashMap<String,UserLoyaltyReport> userReportNewMap = new LinkedHashMap<>();
+        userReportNewMap.put(reportDate,userReport);
+        saveUserReportMap(userReportNewMap,gson,preferences,reportToken);
     }
 
     private void saveUserReportMap(LinkedHashMap<String,UserLoyaltyReport> userReportMap, Gson gson, SharedPreferences preferences

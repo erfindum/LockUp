@@ -1,14 +1,6 @@
 package com.smartfoxitsolutions.lockup.loyaltybonus;
 
-import com.smartfoxitsolutions.lockup.loyaltybonus.services.UserLoyaltyReportResponse;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
@@ -41,5 +33,10 @@ public interface LoyaltyBonusRequest {
     @GET("service.php")
     Call<UserLoyaltyReportResponse> sendUserLoyaltyReport(@Query("action") String action, @Query("emailId")String emailId
             , @Query("auth_code")String auth_code, @Query("reportData") String reportData);
+
+    @GET("service.php")
+    Call<LoyaltyUserRedeemResponse> requestBonusRedeem(@Query("action") String action, @Query("Redeem_Point") String redeemPoints
+            ,@Query("emailId") String emailId, @Query("auth_code") String auth_code,@Query("Redeem_Type") String redeemType
+            ,@Query("Reddemd_price") String redeemedPrice, @Query("date") String redeemDate, @Query("ReddemedAcc") String redeemedAcc);
 
 }

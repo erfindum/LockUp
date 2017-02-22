@@ -1,4 +1,4 @@
-package com.smartfoxitsolutions.lockup.loyaltybonus.services;
+package com.smartfoxitsolutions.lockup.loyaltybonus;
 
 /**
  * Created by RAAJA on 07-02-2017.

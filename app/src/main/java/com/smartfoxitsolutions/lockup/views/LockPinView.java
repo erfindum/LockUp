@@ -69,7 +69,7 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
 
     public LockPinView(Context context, OnPinLockUnlockListener pinLockListener) {
         super(context);
-        this.context = context;
+        this.context = getContext();
         setPinLockUnlockListener(pinLockListener);
         LayoutInflater.from(context).inflate(R.layout.pin_lock_activity,this,true);
         pinViewParent = (RelativeLayout) findViewById(R.id.pin_lock_activity_parent);
@@ -724,7 +724,7 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
     }
 
     void startHome(){
-        context.startActivity(new Intent(Intent.ACTION_MAIN)
+        getContext().startActivity(new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         );

@@ -21,6 +21,9 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.mopub.nativeads.MoPubRecyclerAdapter;
+import com.mopub.nativeads.MoPubStaticNativeAdRenderer;
+import com.mopub.nativeads.ViewBinder;
 import com.smartfoxitsolutions.lockup.AppLoaderActivity;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.R;
@@ -41,6 +44,7 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
     int viewWidth, viewHeight,noOfColumns;
     private String mediaType;
     private MediaVaultAlbumActivity activity;
+    private MoPubRecyclerAdapter moPubAdapter;
 
 
     @Nullable
@@ -134,13 +138,26 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if(mediaAdapter == null){
-            mediaAdapter = new MediaVaultAlbumAdapter(data,this
-                    , viewWidth, viewHeight);
-            mediaVaultBuckRecycler.setAdapter(mediaAdapter);
             int itemMargin = Math.round(getResources().getDimension(R.dimen.tenDpDimension));
             mediaVaultBuckRecycler.addItemDecoration(new MediaVaultAlbumDecoration(itemMargin));
             mediaVaultBuckRecycler.setLayoutManager(new GridLayoutManager(activity.getBaseContext()
                                 ,noOfColumns,GridLayoutManager.VERTICAL,false));
+            ViewBinder viewBinder = new ViewBinder.Builder(R.layout.vault_ad_view)
+                    .titleId(R.id.vault_ad_view_title)
+                    .textId(R.id.vault_ad_view_text)
+                    .mainImageId(R.id.vault_ad_view_image)
+                    .callToActionId(R.id.vault_ad_view_call_to_action)
+                    .build();
+            MoPubStaticNativeAdRenderer adRenderer = new MoPubStaticNativeAdRenderer(viewBinder);
+            mediaAdapter = new MediaVaultAlbumAdapter(data,this
+                    , viewWidth, viewHeight);
+            moPubAdapter = new MoPubRecyclerAdapter(activity,mediaAdapter);
+            mediaAdapter.setMoPubAdapter(moPubAdapter);
+            moPubAdapter.registerAdRenderer(adRenderer);
+
+            mediaVaultBuckRecycler.setAdapter(moPubAdapter);
+
+            moPubAdapter.loadAds("ea1ea6ae342a4dd295aec2cdd8da905b");
             if(data.getCount()<=0){
                 loadEmptyPlaceholder();
             }
@@ -240,6 +257,9 @@ public class MediaVaultAlbumFragment extends Fragment implements LoaderManager.L
         if(mediaAdapter !=null){
             mediaAdapter.closeResources();
             mediaAdapter = null;
+        }
+        if(moPubAdapter!=null){
+            moPubAdapter.destroy();
         }
         if(activity!=null){
             activity =  null;

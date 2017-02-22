@@ -93,7 +93,7 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
     public LockPinViewFinger(Context context, OnPinLockUnlockListener pinLockListener
             ,OnFingerScannerCancelListener fingerScannerCancelListener,boolean isFingerPrintActive) {
         super(context);
-        this.context = context;
+        this.context = getContext();
         this.isFingerPrintActive = isFingerPrintActive;
         setPinLockUnlockListener(pinLockListener);
         setFingerCanceledListener(fingerScannerCancelListener);
@@ -964,7 +964,7 @@ public class LockPinViewFinger extends FrameLayout implements View.OnClickListen
     }
 
     void startHome(){
-        context.startActivity(new Intent(Intent.ACTION_MAIN)
+        getContext().startActivity(new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         );

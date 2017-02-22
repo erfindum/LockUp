@@ -16,5 +16,4 @@
         android:layout_below="@+id/faq_activity_tool_bar"
         tools:layout="@layout/user_profile_fragment" />
 
-
 </RelativeLayout>

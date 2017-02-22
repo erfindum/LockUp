@@ -393,8 +393,8 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
 
     @Override
     public void onAdImpressed() {
-        if(isUserLoggedIn) {
-            userLoyaltyReport.setTotalImpression(Integer.valueOf(userLoyaltyReport.getTotalImpression()) + 1);
+        if(isUserLoggedIn && userLoyaltyReport!=null) {
+            userLoyaltyReport.setTotalImpression(Integer.parseInt(userLoyaltyReport.getTotalImpression()) + 1);
             SharedPreferences loyaltyPrefs = getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE);
             String userReportCurrentString = loyaltyPrefs.getString(LoyaltyBonusModel.USER_LOYALTY_REPORT,null);
             LinkedHashMap<String,UserLoyaltyReport> userLoyaltyReportMap = gson.fromJson(userReportCurrentString, userReportMapToken);
@@ -410,8 +410,8 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
 
     @Override
     public void onAdClicked() {
-        if(isUserLoggedIn) {
-            userLoyaltyReport.setTotalClicked(Integer.valueOf(userLoyaltyReport.getTotalClicked()) + 1);
+        if(isUserLoggedIn && userLoyaltyReport!=null) {
+            userLoyaltyReport.setTotalClicked(Integer.parseInt(userLoyaltyReport.getTotalClicked()) + 1);
             SharedPreferences loyaltyPrefs = getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE);
             String userReportCurrentString = loyaltyPrefs.getString(LoyaltyBonusModel.USER_LOYALTY_REPORT,null);
             LinkedHashMap<String,UserLoyaltyReport> userLoyaltyReportMap = gson.fromJson(userReportCurrentString, userReportMapToken);

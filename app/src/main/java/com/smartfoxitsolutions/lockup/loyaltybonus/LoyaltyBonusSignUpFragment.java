@@ -11,8 +11,10 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatSpinner;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -32,6 +34,7 @@ import com.smartfoxitsolutions.lockup.loyaltybonus.dialogs.OnUserSignUpListener;
 import com.smartfoxitsolutions.lockup.loyaltybonus.dialogs.SignUpErrorDialog;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +62,8 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
     private String genderText, countryText;
     private boolean shouldValidateUserData;
     private ConnectivityManager connectivityManager;
-    private DialogFragment errorFragment, operationSuccessDialog;
+    private DialogFragment errorFragment;
+    private Toolbar toolbar;
 
     @Nullable
     @Override
@@ -77,6 +81,7 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
         datePicker = (TextView) parent.findViewById(R.id.loyalty_bonus_signup_dob);
         signUpInfo = (TextView) parent.findViewById(R.id.loyalty_bonus_signup_info);
         signUpProgress = (ProgressBar) parent.findViewById(R.id.loyalty_bonus_signup_progress_bar);
+        toolbar = (Toolbar) parent.findViewById(R.id.loyalty_bonus_signup_tool_bar);
         if(savedInstanceState!=null){
             shouldValidateUserData = savedInstanceState.getBoolean("shouldSignup");
         }else {
@@ -91,13 +96,19 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
         genderAdapter.setDropDownViewResource(R.layout.loyalty_spinner_dropdown);
         genderSpinner.setAdapter(genderAdapter);
         String[] localeList = Locale.getISOCountries();
+        ArrayList<String> defaultCountryList = new ArrayList<>();
         ArrayList<String> countryList = new ArrayList<>();
+        defaultCountryList.addAll(Arrays.asList(getResources().getStringArray(R.array.loyalty_bonus_signup_country_list)));
         for(String countryCode:localeList){
             Locale countryLoacale = new Locale("",countryCode);
-            countryList.add(countryLoacale.getDisplayCountry());
+            String countryName = countryLoacale.getDisplayCountry();
+            if(!defaultCountryList.contains(countryName) && !countryName.equalsIgnoreCase("India")) {
+                countryList.add(countryName);
+            }
         }
         Collections.sort(countryList,String.CASE_INSENSITIVE_ORDER);
-        ArrayAdapter<String> countryAdapter = new ArrayAdapter<>(getActivity(),R.layout.loyalty_spinner,countryList);
+        defaultCountryList.addAll(countryList);
+        ArrayAdapter<String> countryAdapter = new ArrayAdapter<>(getActivity(),R.layout.loyalty_spinner,defaultCountryList);
         countryAdapter.setDropDownViewResource(R.layout.loyalty_spinner_dropdown);
         countrySpinner.setAdapter(countryAdapter);
         countrySpinner.setOnItemSelectedListener(this);
@@ -110,6 +121,18 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
         activity = (LoyaltyBonusMain) getActivity();
         activity.setOnUserSignUpListener(this);
         connectivityManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
+        activity.setSupportActionBar(toolbar);
+        ActionBar actionToolbar = activity.getSupportActionBar();
+        if(actionToolbar!=null){
+            actionToolbar.setDisplayHomeAsUpEnabled(true);
+            actionToolbar.setTitle(getString(R.string.loyalty_bonus_signup_info));
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    activity.onBackPressed();
+                }
+            });
+        }
         setupSpinners();
 
     }
@@ -176,6 +199,10 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
                 Log.d("LoyaltySignUp",genderText);
             }
             if(spinner.getId() == R.id.loyalty_bonus_signup_country){
+                if(position==12){
+                    countryText = "No Country";
+                    return;
+                }
                 countryText = (String) spinner.getItemAtPosition(position);
                 Log.d("LoyaltySignUp",countryText);
             }
@@ -241,6 +268,8 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
             displayErrorDialog(getString(R.string.loyalty_password_recovery_reset_password_length_error));
         }else if(!password.getText().toString().equals(confirmPassword.getText().toString())){
             displayErrorDialog(getString(R.string.loyalty_bonus_signup_password_error));
+        }else if(countryText.equals("No Country")){
+            displayErrorDialog(getString(R.string.loyalty_bonus_signup_country_error));
         }else if(day<=0 || month<=0 || year<=0){
             displayErrorDialog(getString(R.string.loyalty_bonus_signup_date_error));
         }else if(!getValidBirthDate(month,year,day)){

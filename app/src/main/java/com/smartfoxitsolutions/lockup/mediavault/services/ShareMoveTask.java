@@ -463,7 +463,7 @@ public class ShareMoveTask implements Runnable {
     }
 
     boolean getFileSpaceAvailability(String path){
-        StatFs fileStats = new StatFs(path);
+        StatFs fileStats = new StatFs(Environment.getExternalStorageDirectory().getPath());
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2){
             File originalFile = new File(path);
             if(originalFile.exists()) {

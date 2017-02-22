@@ -20,7 +20,6 @@ import android.support.v4.os.CancellationSignal;
 import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -81,7 +80,7 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
     public LockPatternViewFinger(Context context, OnPinLockUnlockListener patternLockListener
             ,OnFingerScannerCancelListener fingerCanceledListener, boolean isFingerPrintActive) {
         super(context);
-        this.context = context;
+        this.context = getContext();
         setPinLockUnlockListener(patternLockListener);
         setFingerCanceledListener(fingerCanceledListener);
         this.isFingerPrintActive = isFingerPrintActive;
@@ -511,7 +510,7 @@ public class LockPatternViewFinger extends FrameLayout implements PatternLockVie
     }
 
     void startHome(){
-        context.startActivity(new Intent(Intent.ACTION_MAIN)
+        getContext().startActivity(new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         );

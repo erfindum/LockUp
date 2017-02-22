@@ -1,13 +1,17 @@
 package com.smartfoxitsolutions.lockup.loyaltybonus;
 
+import android.app.AlarmManager;
 import android.app.Fragment;
-import android.app.FragmentManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -16,17 +20,32 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.smartfoxitsolutions.lockup.AppLockModel;
+import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.loyaltybonus.receivers.UserReportBroadcastReceiver;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.TreeMap;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import static android.content.Context.CONNECTIVITY_SERVICE;
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by RAAJA on 29-01-2017.
@@ -38,6 +57,7 @@ public class LoyaltyUserProfileFragment extends Fragment {
     private CardView paypalCard, paytmCard;
     private FloatingActionButton appLockButton;
     private LoyaltyUserActivity activity;
+    private ProgressBar loadingProgress;
     public static int lockedRecommendApps,lockedApps;
 
     @Nullable
@@ -49,6 +69,7 @@ public class LoyaltyUserProfileFragment extends Fragment {
         noOfAppsLocked = (TextView) parent.findViewById(R.id.loyalty_bonus_user_main_lock_info_one);
         appLockInfo = (TextView) parent.findViewById(R.id.loyalty_bonus_user_main_lock_info_two);
         pointsEarned = (TextView) parent.findViewById(R.id.loyalty_bonus_user_main_point);
+        loadingProgress = (ProgressBar) parent.findViewById(R.id.loyalty_bonus_user_main_progress);
 
         appLockButton = (FloatingActionButton) parent.findViewById(R.id.loyalty_bonus_user_main_lock_fab);
 
@@ -83,7 +104,11 @@ public class LoyaltyUserProfileFragment extends Fragment {
         appLockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.checkAndSetUsagePermissions();
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) {
+                    activity.checkAndSetUsagePermissions();
+                }else{
+                   activity.startLockActivity();
+                }
             }
         });
     }
@@ -92,7 +117,7 @@ public class LoyaltyUserProfileFragment extends Fragment {
     public void onStart() {
         super.onStart();
         SharedPreferences loyaltyPrefs = activity.getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME
-                , Context.MODE_PRIVATE);
+                , MODE_PRIVATE);
         String welcome = getString(R.string.loyalty_user_main_hello)+"! " +
                 loyaltyPrefs.getString(LoyaltyBonusModel.LOGIN_USER_NAME_KEY,"Unknown");
         fullName.setText(welcome);
@@ -101,15 +126,18 @@ public class LoyaltyUserProfileFragment extends Fragment {
         String lockInfo =(lockedRecommendApps+lockedApps)+" "+getString(R.string.loyalty_user_main_lock_info_one);
         noOfAppsLocked.setText(lockInfo);
         if((lockedRecommendApps + lockedApps)<=3){
+            appLockInfo.setVisibility(View.VISIBLE);
             appLockInfo.setText(getString(R.string.loyalty_user_main_lock_info_two));
         }else{
             appLockInfo.setVisibility(View.INVISIBLE);
         }
+        getLoyaltyPoints();
+
     }
 
     private void setAppLockInfo(){
         SharedPreferences appPrefs = activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME
-                , Context.MODE_PRIVATE);
+                , MODE_PRIVATE);
         AppLockModel appModel = new AppLockModel(appPrefs);
 
         String installerPackage = getAppInstallerPackage();
@@ -138,6 +166,173 @@ public class LoyaltyUserProfileFragment extends Fragment {
         }else{
             return "none";
         }
+    }
+
+    private void getLoyaltyPoints(){
+        requestLoyaltyPoints();
+    }
+
+    private void requestLoyaltyPoints(){
+        final SharedPreferences preferences = activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME
+                ,MODE_PRIVATE);
+
+        final SharedPreferences loyaltyPreference = activity.getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME
+                ,MODE_PRIVATE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) activity.getSystemService(CONNECTIVITY_SERVICE);
+        final Gson gson = new Gson();
+        final Type userReportToken = new TypeToken<LinkedHashMap<String, UserLoyaltyReport>>() {
+        }.getType();
+        final Calendar calendar = getReportCalendarInstance();
+        NetworkInfo connectivityInfo = connectivityManager.getActiveNetworkInfo();
+        String userReportMapCurrentString = loyaltyPreference.getString(LoyaltyBonusModel.USER_LOYALTY_REPORT, null);
+        final LinkedHashMap<String, UserLoyaltyReport> userReportCurrentMap = gson.fromJson(userReportMapCurrentString, userReportToken);
+        if(userReportCurrentMap == null)
+        {
+            String reportDate = String.valueOf(calendar.get(Calendar.YEAR)+"-"+(calendar.get(Calendar.MONTH)+1)+"-"
+                    +calendar.get(Calendar.DAY_OF_MONTH));
+            createNewUserReport(reportDate,gson,userReportToken,loyaltyPreference);
+            setAlarm(calendar);
+            displayPoints();
+            return;
+        }
+        int recentReportedDate = loyaltyPreference.getInt(LoyaltyBonusModel.RECENT_REPORTED_DATE,0000_00_00);
+        final int currentDate = calendar.get(Calendar.YEAR)+(calendar.get(Calendar.MONTH)+1)+calendar.get(Calendar.DAY_OF_MONTH);
+        if(recentReportedDate>=currentDate){
+            setAlarm(calendar);
+            displayPoints();
+            return;
+        }
+        if(connectivityInfo != null) {
+            if (connectivityInfo.isConnected()) {
+                loadingProgress.setVisibility(View.VISIBLE);
+                pointsEarned.setVisibility(View.INVISIBLE);
+                if (!userReportCurrentMap.isEmpty()) {
+                    for(UserLoyaltyReport report : userReportCurrentMap.values()){
+                        Log.d("LockupUserReport",report.getReportDate()+" Impressions: " + report.getTotalImpression()+" Clicks: "+ report.getTotalClicked());
+                    }
+                    ArrayList<UserLoyaltyReport> userReportCompleteList = new ArrayList<>(userReportCurrentMap.values());
+                    final UserLoyaltyReport presetDayReport = userReportCompleteList.remove(userReportCompleteList.size()-1);
+                    ArrayList<String> userReportDateList = new ArrayList<>(userReportCurrentMap.keySet());
+                    final String presentDateString = userReportDateList.get(userReportDateList.size()-1);
+                    if(userReportCompleteList.isEmpty()){
+                        setAlarm(calendar);
+                        displayPoints();
+                        return;
+                    }
+
+                    Type reportDataToken = new TypeToken<ArrayList<UserLoyaltyReport>>(){}.getType();
+                    String reportDataString = gson.toJson(userReportCompleteList,reportDataToken);
+                    LoyaltyBonusRequest userReportRequest = LoyaltyServiceGenerator.createService(LoyaltyBonusRequest.class);
+                    Call<UserLoyaltyReportResponse> userReportCall = userReportRequest.sendUserLoyaltyReport(
+                            "Report_add",
+                            preferences.getString(LockUpSettingsActivity.RECOVERY_EMAIL_PREFERENCE_KEY,"nomail"),
+                            loyaltyPreference.getString(LoyaltyBonusModel.LOYALTY_SEND_REQUEST,"noCode"),
+                            reportDataString
+                    );
+
+
+                    Log.d("LockupUserReport",userReportCall.request().url().toString());
+                    userReportCall.enqueue(new Callback<UserLoyaltyReportResponse>() {
+                        @Override
+                        public void onResponse(Call<UserLoyaltyReportResponse> call, Response<UserLoyaltyReportResponse> response) {
+                            if(response.isSuccessful()){
+                                UserLoyaltyReportResponse reportResponse = response.body();
+                                if(reportResponse.code.equals("200")){
+                                    Log.d("LockupUserReport","Report Success --------" + " " + reportResponse.totalPoint);
+                                    loyaltyPreference.edit().putString(LoyaltyBonusModel.USER_LOYALTY_BONUS
+                                            ,reportResponse.totalPoint).apply();
+                                    userReportCurrentMap.clear();
+                                    userReportCurrentMap.put(presentDateString,presetDayReport);
+                                    saveUserReportMap(userReportCurrentMap,gson,loyaltyPreference,userReportToken);
+                                    loyaltyPreference.edit().putInt(LoyaltyBonusModel.RECENT_REPORTED_DATE,currentDate)
+                                            .apply();
+                                    setAlarm(calendar);
+                                    displayPoints();
+                                    return;
+                                }
+                                if(reportResponse.code.equals("100")){
+                                    setAlarm(calendar);
+                                    displayPoints();
+                                    Log.d("LockupUserReport","Report Failure --------");
+                                }
+                            }else{
+                                setAlarm(calendar);
+                                displayPoints();
+                                Log.d("LockupUserReport","Report Failure --------");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<UserLoyaltyReportResponse> call, Throwable t) {
+                            setAlarm(calendar);
+                            displayPoints();
+                            Log.d("LockupUserReport","Report Failure --------");
+                        }
+                    });
+
+                }
+            } else {
+                setAlarm(calendar);
+                displayPoints();
+            }
+        }else{
+            setAlarm(calendar);
+            displayPoints();
+        }
+
+        Log.d("LockupUserReport","Report Complete --------");
+    }
+
+    private void displayPoints(){
+        pointsEarned.setVisibility(View.VISIBLE);
+        loadingProgress.setVisibility(View.INVISIBLE);
+    }
+
+    private Calendar getReportCalendarInstance(){
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        if(calendar.get(Calendar.HOUR_OF_DAY)>=14 && calendar.get(Calendar.MINUTE)>=0 &&
+                calendar.get(Calendar.SECOND)>0) {
+            calendar.add(Calendar.DATE, 1);
+            calendar.set(Calendar.HOUR_OF_DAY, 14);
+            calendar.set(Calendar.MINUTE, 1);
+            calendar.set(Calendar.SECOND, 0);
+        }else{
+            calendar.set(Calendar.HOUR_OF_DAY, 14);
+            calendar.set(Calendar.MINUTE, 1);
+            calendar.set(Calendar.SECOND, 0);
+        }
+        return calendar;
+    }
+
+    private void createNewUserReport(String reportDate, Gson gson, Type userReportToken, SharedPreferences preferences){
+        UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate);
+        userReport.setTotalImpression(0);
+        userReport.setTotalClicked(0);
+        LinkedHashMap<String,UserLoyaltyReport> userReportNewMap = new LinkedHashMap<>();
+        userReportNewMap.put(reportDate,userReport);
+        saveUserReportMap(userReportNewMap,gson,preferences,userReportToken);
+    }
+
+    private void saveUserReportMap(LinkedHashMap<String,UserLoyaltyReport> userReportMap, Gson gson, SharedPreferences preferences
+            ,Type reportToken){
+        String userReportMapNewString = gson.toJson(userReportMap,reportToken);
+        SharedPreferences.Editor edit = preferences.edit();
+        edit.putString(LoyaltyBonusModel.USER_LOYALTY_REPORT,userReportMapNewString);
+        edit.apply();
+    }
+
+    private void setAlarm(Calendar calendar){
+        AlarmManager alarmManager = (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
+        PendingIntent reportPendingIntent = PendingIntent.getBroadcast(
+                activity,23,new Intent(activity,UserReportBroadcastReceiver.class),0
+        );
+        alarmManager.cancel(reportPendingIntent);
+        if(Build.VERSION.SDK_INT<Build.VERSION_CODES.KITKAT){
+            alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),reportPendingIntent);
+        }else{
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),reportPendingIntent);
+        }
+        Log.d("LockupUserReport","Report Alarm Set --------");
     }
 
 

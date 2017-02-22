@@ -24,25 +24,17 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.smartfoxitsolutions.lockup.AppLockActivity;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.dialogs.GrantUsageAccessDialog;
 import com.smartfoxitsolutions.lockup.dialogs.OverlayPermissionDialog;
+import com.smartfoxitsolutions.lockup.loyaltybonus.dialogs.OnRequestRedeemListener;
 import com.smartfoxitsolutions.lockup.loyaltybonus.receivers.UserReportBroadcastReceiver;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Created by RAAJA on 29-01-2017.
@@ -58,6 +50,7 @@ public class LoyaltyUserActivity extends AppCompatActivity {
     private GrantUsageAccessDialog usageDialog;
     private OverlayPermissionDialog overlayPermissionDialog;
     private boolean hasPermissionReturned;
+    private OnRequestRedeemListener onRequestRedeemListener;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,6 +61,10 @@ public class LoyaltyUserActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         fragmentManager = getFragmentManager();
         shouldTrackUserPresence = true;
+    }
+
+    void setOnRequestRedeemListener(OnRequestRedeemListener redeemListener){
+        onRequestRedeemListener = redeemListener;
     }
 
     @Override
@@ -204,6 +201,11 @@ public class LoyaltyUserActivity extends AppCompatActivity {
         }
     }
 
+    void startLockActivity(){
+        startActivity(new Intent(getBaseContext(),AppLockActivity.class));
+        shouldTrackUserPresence = false;
+    }
+
     @TargetApi(23)
     void checkAndSetOverlayPermission(){
         if(Settings.canDrawOverlays(this)){
@@ -267,73 +269,16 @@ public class LoyaltyUserActivity extends AppCompatActivity {
         }
     }
 
-    private void setReportAlarm(){
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        PendingIntent reportPendingIntent = PendingIntent.getBroadcast(
-                this,23,new Intent(this,UserReportBroadcastReceiver.class),0
-        );
-        alarmManager.cancel(reportPendingIntent);
-        Calendar calendar = Calendar.getInstance();
-        if(calendar.get(Calendar.HOUR_OF_DAY)>21 && calendar.get(Calendar.MINUTE)>0 &&
-                calendar.get(Calendar.SECOND)>0) {
-            calendar.add(Calendar.DATE, 1);
-            calendar.set(Calendar.HOUR_OF_DAY, 21);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-        }else{
-            calendar.set(Calendar.HOUR_OF_DAY, 21);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-        }
-        String reportDate = String.valueOf(calendar.get(Calendar.YEAR)+"-"+(calendar.get(Calendar.MONTH)+1)+"-"
-                                        +calendar.get(Calendar.DAY_OF_MONTH));
-        Log.d("LockupUserReport",reportDate);
-        saveInitialUserReport(reportDate);
-        if(Build.VERSION.SDK_INT<Build.VERSION_CODES.KITKAT){
-            alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),reportPendingIntent);
-        }else{
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),reportPendingIntent);
-        }
-        Log.d("LockupUserReport","Report Alarm Set --------");
-    }
-
-    private void saveInitialUserReport(String reportDate){
-        SharedPreferences preferences = getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE);
-        Gson gson = new Gson();
-        Type userReportToken = new TypeToken<LinkedHashMap<String,UserLoyaltyReport>>(){}.getType();
-        String userReportMapCurrentString = preferences.getString(LoyaltyBonusModel.USER_LOYALTY_REPORT,null);
-        LinkedHashMap<String,UserLoyaltyReport> userReportCurrentMap = gson.fromJson(userReportMapCurrentString,userReportToken);
-        if(userReportCurrentMap!=null && !userReportCurrentMap.isEmpty()){
-            ArrayList<String> dateKeyList = new ArrayList<>(userReportCurrentMap.keySet());
-            String dateKey = dateKeyList.get(dateKeyList.size()-1);
-           UserLoyaltyReport userCurrentReport = userReportCurrentMap.get(dateKey);
-            if(!reportDate.equals(userCurrentReport.getReportDate())){
-                UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate);
-                userReport.setTotalImpression(0);
-                userReport.setTotalClicked(0);
-                userReportCurrentMap.put(reportDate,userReport);
-                saveUserReportMap(userReportCurrentMap,gson,preferences,userReportToken);
-            }
-        }else{
-         createNewUserReport(reportDate,gson,userReportToken,preferences);
+    public void requestRedeem(){
+        if(onRequestRedeemListener !=null){
+            onRequestRedeemListener.requestRedeem();
         }
     }
 
-    private void createNewUserReport(String reportDate, Gson gson, Type reportToken, SharedPreferences preferences){
-        UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate);
-        userReport.setTotalImpression(0);
-        userReport.setTotalClicked(0);
-        LinkedHashMap<String,UserLoyaltyReport> userReportNewMap = new LinkedHashMap<>();
-        userReportNewMap.put(reportDate,userReport);
-        saveUserReportMap(userReportNewMap,gson,preferences,reportToken);
-    }
-
-    private void saveUserReportMap(LinkedHashMap<String,UserLoyaltyReport> userReportMap, Gson gson, SharedPreferences preferences
-                                    ,Type reportToken){
-        String userReportMapNewString = gson.toJson(userReportMap,reportToken);
-        SharedPreferences.Editor edit = preferences.edit();
-        edit.putString(LoyaltyBonusModel.USER_LOYALTY_REPORT,userReportMapNewString);
-        edit.apply();
+    public void requestCancelled(){
+        if(onRequestRedeemListener!=null){
+            onRequestRedeemListener.requestCancelled();
+        }
     }
 
     private void stopReportAlarm(){
@@ -367,9 +312,7 @@ public class LoyaltyUserActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         if(shouldStartAppLockOn && !isAppLockFirstLoad){
-            if(isUserLoggedIn) {
-                setReportAlarm();
-            }else{
+            if(!isUserLoggedIn) {
                 stopReportAlarm();
             }
             startService(new Intent(getBaseContext(), AppLockingService.class));

@@ -294,7 +294,7 @@
 
     <!-- Loyalty Bonus Login -->
     <string name="loyalty_bonus_signin_button">Sign In</string>
-    <string name="loyalty_bonus_signin_info">Sign In and win loyalty bonus</string>
+    <string name="loyalty_bonus_signin_info">Sign In and get loyalty bonus</string>
     <string name="loyalty_bonus_signin_email_hint">E-Mail</string>
     <string name="loyalty_bonus_signin_password_hint">Password</string>
     <string name="loyalty_bonus_signin_forgot_password">Forgot Password?</string>
@@ -316,6 +316,7 @@
     <string name="loyalty_bonus_signup_first_name_error">First Name cannot be empty</string>
     <string name="loyalty_bonus_signup_last_name_error">Last Name cannot be empty</string>
     <string name="loyalty_bonus_signup_email_error">Enter a valid email</string>
+    <string name="loyalty_bonus_signup_country_error">Select a valid country</string>
     <string name="loyalty_bonus_signup_email_empty_error">Email cannot be empty</string>
     <string name="loyalty_bonus_signup_password_error">Passwords do not match</string>
     <string name="loyalty_bonus_signup_password_empty_error">Passwords cannot be empty</string>
@@ -358,7 +359,7 @@
     <string name="loyalty_user_main_lock_head">App Lock</string>
     <string name="loyalty_user_main_lock_info_one"> protected apps</string>
     <string name="loyalty_user_main_lock_info_two">Lock more apps to get more points</string>
-    <string name="loyalty_user_main_points_info_one">1000 points = 1$</string>
+    <string name="loyalty_user_main_points_info_one">100 points = 1$</string>
     <string name="loyalty_user_main_points_info_two">Points will be updated once a day</string>
     <string name="loyalty_user_main_redeem_text">Redeem with</string>
     <string name="loyalty_user_main_logout">Logout</string>
@@ -368,22 +369,38 @@
     <!-- Loyalty Bonus Redeem -->
     <string name="loyalty_bonus_redeem_text">Redeemable Points</string>
     <string name="loyalty_bonus_redeem_head">Choose a required denomination to redeem</string>
-    <string name="loyalty_bonus_redeem_one_credit">$2</string>
-    <string name="loyalty_bonus_redeem_two_credit">$3</string>
-    <string name="loyalty_bonus_redeem_three_credit">$5</string>
-    <string name="loyalty_bonus_redeem_four_credit">$10</string>
-    <string name="loyalty_bonus_redeem_five_credit">$50</string>
-    <string name="loyalty_bonus_redeem_six_credit">$100</string>
-    <string name="loyalty_bonus_redeem_seven_credit">$200</string>
-    <string name="loyalty_bonus_redeem_one_points">2,000</string>
-    <string name="loyalty_bonus_redeem_two_points">3,000</string>
-    <string name="loyalty_bonus_redeem_three_points">5,000</string>
-    <string name="loyalty_bonus_redeem_four_points">10,000</string>
-    <string name="loyalty_bonus_redeem_five_points">50,000</string>
-    <string name="loyalty_bonus_redeem_six_points">100,000</string>
-    <string name="loyalty_bonus_redeem_seven_points">200,000</string>
+    <string name="loyalty_bonus_redeem_one_points">200</string>
+    <string name="loyalty_bonus_redeem_two_points">300</string>
+    <string name="loyalty_bonus_redeem_three_points">500</string>
+    <string name="loyalty_bonus_redeem_four_points">1000</string>
+    <string name="loyalty_bonus_redeem_five_points">5000</string>
+    <string name="loyalty_bonus_redeem_six_points">10,000</string>
+    <string name="loyalty_bonus_redeem_seven_points">20,000</string>
     <string name="loyalty_bonus_redeem_button">Redeem Now</string>
     <string name="loyalty_bonus_redeem_title">Select Redeem Points</string>
+    <string name="loyalty_bonus_redeem_error">Redeem Error</string>
+    <string name="loyalty_bonus_redeem_low_point_error">Earned points is less than redeemable points</string>
+
+
+    <integer-array name="loyalty_bonus_redeem_paytm_credits">
+        <item>2</item>
+        <item>5</item>
+        <item>10</item>
+        <item>20</item>
+        <item>50</item>
+        <item>100</item>
+        <item>500</item>
+    </integer-array>
+
+    <integer-array name="loyalty_bonus_redeem_paypal_credits">
+        <item>4</item>
+        <item>6</item>
+        <item>10</item>
+        <item>20</item>
+        <item>50</item>
+        <item>100</item>
+        <item>500</item>
+    </integer-array>
 
     <!-- Loyalty Redeem Final -->
     <string name="loyalty_redeem_final_selected_info">Selected Denomination</string>
@@ -393,6 +410,30 @@
     <string name="loyalty_redeem_final_paytm_hint">Paytm ID</string>
     <string name="loyalty_redeem_final_redeem_button">Redeem Points</string>
     <string name="loyalty_redeem_final_redeem_title">Redeem Bonus</string>
+    <string name="loyalty_redeem_final_redeem_failed">Redeem Failed</string>
+    <string name="loyalty_redeem_final_empty_ID">Enter a valid ID</string>
+    <string name="loyalty_redeem_dialog_negative_text">NOT NOW</string>
+    <string name="loyalty_redeem_dialog_positive_text">YES</string>
+    <string name="loyalty_redeem_dialog_info_message">Would you like to credit &lt;b>$%1$s &lt;/b> to your following %2$s ID &lt;b>%3$s &lt;/b></string>
+    <string name="loyalty_redeem_success_title">Redeem Success</string>
+    <string name="loyalty_redeem_success_message">Hurray! &lt;b>$%1$s &lt;/b> will be credited to your account soon. A confirmation mail is sent to &lt;b>%2$s&lt;/b></string>
+    <string name="loyalty_redeem_paypal_id_error">Enter a valid Paypal ID</string>
 
+
+    <string-array name="loyalty_bonus_signup_country_list">
+        <item>Australia</item>
+        <item>INDIA</item>
+        <item>United States</item>
+        <item>Russia</item>
+        <item>Germany</item>
+        <item>United Kingdom</item>
+        <item>Spain</item>
+        <item>France</item>
+        <item>Ukraine</item>
+        <item>Italy</item>
+        <item>Pakistan</item>
+        <item>New Zealand</item>
+        <item>-----------------</item>
+    </string-array>
 
 </resources>

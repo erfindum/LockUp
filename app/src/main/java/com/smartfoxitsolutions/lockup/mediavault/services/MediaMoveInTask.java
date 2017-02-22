@@ -370,31 +370,31 @@ public class MediaMoveInTask implements Runnable {
     }
 
     boolean getFileSpaceAvailability(String path){
-        StatFs fileStats = new StatFs(path);
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2){
-            File originalFile = new File(path);
-            if(originalFile.exists()) {
-                if (fileStats.getAvailableBytes() > (originalFile.length() + 10_24_000)) {
-                    return true;
+            StatFs fileStats = new StatFs(Environment.getExternalStorageDirectory().getPath());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                File originalFile = new File(path);
+                if (originalFile.exists()) {
+                    if (fileStats.getAvailableBytes() > (originalFile.length() + 10_24_000)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
                 } else {
-                    return false;
-                }
-            }else{
-                return true;
-            }
-        }else{
-            File originalFile = new File(path);
-            if(originalFile.exists()) {
-                long availableBytes = fileStats.getAvailableBlocks() * fileStats.getBlockSize();
-                if (availableBytes > (originalFile.length() + 10_24_000)) {
                     return true;
-                } else {
-                    return false;
                 }
-            }else{
-                return true;
+            } else {
+                File originalFile = new File(path);
+                if (originalFile.exists()) {
+                    long availableBytes = fileStats.getAvailableBlocks() * fileStats.getBlockSize();
+                    if (availableBytes > (originalFile.length() + 10_24_000)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return true;
+                }
             }
-        }
     }
 
     private boolean copyMediaFile(String mediaPath, String destPath) throws IOException{

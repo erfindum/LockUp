@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.mopub.nativeads.MoPubRecyclerAdapter;
 import com.smartfoxitsolutions.lockup.R;
 
 import java.io.File;
@@ -43,6 +44,7 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private Drawable placeHolder;
     private MediaVaultAlbumFragment mediaAlbumFragment;
     private String mediaType;
+    private MoPubRecyclerAdapter moPubAdapter;
 
     MediaVaultAlbumAdapter(Cursor cursor, MediaVaultAlbumFragment frag, int viewWidth, int viewHeight){
         bucketIdList = new LinkedList<>();
@@ -157,17 +159,19 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
     }
 
+    void setMoPubAdapter(MoPubRecyclerAdapter moPubAdapter){
+        this.moPubAdapter = moPubAdapter;
+    }
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context ctxt = parent.getContext();
         LayoutInflater inflater =  LayoutInflater.from(ctxt);
-        if(viewType == ITEM_TYPE_ALBUM) {
-            View itemView = inflater.inflate(R.layout.vault_album_recycler_item, parent, false);
-            MediaAlbumPickerHolder holder = new MediaAlbumPickerHolder(itemView);
-            holder.setOnGridItemSelectedListener(this);
-            holders.add(holder);
-            return holder;
-        }
+        View itemView = inflater.inflate(R.layout.vault_album_recycler_item, parent, false);
+        MediaAlbumPickerHolder holder = new MediaAlbumPickerHolder(itemView);
+        holder.setOnGridItemSelectedListener(this);
+        holders.add(holder);
+        return holder;
        /* if(viewType == ITEM_TYPE_ADS){
             View itemView = inflater.inflate(R.layout.vault_album_fragment_ads_recycler_item, parent, false);
             MediaAlbumAdHolder holder = new MediaAlbumAdHolder(itemView);
@@ -175,7 +179,7 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             adHolders.add(holder);
             return holder;
         } */
-        return null;
+        //return null;
     }
 
     @Override
@@ -187,18 +191,21 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             return;
         } */
         MediaAlbumPickerHolder mediaHolder = (MediaAlbumPickerHolder) holder;
-        File thumbnailFile = new File(bucketThumbnailPathList.get(position));
-        File renamedFile = new File(bucketThumbnailPathList.get(position)+".jpg");
+        if(moPubAdapter.isAd(mediaHolder.getLayoutPosition())){
+            return;
+        }
+        int originalPosition = moPubAdapter.getOriginalPosition(mediaHolder.getLayoutPosition());
+        File thumbnailFile = new File(bucketThumbnailPathList.get(originalPosition));
+        File renamedFile = new File(bucketThumbnailPathList.get(originalPosition)+".jpg");
         if(thumbnailFile.exists()) {
-            printSize(thumbnailFile);
             thumbnailFile.renameTo(renamedFile);
             Glide.with(mediaAlbumFragment.getContext()).load(renamedFile).placeholder(getPlaceHolderImages())
                     .error(getPlaceHolderImages()).override(viewWidth, viewHeight)
                     .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                     .into(mediaHolder.getThumbnailView());
         }
-        mediaHolder.getInfoText().setText(bucketNameList.get(position));
-        mediaHolder.getCountText().setText("(" + bucketCountList.get(position)+")");
+        mediaHolder.getInfoText().setText(bucketNameList.get(originalPosition));
+        mediaHolder.getCountText().setText("(" + bucketCountList.get(originalPosition)+")");
     }
 
     @Override
@@ -221,9 +228,13 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public void onViewRecycled(RecyclerView.ViewHolder holder) {
         super.onViewRecycled(holder);
         MediaAlbumPickerHolder contentHolder= (MediaAlbumPickerHolder) holder;
-        int holderPosition = contentHolder.getAdapterPosition();
-        File oldFile = new File(bucketThumbnailPathList.get(holderPosition)+".jpg");
-        if(oldFile.exists()){oldFile.renameTo(new File(bucketThumbnailPathList.get(holderPosition)));}
+        int holderPosition = contentHolder.getLayoutPosition();
+        if(moPubAdapter.isAd(holderPosition)){
+            return;
+        }
+        int originalPosition = moPubAdapter.getOriginalPosition(holderPosition);
+        File oldFile = new File(bucketThumbnailPathList.get(originalPosition)+".jpg");
+        if(oldFile.exists()){oldFile.renameTo(new File(bucketThumbnailPathList.get(originalPosition)));}
         Glide.clear(contentHolder.getThumbnailView());
     }
 
@@ -231,10 +242,15 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         Log.d("VaultRename", System.currentTimeMillis()+" rename started " + holders.size() + " holder size");
         for (MediaAlbumPickerHolder holder : holders){
             int holderPosition = holder.getLayoutPosition();
-            if(holderPosition!=-1) {
-                File oldFile = new File(bucketThumbnailPathList.get(holderPosition) + ".jpg");
+            if(moPubAdapter.isAd(holderPosition)){
+                continue;
+            }
+            int originalPosition = moPubAdapter.getOriginalPosition(holderPosition);
+            if(originalPosition!=-1) {
+                Log.d("VaultRename",originalPosition+" holderposition " + bucketThumbnailPathList.size() + " Path List size");
+                File oldFile = new File(bucketThumbnailPathList.get(originalPosition) + ".jpg");
                 if (oldFile.exists()) {
-                    oldFile.renameTo(new File(bucketThumbnailPathList.get(holderPosition)));
+                    oldFile.renameTo(new File(bucketThumbnailPathList.get(originalPosition)));
                 }
             }
         }
@@ -243,9 +259,12 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public void onGridItemSelected(int gridPosition) {
-        if(getItemViewType(gridPosition) == ITEM_TYPE_ALBUM) {
-            mediaAlbumFragment.albumClicked(bucketIdList.get(gridPosition), bucketNameList.get(gridPosition));
+        if(moPubAdapter.isAd(gridPosition)){
+            return;
         }
+        int originalPosition = moPubAdapter.getOriginalPosition(gridPosition);
+
+        mediaAlbumFragment.albumClicked(bucketIdList.get(originalPosition), bucketNameList.get(originalPosition));
      /*   if(getItemViewType(gridPosition)== ITEM_TYPE_ADS){
             Toast.makeText(mediaAlbumFragment.getActivity(),"Ads Will be displayed",Toast.LENGTH_SHORT).show();
         } */
@@ -256,23 +275,13 @@ public class MediaVaultAlbumAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         if(mediaAlbumFragment !=null) {
             mediaAlbumFragment = null;
         }
+        moPubAdapter = null;
         for (MediaAlbumPickerHolder holder : holders){
             holder.setOnGridItemSelectedListener(null);
         }
        /* for(MediaAlbumAdHolder holder: adHolders){
             holder.setOnGridItemSelectedListener(null);
         } */
-    }
-
-    @TargetApi(18)
-    void printSize(File path){
-        StatFs stats = new StatFs(path.getPath());
-        Log.d("LockUpFile","Start ----------------------------");
-        Log.d("LockUpFile",stats.getAvailableBytes() + " Available bytes");
-        Log.d("LockUpFile",path.length() + " File Size");
-        boolean isSizeMatch = stats.getAvailableBytes()/(1024*1024) < path.length()/(1024*1024);
-        Log.d("LockUpFile",String.valueOf(isSizeMatch) + " Size Match");
-        Log.d("LockUpFile","---------------------------- Stop");
     }
 
 }

@@ -3,10 +3,10 @@
     android:layout_width="match_parent" android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fillViewport="true"
+    android:background="@color/backgroundGrey"
     >
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:background="@color/backgroundGrey"
     >
 
     <RelativeLayout
@@ -29,15 +29,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/loyalty_bonus_redeem_points_type"
+                android:layout_width="@dimen/loyalty_bonus_redeem_logo_size"
+                android:layout_height="@dimen/loyalty_bonus_redeem_logo_size"
+                android:layout_centerHorizontal="true"
+                android:background="@null"
+                android:scaleType="fitXY"
+                />
+
             <TextView
                 android:id="@+id/loyalty_bonus_redeem_points_redeem_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/thirtyDpDimension"
                 android:textColor="@color/textSecondaryColor"
                 android:textSize="@dimen/fifteenSpDimension"
                 android:text="@string/loyalty_bonus_redeem_text"
+                android:layout_below="@+id/loyalty_bonus_redeem_points_type"
                 />
             <RelativeLayout
                 android:id="@+id/loyalty_bonus_redeem_points_redeem_info_group"
@@ -53,7 +62,7 @@
                     android:textColor="@color/textSecondaryColor"
                     android:textSize="@dimen/fifteenSpDimension"
                     android:layout_centerHorizontal="true"
-                    android:text="2,000"
+
                     />
 
                 <android.support.v7.widget.AppCompatImageView
@@ -98,7 +107,6 @@
                     android:layout_centerHorizontal="true"
                     android:textSize="@dimen/twentySpDimension"
                     android:textColor="@color/colorMainPrimary"
-                    android:text="@string/loyalty_bonus_redeem_two_credit"
                     android:layout_marginTop="@dimen/fifteenDpDimension"
                     />
                 <RelativeLayout
@@ -148,7 +156,6 @@
                     android:layout_centerHorizontal="true"
                     android:textSize="@dimen/twentySpDimension"
                     android:textColor="@color/colorMainPrimary"
-                    android:text="@string/loyalty_bonus_redeem_one_credit"
                     android:layout_marginTop="@dimen/fifteenDpDimension"
                     />
                 <RelativeLayout
@@ -198,7 +205,6 @@
                     android:layout_centerHorizontal="true"
                     android:textSize="@dimen/twentySpDimension"
                     android:textColor="@color/colorMainPrimary"
-                    android:text="@string/loyalty_bonus_redeem_three_credit"
                     android:layout_marginTop="@dimen/fifteenDpDimension"
                     />
                 <RelativeLayout
@@ -247,7 +253,6 @@
                     android:layout_centerHorizontal="true"
                     android:textSize="@dimen/twentySpDimension"
                     android:textColor="@color/colorMainPrimary"
-                    android:text="@string/loyalty_bonus_redeem_five_credit"
                     android:layout_marginTop="@dimen/fifteenDpDimension"
                     />
                 <RelativeLayout
@@ -297,7 +302,6 @@
                     android:layout_centerHorizontal="true"
                     android:textSize="@dimen/twentySpDimension"
                     android:textColor="@color/colorMainPrimary"
-                    android:text="@string/loyalty_bonus_redeem_four_credit"
                     android:layout_marginTop="@dimen/fifteenDpDimension"
                     />
                 <RelativeLayout
@@ -307,6 +311,7 @@
                     android:layout_below="@+id/loyalty_bonus_redeem_points_redeem_four_credit"
                     android:layout_marginTop="@dimen/tenDpDimension"
                     android:layout_marginLeft="10dp"
+                    android:layout_marginStart="@dimen/tenDpDimension"
                     android:layout_marginBottom="@dimen/fifteenDpDimension"
                     >
                     <TextView
@@ -347,7 +352,6 @@
                     android:layout_centerHorizontal="true"
                     android:textSize="@dimen/twentySpDimension"
                     android:textColor="@color/colorMainPrimary"
-                    android:text="@string/loyalty_bonus_redeem_six_credit"
                     android:layout_marginTop="@dimen/fifteenDpDimension"
                     />
                 <RelativeLayout
@@ -398,7 +402,6 @@
                     android:layout_centerHorizontal="true"
                     android:textSize="@dimen/twentySpDimension"
                     android:textColor="@color/colorMainPrimary"
-                    android:text="@string/loyalty_bonus_redeem_seven_credit"
                     android:layout_marginTop="@dimen/fifteenDpDimension"
                     />
                 <RelativeLayout
@@ -432,41 +435,24 @@
                         />
                 </RelativeLayout>
             </RelativeLayout>
+            <Button
+                android:id="@+id/loyalty_bonus_redeem_points_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/loyalty_bonus_redeem_points_redeem_seven_group"
+                android:layout_marginRight="@dimen/tenDpDimension"
+                android:layout_marginLeft="@dimen/tenDpDimension"
+                android:layout_marginTop="@dimen/thirtyDpDimension"
+                android:layout_marginBottom="@dimen/tenDpDimension"
+                android:background="@color/colorMainAccent"
+                android:text="@string/loyalty_bonus_redeem_button"
+                android:textColor="@color/colorMainPrimaryDark"
+                android:textSize="@dimen/fifteenSpDimension"
+                />
 
         </RelativeLayout>
 
+
     </android.support.v7.widget.CardView>
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/loyalty_bonus_redeem_logo_margin_top"
-        android:paddingLeft="@dimen/loyalty_bonus_redeem_logo_padding_left_right"
-        android:paddingRight="@dimen/loyalty_bonus_redeem_logo_padding_left_right"
-        android:background="@drawable/img_redeem_logo_back"
-        >
-        <android.support.v7.widget.AppCompatImageView
-            android:id="@+id/loyalty_bonus_redeem_points_type"
-            android:layout_width="@dimen/loyalty_bonus_redeem_logo_size"
-            android:layout_height="@dimen/loyalty_bonus_redeem_logo_size"
-            android:background="@null"
-            android:scaleType="fitXY"
-            />
-    </RelativeLayout>
-
-    <Button
-        android:id="@+id/loyalty_bonus_redeem_points_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/loyalty_bonus_redeem_points_card"
-        android:layout_marginRight="@dimen/tenDpDimension"
-        android:layout_marginLeft="@dimen/tenDpDimension"
-        android:layout_marginTop="@dimen/thirtyDpDimension"
-        android:background="@color/colorMainAccent"
-        android:text="@string/loyalty_bonus_redeem_button"
-        android:textColor="@color/colorMainPrimaryDark"
-        android:textSize="@dimen/fifteenSpDimension"
-        />
 </RelativeLayout>
     </ScrollView>

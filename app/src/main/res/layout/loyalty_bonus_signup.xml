@@ -5,49 +5,40 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorMainPrimary">
 
+    <android.support.v7.widget.Toolbar
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/loyalty_bonus_signup_tool_bar"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:background="@color/colorMainPrimary"
+        android:elevation="0dp"
+        android:layout_alignParentTop="true"
+        app:theme="@style/DarkActivityTheme"
+        app:popupTheme="@style/Theme.AppCompat.Light"
+        />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/loyalty_bonus_signup_tool_bar"
         android:fillViewport="true"
         >
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <TextView
-                android:id="@+id/loyalty_bonus_signup_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_alignParentTop="true"
-                android:textSize="@dimen/fifteenSpDimension"
-                android:textColor="@color/white"
-                android:text="@string/loyalty_bonus_signup_info"
-                android:layout_marginTop="@dimen/fifteenDpDimension"
-                android:layout_marginBottom="@dimen/twentyDpDimension"
-                />
-
-            <View
-                android:id="@+id/loyalty_bonus_signup_seperator"
-                android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
-                android:layout_height="1dp"
-                android:layout_below="@+id/loyalty_bonus_signup_header"
-                android:background="@color/viewPagerTabBlue"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="@dimen/twentyDpDimension"
-                />
 
             <Button
                 android:id="@+id/loyalty_bonus_signup_login_button"
                 android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_below="@+id/loyalty_bonus_signup_seperator"
                 android:background="@drawable/img_loyalty_login_button"
                 android:text="@string/loyalty_bonus_signup_signin_button"
                 android:textColor="@color/white"
                 android:textSize="@dimen/thirteenSpDimension"
                 android:textAllCaps="false"
+                android:layout_marginTop="@dimen/tenDpDimension"
                 />
 
             <TextView
@@ -62,16 +53,28 @@
                 android:text="@string/set_email_activity_or_text"
                 />
 
+            <View
+                android:id="@+id/loyalty_bonus_signup_seperator"
+                android:layout_width="@dimen/twoHunderedAndFourtyDpDimension"
+                android:layout_height="1dp"
+                android:layout_below="@+id/loyalty_bonus_signup_or"
+                android:background="@color/viewPagerTabBlue"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="@dimen/fifteenDpDimension"
+                android:layout_marginTop="@dimen/fifteenDpDimension"
+                />
+
             <TextView
                 android:id="@+id/loyalty_bonus_signup_header_sub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_below="@id/loyalty_bonus_signup_or"
+                android:layout_below="@id/loyalty_bonus_signup_seperator"
                 android:textSize="@dimen/fifteenSpDimension"
                 android:textColor="@color/white"
                 android:text="@string/loyalty_bonus_signup_button"
-                android:layout_marginBottom="@dimen/tenDpDimension"
+                android:textStyle="bold"
+                android:layout_marginBottom="@dimen/fifteenDpDimension"
                 />
 
             <android.support.v7.widget.AppCompatEditText

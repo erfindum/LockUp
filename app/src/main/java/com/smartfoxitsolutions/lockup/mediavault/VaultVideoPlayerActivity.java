@@ -331,7 +331,7 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
     }
 
     void setAnimations(){
-        displayTopBarAnim = new ValueAnimator();
+        displayTopBarAnim = ValueAnimator.ofInt(topBar.getTop(),topBar.getBottom());
         displayTopBarAnim.setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator());
         displayTopBarAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -344,7 +344,7 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
             }
         });
 
-        displayBottomBarAnim = new ValueAnimator();
+        displayBottomBarAnim = ValueAnimator.ofInt(bottomBar.getBottom(),bottomBar.getTop());
         displayBottomBarAnim.setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator());
         displayBottomBarAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -357,7 +357,7 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
             }
         });
 
-        hideTopBarAnim = new ValueAnimator();
+        hideTopBarAnim = ValueAnimator.ofInt(topBar.getBottom(),topBar.getTop());
         hideTopBarAnim.setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator());
         hideTopBarAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -367,7 +367,7 @@ public class VaultVideoPlayerActivity extends AppCompatActivity{
             }
         });
 
-        hideBottomBarAnim = new ValueAnimator();
+        hideBottomBarAnim = ValueAnimator.ofInt(bottomBar.getTop(),bottomBar.getBottom());
         hideBottomBarAnim.setDuration(300).setInterpolator(new AccelerateDecelerateInterpolator());
         hideBottomBarAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override

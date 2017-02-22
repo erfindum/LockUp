@@ -46,7 +46,8 @@
 -keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusSignUpResponse {*;}
 -keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusSignUpData {*;}
 -keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusInitialPointResponse {*;}
--keep class com.smartfoxitsolutions.lockup.loyaltybonus.services.UserLoyaltyReportResponse {*;}
+-keep class com.smartfoxitsolutions.lockup.loyaltybonus.UserLoyaltyReportResponse {*;}
+-keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyUserRedeemResponse {*;}
 
 
 

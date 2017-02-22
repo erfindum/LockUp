@@ -13,7 +13,9 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -50,6 +52,7 @@ public class LoyaltyBonusLoginFragment extends Fragment {
     private Button loginButton, resetPasswordButton;
     private boolean shouldValidateLogin;
     private ConnectivityManager connectivityManager;
+    private Toolbar toolbar;
 
     @Nullable
     @Override
@@ -61,6 +64,7 @@ public class LoyaltyBonusLoginFragment extends Fragment {
         progress = (ProgressBar) parent.findViewById(R.id.loyalty_bonus_login_progress_bar);
         loginInfo = (TextView) parent.findViewById(R.id.loyalty_bonus_login_info);
         loginButton = (Button) parent.findViewById(R.id.loyalty_bonus_login_button);
+        toolbar = (Toolbar) parent.findViewById(R.id.loyalty_bonus_login_tool_bar);
         resetPasswordButton = (Button) parent.findViewById(R.id.loyalty_bonus_login_forgot_password_button);
         if(savedInstanceState!=null){
             shouldValidateLogin = savedInstanceState.getBoolean("shouldValidateLogin");
@@ -75,6 +79,18 @@ public class LoyaltyBonusLoginFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         activity = (LoyaltyBonusMain) getActivity();
         connectivityManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
+        activity.setSupportActionBar(toolbar);
+        ActionBar actionToolbar = activity.getSupportActionBar();
+        if(actionToolbar!=null){
+            actionToolbar.setDisplayHomeAsUpEnabled(true);
+            actionToolbar.setTitle(getString(R.string.loyalty_bonus_signin_button));
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    activity.onBackPressed();
+                }
+            });
+        }
         setListeners();
     }
 

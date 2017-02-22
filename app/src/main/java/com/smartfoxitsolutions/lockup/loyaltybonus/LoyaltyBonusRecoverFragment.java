@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -45,6 +46,7 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
     private LoyaltyBonusMain activity;
     private DialogFragment networkProcessDialog,operationSuccessDialog;
     private ConnectivityManager connectivityManager;
+    private CardView resetPasswordGroup;
 
     @Nullable
     @Override
@@ -59,6 +61,8 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
         passwordEdit = (AppCompatEditText) parent.findViewById(R.id.loyalty_bonus_password_recovery_one);
         confirmPasswordEdit = (AppCompatEditText) parent.findViewById(R.id.loyalty_bonus_password_recovery_two);
         toolbar = (Toolbar) parent.findViewById(R.id.loyalty_bonus_password_recovery_tool_bar);
+
+        resetPasswordGroup = (CardView) parent.findViewById(R.id.loyalty_bonus_password_recovery_reset_card);
         return parent;
     }
 
@@ -90,13 +94,15 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
         sendRecoveryEdit.setText(emailString);
         sendRecoveryEdit.setEnabled(false);
         long intervalStart = prefs.getLong(LoyaltyBonusModel.RECOVERY_CODE_TIME_INTERVAL,0);
-        long intervalEnd = intervalStart+(30*1000);
+        long intervalEnd = intervalStart+(60*1000*5);
 
         if(System.currentTimeMillis()<intervalEnd){
+            resetPasswordGroup.setVisibility(View.VISIBLE);
             resetPasswordEdit.setEnabled(true);
             passwordEdit.setEnabled(true);
             confirmPasswordEdit.setEnabled(true);
         }else{
+            resetPasswordGroup.setVisibility(View.INVISIBLE);
             resetPasswordEdit.setEnabled(false);
             passwordEdit.setEnabled(false);
             confirmPasswordEdit.setEnabled(false);
@@ -131,7 +137,7 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
     void sendRecoveryCode(){
         final SharedPreferences prefs = activity.getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME, Context.MODE_PRIVATE);
         long intervalStart = prefs.getLong(LoyaltyBonusModel.RECOVERY_CODE_TIME_INTERVAL,0);
-        long intervalEnd = intervalStart+(30*1000);
+        long intervalEnd = intervalStart+(60*1000*5);
         if(intervalStart!=0 && System.currentTimeMillis()<intervalEnd){
             String pauseRequest = getString(R.string.reset_pin_pattern_pause_request);
             long interval = intervalEnd - System.currentTimeMillis();
@@ -200,6 +206,7 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
                                     ,"resetSuccessResponse");
                             activity.isRecoverySent =true;
                             activity.shouldTrackUserPresence=false;
+                            resetPasswordGroup.setVisibility(View.VISIBLE);
                             resetPasswordEdit.setEnabled(true);
                             passwordEdit.setEnabled(true);
                             confirmPasswordEdit.setEnabled(true);
@@ -329,6 +336,7 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
                             resetPasswordEdit.setEnabled(false);
                             passwordEdit.setEnabled(false);
                             confirmPasswordEdit.setEnabled(false);
+                            resetPasswordGroup.setVisibility(View.INVISIBLE);
                             SharedPreferences.Editor edit = prefs.edit();
                             edit.putLong(LoyaltyBonusModel.RECOVERY_CODE_TIME_INTERVAL,0);
                             edit.apply();
