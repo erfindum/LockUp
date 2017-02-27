@@ -67,7 +67,6 @@ public class LoyaltyBonusMain extends AppCompatActivity implements FragmentManag
                 finish();
             } else if (!isRecoverySent) {
                 FragmentTransaction fragTransaction = fragmentManager.beginTransaction();
-                fragTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 fragTransaction.add(R.id.loyalty_bonus_main_activity_container, new LoyaltyBonusSignUpFragment(), LOYALTY_BONUS_SIGNUP_TAG);
                 fragTransaction.addToBackStack(LOYALTY_BONUS_SIGNUP_TAG);
                 fragTransaction.commit();
@@ -90,7 +89,6 @@ public class LoyaltyBonusMain extends AppCompatActivity implements FragmentManag
 
     void startSignIn(){
         FragmentTransaction fragTransaction = fragmentManager.beginTransaction();
-        fragTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         fragTransaction.add(R.id.loyalty_bonus_main_activity_container,new LoyaltyBonusLoginFragment(),"loyaltyBonusSignin");
         fragTransaction.addToBackStack("loyaltyBonusSignin");
         fragTransaction.commit();
@@ -98,7 +96,6 @@ public class LoyaltyBonusMain extends AppCompatActivity implements FragmentManag
 
     void startForgotPassword(){
         FragmentTransaction fragTransaction = fragmentManager.beginTransaction();
-        fragTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         fragTransaction.add(R.id.loyalty_bonus_main_activity_container,new LoyaltyBonusRecoverFragment(),"forgotUserPassword");
         fragTransaction.addToBackStack("forgotUserPassword");
         fragTransaction.commit();

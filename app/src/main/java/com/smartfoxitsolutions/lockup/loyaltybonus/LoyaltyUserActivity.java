@@ -80,7 +80,6 @@ public class LoyaltyUserActivity extends AppCompatActivity {
             toolbar.setTitle(getString(R.string.loyalty_user_main_title));
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.add(R.id.loyalty_bonus_user_activity_container, new LoyaltyUserProfileFragment(), "loyaltyProfileFragment");
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             transaction.addToBackStack("loyaltyProfileFragment");
             transaction.commit();
         }
@@ -154,7 +153,6 @@ public class LoyaltyUserActivity extends AppCompatActivity {
         redeemFragment.setArguments(args);
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(R.id.loyalty_bonus_user_activity_container,redeemFragment,"loyaltyRedeemFragment");
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.addToBackStack("loyaltyRedeemFragment");
         transaction.commit();
     }
@@ -168,7 +166,6 @@ public class LoyaltyUserActivity extends AppCompatActivity {
         redeemFinalFragment.setArguments(args);
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.add(R.id.loyalty_bonus_user_activity_container,redeemFinalFragment,"loyaltyRedeemFinalFragment");
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.addToBackStack("loyaltyRedeemFinalFragment");
         transaction.commit();
     }
@@ -278,6 +275,17 @@ public class LoyaltyUserActivity extends AppCompatActivity {
     public void requestCancelled(){
         if(onRequestRedeemListener!=null){
             onRequestRedeemListener.requestCancelled();
+        }
+    }
+
+    public void redeemBonusSuccess(){
+        if(fragmentManager.findFragmentByTag("loyaltyProfileFragment")!=null) {
+            fragmentManager.popBackStack("loyaltyProfileFragment",FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            toolbar.setTitle(getString(R.string.loyalty_user_main_title));
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.add(R.id.loyalty_bonus_user_activity_container, new LoyaltyUserProfileFragment(), "loyaltyProfileFragment");
+            transaction.addToBackStack("loyaltyProfileFragment");
+            transaction.commit();
         }
     }
 

@@ -2,10 +2,8 @@ package com.smartfoxitsolutions.lockup.loyaltybonus;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.AppCompatImageView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,9 +12,7 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
-import com.smartfoxitsolutions.lockup.loyaltybonus.dialogs.RedeemErrorDialog;
 
 /**
  * Created by RAAJA on 30-01-2017.
@@ -25,16 +21,15 @@ import com.smartfoxitsolutions.lockup.loyaltybonus.dialogs.RedeemErrorDialog;
 public class LoyaltyUserRedeemFragment extends Fragment {
 
     private AppCompatImageView redeemTypeImage;
-    private RelativeLayout redeemPointsOne, redeemPointsTwo,redeemPointsThree,redeemPointsFour,redeemPointsFive,redeemPointsSix
-                ,redeemPointsSeven;
+    private RelativeLayout redeemPointsOneGroup, redeemPointsTwoGroup, redeemPointsThreeGroup, redeemPointsFourGroup, redeemPointsFiveGroup, redeemPointsSixGroup;
     private TextView redeemOneCredit,redeemTwoCredit,redeemThreeCredit,redeemFourCredit,redeemFiveCredit,redeemSixCredit,
-            redeemSevenCredit, userTotalPoints;
+            userTotalPoints;
+    private TextView redeemOnePoints,redeemTwoPoints,redeemThreePoints,redeemFourPoints,redeemFivePoints,redeemSixPoints;
     private Button redeemButton;
     private int selectedDenomination;
     private RelativeLayout currentSelection;
     private LoyaltyUserActivity activity;
     private String type;
-    private DialogFragment errorFragment;
 
     @Nullable
     @Override
@@ -43,13 +38,12 @@ public class LoyaltyUserRedeemFragment extends Fragment {
         View parent = inflater.inflate(R.layout.loyalty_bonus_redeem_points,container,false);
         redeemTypeImage = (AppCompatImageView) parent.findViewById(R.id.loyalty_bonus_redeem_points_type);
 
-        redeemPointsOne = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_one_group);
-        redeemPointsTwo = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_two_group);
-        redeemPointsThree = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_three_group);
-        redeemPointsFour = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_four_group);
-        redeemPointsFive = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_five_group);
-        redeemPointsSix = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_six_group);
-        redeemPointsSeven = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_seven_group);
+        redeemPointsOneGroup = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_one_group);
+        redeemPointsTwoGroup = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_two_group);
+        redeemPointsThreeGroup = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_three_group);
+        redeemPointsFourGroup = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_four_group);
+        redeemPointsFiveGroup = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_five_group);
+        redeemPointsSixGroup = (RelativeLayout) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_six_group);
 
         redeemOneCredit = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_one_credit);
         redeemTwoCredit = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_two_credit);
@@ -57,7 +51,14 @@ public class LoyaltyUserRedeemFragment extends Fragment {
         redeemFourCredit = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_four_credit);
         redeemFiveCredit = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_five_credit);
         redeemSixCredit = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_six_credit);
-        redeemSevenCredit = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_seven_credit);
+
+        redeemOnePoints = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_one_info);
+        redeemTwoPoints = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_two_info);
+        redeemThreePoints = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_three_info);
+        redeemFourPoints = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_four_info);
+        redeemFivePoints = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_five_info);
+        redeemSixPoints = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_six_info);
+
 
         userTotalPoints = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_info);
 
@@ -77,87 +78,75 @@ public class LoyaltyUserRedeemFragment extends Fragment {
     }
 
     void setListeners(){
-        redeemPointsOne.setOnClickListener(new View.OnClickListener() {
+        redeemPointsOneGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(currentSelection!=null){
                     currentSelection.setBackground(null);
                 }
                 selectedDenomination = 0;
-                currentSelection = redeemPointsOne;
-                redeemPointsOne.setBackgroundResource(R.drawable.img_redeem_point_group);
+                currentSelection = redeemPointsOneGroup;
+                redeemPointsOneGroup.setBackgroundResource(R.drawable.img_redeem_point_group);
             }
         });
 
-        redeemPointsTwo.setOnClickListener(new View.OnClickListener() {
+        redeemPointsTwoGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(currentSelection!=null){
                     currentSelection.setBackground(null);
                 }
                 selectedDenomination = 1;
-                currentSelection = redeemPointsTwo;
-                redeemPointsTwo.setBackgroundResource(R.drawable.img_redeem_point_group);
+                currentSelection = redeemPointsTwoGroup;
+                redeemPointsTwoGroup.setBackgroundResource(R.drawable.img_redeem_point_group);
             }
         });
 
-        redeemPointsThree.setOnClickListener(new View.OnClickListener() {
+        redeemPointsThreeGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(currentSelection!=null){
                     currentSelection.setBackground(null);
                 }
                 selectedDenomination = 2;
-                currentSelection = redeemPointsThree;
-                redeemPointsThree.setBackgroundResource(R.drawable.img_redeem_point_group);
+                currentSelection = redeemPointsThreeGroup;
+                redeemPointsThreeGroup.setBackgroundResource(R.drawable.img_redeem_point_group);
             }
         });
 
-        redeemPointsFour.setOnClickListener(new View.OnClickListener() {
+        redeemPointsFourGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(currentSelection!=null){
                     currentSelection.setBackground(null);
                 }
                 selectedDenomination = 3;
-                currentSelection = redeemPointsFour;
-                redeemPointsFour.setBackgroundResource(R.drawable.img_redeem_point_group);
+                currentSelection = redeemPointsFourGroup;
+                redeemPointsFourGroup.setBackgroundResource(R.drawable.img_redeem_point_group);
             }
         });
 
-        redeemPointsFive.setOnClickListener(new View.OnClickListener() {
+        redeemPointsFiveGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(currentSelection!=null){
                     currentSelection.setBackground(null);
                 }
                 selectedDenomination = 4;
-                currentSelection = redeemPointsFive;
-                redeemPointsFive.setBackgroundResource(R.drawable.img_redeem_point_group);
+                currentSelection = redeemPointsFiveGroup;
+                redeemPointsFiveGroup.setBackgroundResource(R.drawable.img_redeem_point_group);
             }
         });
 
-        redeemPointsSix.setOnClickListener(new View.OnClickListener() {
+        redeemPointsSixGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(currentSelection!=null){
                     currentSelection.setBackground(null);
                 }
                 selectedDenomination = 5;
-                currentSelection = redeemPointsSix;
-                redeemPointsSix.setBackgroundResource(R.drawable.img_redeem_point_group);
-            }
-        });
-
-        redeemPointsSeven.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(currentSelection!=null){
-                    currentSelection.setBackground(null);
-                }
-                selectedDenomination = 6;
-                currentSelection = redeemPointsSeven;
-                redeemPointsSeven.setBackgroundResource(R.drawable.img_redeem_point_group);
+                currentSelection = redeemPointsSixGroup;
+                redeemPointsSixGroup.setBackgroundResource(R.drawable.img_redeem_point_group);
             }
         });
 
@@ -217,30 +206,44 @@ public class LoyaltyUserRedeemFragment extends Fragment {
     void setDenomination(){
         if(type.equals("paypal")){
             redeemTypeImage.setImageResource(R.drawable.ic_paypal_logo);
-            int[] credit = activity.getResources().getIntArray(R.array.loyalty_bonus_redeem_paypal_credits);
+            int[] credit = getResources().getIntArray(R.array.loyalty_bonus_redeem_paypal_credits);
             redeemOneCredit.setText(getCreditText(credit[0]));
             redeemTwoCredit.setText(getCreditText(credit[1]));
             redeemThreeCredit.setText(getCreditText(credit[2]));
             redeemFourCredit.setText(getCreditText(credit[3]));
             redeemFiveCredit.setText(getCreditText(credit[4]));
             redeemSixCredit.setText(getCreditText(credit[5]));
-            redeemSevenCredit.setText(getCreditText(credit[6]));
+
+            String[] points = getResources().getStringArray(R.array.loyalty_bonus_redeem_paypal_points);
+            redeemOnePoints.setText(points[0]);
+            redeemTwoPoints.setText(points[1]);
+            redeemThreePoints.setText(points[2]);
+            redeemFourPoints.setText(points[3]);
+            redeemFivePoints.setText(points[4]);
+            redeemSixPoints.setText(points[5]);
         }
         if(type.equals("paytm")){
             redeemTypeImage.setImageResource(R.drawable.ic_paytm_logo);
-            int[] credit = activity.getResources().getIntArray(R.array.loyalty_bonus_redeem_paytm_credits);
+            int[] credit = getResources().getIntArray(R.array.loyalty_bonus_redeem_paytm_credits);
             redeemOneCredit.setText(getCreditText(credit[0]));
             redeemTwoCredit.setText(getCreditText(credit[1]));
             redeemThreeCredit.setText(getCreditText(credit[2]));
             redeemFourCredit.setText(getCreditText(credit[3]));
             redeemFiveCredit.setText(getCreditText(credit[4]));
             redeemSixCredit.setText(getCreditText(credit[5]));
-            redeemSevenCredit.setText(getCreditText(credit[6]));
+
+            String[] points = getResources().getStringArray(R.array.loyalty_bonus_redeem_paytm_points);
+            redeemOnePoints.setText(points[0]);
+            redeemTwoPoints.setText(points[1]);
+            redeemThreePoints.setText(points[2]);
+            redeemFourPoints.setText(points[3]);
+            redeemFivePoints.setText(points[4]);
+            redeemSixPoints.setText(points[5]);
         }
 
         selectedDenomination = 0;
-        currentSelection = redeemPointsOne;
-        redeemPointsOne.setBackgroundResource(R.drawable.img_redeem_point_group);
+        currentSelection = redeemPointsOneGroup;
+        redeemPointsOneGroup.setBackgroundResource(R.drawable.img_redeem_point_group);
     }
 
     String getCreditText(int credit){

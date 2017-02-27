@@ -12,14 +12,7 @@
         android:layout_toLeftOf="@+id/lockup_main_activity_main_seperator"
         android:layout_toStartOf="@+id/lockup_main_activity_main_seperator"
         >
-        <ImageButton
-            android:id="@+id/lockup_main_activity_lock_button"
-            android:layout_width="@dimen/main_activity_lock_icon_size"
-            android:layout_height="@dimen/main_activity_lock_icon_size"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/ic_main_screen_lock"
-            />
+
 
         <TextView
             android:id="@+id/lockup_main_activity_lockup_title"
@@ -28,7 +21,6 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/tenDpDimension"
             android:layout_marginBottom="@dimen/tenDpDimension"
-            android:layout_below="@+id/lockup_main_activity_lock_button"
             android:textSize="@dimen/twentyFourSpDimension"
             android:textColor="@color/mainScreenText"
             android:text="@string/main_screen_activity_app_name_text"

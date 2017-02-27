@@ -9,9 +9,6 @@
 
     <dimen name="vault_album_ad_height">115dp</dimen>
 
-
-    <dimen name="main_activity_lock_icon_size">190dp</dimen>
-
     <dimen name="native_ad_image_width">250dp</dimen>
     <dimen name="native_ad_image_height">140dp</dimen>
 
@@ -24,6 +21,11 @@
 
     <dimen name="loyalty_bonus_redeem_final_card_margin_top">60dp</dimen>
 
+    <dimen name="lockup_main_activity_thumbnail_margin">15dp</dimen>
+    <dimen name="lockup_main_activity_thumbnail_height">150dp</dimen>
+    <dimen name="lockup_main_activity_thumbnail_width">216dp</dimen>
+    <dimen name="lockup_main_activity_thumbnail_play">25dp</dimen>
+    <dimen name="lockup_main_activity_thumbnail_padding">7dp</dimen>
 
 
 </resources>

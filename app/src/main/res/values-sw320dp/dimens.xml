@@ -23,4 +23,10 @@
 
     <dimen name="loyalty_bonus_redeem_final_card_margin_top">40dp</dimen>
 
+    <dimen name="lockup_main_activity_thumbnail_margin">10dp</dimen>
+    <dimen name="lockup_main_activity_thumbnail_height">120dp</dimen>
+    <dimen name="lockup_main_activity_thumbnail_width">172dp</dimen>
+    <dimen name="lockup_main_activity_thumbnail_play">17dp</dimen>
+    <dimen name="lockup_main_activity_thumbnail_padding">4dp</dimen>
+
 </resources>

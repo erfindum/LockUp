@@ -5,44 +5,27 @@
     >
 
     <RelativeLayout
-        android:id="@+id/lockup_main_activity_app_icon_group"
+        android:id="@+id/lockup_main_activity_Watch_video_thumbnail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="@dimen/lockup_main_activity_thumbnail_margin"
         android:layout_centerVertical="true"
+        android:padding="@dimen/lockup_main_activity_thumbnail_padding"
         android:layout_toLeftOf="@+id/lockup_main_activity_main_seperator"
         android:layout_toStartOf="@+id/lockup_main_activity_main_seperator"
+        android:background="#26FFFFFF"
         >
-        <ImageButton
-            android:id="@+id/lockup_main_activity_lock_button"
-            android:layout_width="@dimen/main_activity_lock_icon_size"
-            android:layout_height="@dimen/main_activity_lock_icon_size"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/ic_main_screen_lock"
+        <ImageView
+            android:id="@+id/lockup_main_activity_thumbnail"
+            android:layout_width="@dimen/lockup_main_activity_thumbnail_width"
+            android:layout_height="@dimen/lockup_main_activity_thumbnail_height"
+            android:background="@drawable/watch_video_thumbnail"
             />
-
-        <TextView
-            android:id="@+id/lockup_main_activity_lockup_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/tenDpDimension"
-            android:layout_marginBottom="@dimen/tenDpDimension"
-            android:layout_below="@+id/lockup_main_activity_lock_button"
-            android:textSize="@dimen/twentyFourSpDimension"
-            android:textColor="@color/mainScreenText"
-            android:text="@string/main_screen_activity_app_name_text"
-            />
-
-        <TextView
-            android:id="@+id/lockup_main_activity_lockup_summery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@+id/lockup_main_activity_lockup_title"
-            android:textSize="@dimen/seventeenSpDimension"
-            android:textColor="@color/mainScreenText"
-            android:text="@string/main_screen_activity_app_name_summery"
+        <android.support.v7.widget.AppCompatImageView
+            android:layout_width="@dimen/lockup_main_activity_thumbnail_play"
+            android:layout_height="@dimen/lockup_main_activity_thumbnail_play"
+            app:srcCompat="@drawable/ic_main_video"
+            android:layout_margin="@dimen/fiveDpDimension"
             />
     </RelativeLayout>
 
@@ -55,13 +38,33 @@
        android:layout_marginStart="@dimen/thirtyDpDimension"
        android:background="@color/viewPagerTabBlue"
        />
+    <View
+        android:id="@+id/lockup_main_activity_vertical_seperator"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:layout_centerInParent="true"
+        />
+
+    <TextView
+        android:id="@+id/lockup_main_activity_lockup_summery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/lockup_main_activity_main_seperator"
+        android:layout_toEndOf="@+id/lockup_main_activity_main_seperator"
+        android:layout_above="@+id/lockup_main_activity_button_row_one"
+        android:textSize="@dimen/seventeenSpDimension"
+        android:textColor="@color/mainScreenText"
+        android:text="@string/main_screen_activity_app_name_summery"
+        android:gravity="center"
+        android:layout_marginBottom="@dimen/tenDpDimension"
+        />
     <RelativeLayout
         android:id="@+id/lockup_main_activity_button_row_one"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/lockup_main_activity_main_seperator"
         android:layout_toEndOf="@+id/lockup_main_activity_main_seperator"
-        android:layout_above="@+id/lockup_main_activity_button_row_two"
+        android:layout_above="@+id/lockup_main_activity_vertical_seperator"
         android:layout_marginBottom="@dimen/tenDpDimension"
         >
 
@@ -152,7 +155,7 @@
    android:layout_height="wrap_content"
    android:layout_toRightOf="@+id/lockup_main_activity_main_seperator"
    android:layout_toEndOf="@+id/lockup_main_activity_main_seperator"
-   android:layout_alignBottom="@+id/lockup_main_activity_app_icon_group"
+   android:layout_below="@+id/lockup_main_activity_vertical_seperator"
    >
 
     <View
@@ -226,5 +229,17 @@
         android:textColor="@color/mainScreenText"
         />
 </RelativeLayout>
+    <TextView
+        android:id="@+id/lockup_main_activity_faq_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/fiveDpDimension"
+        android:layout_below="@+id/lockup_main_activity_button_row_two"
+        android:layout_toRightOf="@+id/lockup_main_activity_main_seperator"
+        android:layout_toEndOf="@id/lockup_main_activity_main_seperator"
+        android:textSize="@dimen/seventeenSpDimension"
+        android:textColor="@color/white"
+        android:gravity="center"
+        />
 
 </RelativeLayout>

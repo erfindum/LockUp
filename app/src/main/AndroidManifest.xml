@@ -129,6 +129,11 @@
             android:excludeFromRecents="true"
             android:screenOrientation="portrait"
             />
+        <activity android:name=".FaqActivity"
+            android:excludeFromRecents="true"
+            />
+        <activity android:name=".WatchVideoActivity"
+            android:excludeFromRecents="true"/>
 
         <service android:name=".services.AppLockingService" android:persistent="true" android:priority="1000">
         </service>

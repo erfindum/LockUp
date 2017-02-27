@@ -18,6 +18,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyUserActivity;
 
 /**
  * Created by RAAJA on 20-02-2017.
@@ -31,8 +32,7 @@ public class RedeemErrorDialog extends DialogFragment {
     public static final int REDEEM_TYPE_FAILED =35;
     public static final int REDEEM_TYPE_ERROR =36;
     public static final int REDEEM_TYPE_SUCCESS=34;
-
-
+    private LoyaltyUserActivity activity;
 
     @Nullable
     @Override
@@ -59,6 +59,14 @@ public class RedeemErrorDialog extends DialogFragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(getArguments().getInt(REDEEM_DIALOG_TYPE)==34){
+            activity = (LoyaltyUserActivity) getActivity();
+        }
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         final View dialogView = getDialog().getWindow().getDecorView();
@@ -82,6 +90,9 @@ public class RedeemErrorDialog extends DialogFragment {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
+                        if(getArguments().getInt(REDEEM_DIALOG_TYPE)==34){
+                            activity.redeemBonusSuccess();
+                        }
                         dismiss();
                     }
                 });
@@ -90,4 +101,9 @@ public class RedeemErrorDialog extends DialogFragment {
         });
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        activity = null;
+    }
 }

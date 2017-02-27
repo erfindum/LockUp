@@ -121,7 +121,6 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         IntentFilter appLockFilter = new IntentFilter();
         appLockFilter.addAction(Intent.ACTION_SCREEN_OFF);
         appLockFilter.addAction(Intent.ACTION_SCREEN_ON);
-        appLockFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         appLockFilter.addAction(AppLockingService.STOP_APP_LOCK_SERVICE);
         registerReceiver(appLockReceiver,appLockFilter);
         requestAd();
@@ -130,7 +129,8 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         void setWindowLayoutParams(){
         params = new WindowManager.LayoutParams();
         params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-        params.flags = 769;
+        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL|
+                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         params.height = WindowManager.LayoutParams.MATCH_PARENT;
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.gravity = Gravity.TOP| Gravity.START;
@@ -475,17 +475,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if(action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)){
-                if(hasLockDisplayed) {
-                 /*   String reason = intent.getStringExtra("reason");
-                    if(reason!=null && reason.equals("homekey")){
-                        removeView();
-                        hasLockDisplayed = false;
-                        Log.d("AppLock"," Got System Home Key");
-                    }
-               //     removeView(); */
-                }
-            }
+
             if(action.equals(Intent.ACTION_SCREEN_OFF)){
                 if(!appLockService.isShutdown()){
                     appLockService.shutdown();
@@ -543,9 +533,6 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         if(moPubNative!=null){
             moPubNative.destroy();
         }
-        if(moPubNativeAd!=null){
-         //  moPubNativeAd.setMoPubNativeEventListener(null);
-        }
         unregisterReceiver(appLockReceiver);
         appLockReceiver = null;
         isAppLockRunning = false;
@@ -554,9 +541,5 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         }
         Log.d(TAG,"Service Destroyed");
     }
-
-    /**
-     * Created by RAAJA on 15-09-2016.
-     */
 
 }

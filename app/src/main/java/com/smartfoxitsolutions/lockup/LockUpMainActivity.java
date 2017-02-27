@@ -19,8 +19,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageButton;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.View;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.dialogs.GrantUsageAccessDialog;
 import com.smartfoxitsolutions.lockup.dialogs.OverlayPermissionDialog;
@@ -53,6 +57,8 @@ public class LockUpMainActivity extends AppCompatActivity {
             isAppLockFirstLoad, hasPermissionReturned,stopTrackAfterPermission;
     private AppCompatImageButton lockButton;
     private ScreenOffReceiver screenOffReceiver;
+    private TextView faqButton;
+    private RelativeLayout watchVideo;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,6 +68,8 @@ public class LockUpMainActivity extends AppCompatActivity {
         vaultActivityButton = (AppCompatImageButton) findViewById(R.id.lockup_main_activity_vault_image);
         settingsButton= (AppCompatImageButton) findViewById(R.id.lockup_main_activity_settings_image);
         lockButton = (AppCompatImageButton) findViewById(R.id.lockup_main_activity_app_lock_button);
+        faqButton = (TextView) findViewById(R.id.lockup_main_activity_faq_button);
+        watchVideo = (RelativeLayout) findViewById(R.id.lockup_main_activity_Watch_video_thumbnail);
         loyaltyBonusButton = (AppCompatImageButton) findViewById(R.id.lockup_main_activity_loyalty_button);
         SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
         isAppLockFirstLoad = prefs.getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,true);
@@ -107,6 +115,25 @@ public class LockUpMainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getBaseContext(), LoyaltyBonusMain.class));
+                shouldTrackUserPresence = false;
+            }
+        });
+        String faqString = getString(R.string.main_screen_activity_faq_button_text);
+        SpannableString faqSpannable = new SpannableString(faqString);
+        faqSpannable.setSpan(new UnderlineSpan(),0,faqString.length(),0);
+        faqButton.setText(faqSpannable);
+        faqButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getBaseContext(),FaqActivity.class));
+                shouldTrackUserPresence = false;
+            }
+        });
+
+        watchVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getBaseContext(),WatchVideoActivity.class));
                 shouldTrackUserPresence = false;
             }
         });

@@ -178,6 +178,32 @@
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/loyalty_bonus_signup_dob"
                 android:spinnerMode="dropdown"
+                android:layout_marginBottom="@dimen/fifteenDpDimension"
+                />
+            <android.support.v7.widget.AppCompatCheckBox
+                android:id="@+id/loyalty_bonus_signup_terms_check"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/loyalty_bonus_signup_country"
+                android:layout_alignLeft="@+id/loyalty_bonus_signup_country"
+                android:layout_alignStart="@+id/loyalty_bonus_signup_country"
+                android:padding="@dimen/tenDpDimension"
+                android:layout_marginTop="@dimen/tenDpDimension"
+                android:layout_marginBottom="@dimen/tenDpDimension"
+                android:layout_marginLeft="@dimen/tenDpDimension"
+                android:layout_marginStart="@dimen/tenDpDimension"
+                />
+
+            <TextView
+                android:id="@+id/loyalty_bonus_signup_terms_text"
+                android:layout_width="190dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/loyalty_bonus_signup_country"
+                android:layout_toRightOf="@+id/loyalty_bonus_signup_terms_check"
+                android:layout_toEndOf="@+id/loyalty_bonus_signup_terms_check"
+                android:text="@string/loyalty_bonus_signup_terms_text"
+                android:textColor="@color/white"
+                android:layout_marginTop="@dimen/tenDpDimension"
                 android:layout_marginBottom="@dimen/tenDpDimension"
                 />
 
@@ -186,7 +212,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_centerHorizontal="true"
-                android:layout_below="@+id/loyalty_bonus_signup_country"
+                android:layout_below="@+id/loyalty_bonus_signup_terms_text"
                 android:layout_marginBottom="@dimen/fifteenDpDimension"
                 android:visibility="invisible"
                 />
@@ -196,7 +222,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_below="@+id/loyalty_bonus_signup_country"
+                android:layout_below="@+id/loyalty_bonus_signup_terms_text"
                 android:maxLines="1"
                 android:textColor="@color/colorMainAccent"
                 android:paddingRight="@dimen/tenDpDimension"

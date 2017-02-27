@@ -5,5 +5,5 @@ package com.smartfoxitsolutions.lockup.loyaltybonus;
  */
 
 public class LoyaltyUserRedeemResponse {
-    String code, msg, TotalPoint;
+    String code, msg, TotalPoint,BalacePoint;
 }

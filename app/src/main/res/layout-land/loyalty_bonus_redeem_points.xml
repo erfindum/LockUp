@@ -23,6 +23,7 @@
         android:layout_marginLeft="@dimen/tenDpDimension"
         android:layout_marginRight="@dimen/tenDpDimension"
         android:layout_marginTop="@dimen/loyalty_bonus_redeem_card_margin_top"
+        android:layout_marginBottom="@dimen/twentyDpDimension"
         app:cardCornerRadius="@dimen/fiveDpDimension"
         >
         <RelativeLayout
@@ -386,60 +387,11 @@
                 </RelativeLayout>
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/loyalty_bonus_redeem_points_redeem_seven_group"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/loyalty_bonus_redeem_points_redeem_four_group"
-                android:layout_toLeftOf="@+id/loyalty_bonus_redeem_points_redeem_five_group"
-                android:layout_toStartOf="@+id/loyalty_bonus_redeem_points_redeem_five_group"
-                android:layout_marginBottom="@dimen/tenDpDimension"
-                >
-                <TextView
-                    android:id="@+id/loyalty_bonus_redeem_points_redeem_seven_credit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:textSize="@dimen/twentySpDimension"
-                    android:textColor="@color/colorMainPrimary"
-                    android:layout_marginTop="@dimen/fifteenDpDimension"
-                    />
-                <RelativeLayout
-                    android:id="@+id/loyalty_bonus_redeem_points_redeem_seven_points"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/loyalty_bonus_redeem_points_redeem_seven_credit"
-                    android:layout_marginTop="@dimen/tenDpDimension"
-                    android:layout_marginLeft="7dp"
-                    android:layout_marginBottom="@dimen/fifteenDpDimension"
-                    >
-                    <TextView
-                        android:id="@+id/loyalty_bonus_redeem_points_redeem_seven_info"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/textSecondaryColor"
-                        android:textSize="@dimen/fifteenSpDimension"
-                        android:layout_toRightOf="@+id/loyalty_bonus_redeem_points_redeem_seven_dot"
-                        android:layout_toEndOf="@+id/loyalty_bonus_redeem_points_redeem_seven_dot"
-                        android:text="@string/loyalty_bonus_redeem_seven_points"
-                        />
-
-                    <android.support.v7.widget.AppCompatImageView
-                        android:id="@+id/loyalty_bonus_redeem_points_redeem_seven_dot"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:background="@null"
-                        app:srcCompat="@drawable/ic_loyalty_points_dot"
-                        android:layout_marginRight="@dimen/fiveDpDimension"
-                        android:layout_marginEnd="@dimen/fiveDpDimension"
-                        />
-                </RelativeLayout>
-            </RelativeLayout>
             <Button
                 android:id="@+id/loyalty_bonus_redeem_points_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/loyalty_bonus_redeem_points_redeem_seven_group"
+                android:layout_below="@+id/loyalty_bonus_redeem_points_redeem_five_group"
                 android:layout_marginRight="@dimen/tenDpDimension"
                 android:layout_marginLeft="@dimen/tenDpDimension"
                 android:layout_marginTop="@dimen/thirtyDpDimension"

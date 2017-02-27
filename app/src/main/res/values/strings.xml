@@ -1,39 +1,6 @@
 <resources>
     <string name="app_name">LockUp</string>
 
-    <!-- Login Fragment -->
-    <string name="login_activity_email_edit_hint">E-Mail Address...</string>
-    <string name="login_activity_password_edit_hint">Password...</string>
-    <string name="login_activity_signUp">Don\'t have account? Signup</string>
-    <string name="login_activity_signIn">signin</string>
-    <string name="login_activity_forgot_password">Forgot password?</string>
-    <string name="appInfo">Lock your apps, hide your media files and earn credits to redeem cash!</string>
-
-
-    <!-- SignupFragment-->
-    <string name="signUp_fragment_firstName">First Name...</string>
-    <string name="signUp_fragment_lastName">Last Name...</string>
-    <string name="signUp_fragment_gender">Gender...</string>
-    <string name="signUp_fragment_signup">Signup</string>
-    <string name="signUp_fragment_dob">Date Of Birth...</string>
-    <string name="signUp_fragment_confirm_Password">Confirm Password...</string>
-    <string name="signUp_appInfo">Lock your apps, hide your media files and earn credits to redeem cash. Signup now !</string>
-
-    <!-- SecurityFragment -->
-    <string name="security_fragment_info">Answer any security question below. This will help us to verify your identity during password recovery</string>
-    <string name="security_fragment_select_question">Select Question</string>
-    <string name="security_fragment_select_answer">Your Answer</string>
-
-    <!-- ForgotPasswordFragment -->
-    <string name="forgot_fragment_password_text">Forgot Password ?</string>
-    <string name="forgot_fragment_password_reset_text">Recover Password</string>
-    <string name="forgot_fragment_password_reset_info">Enter your registered E-Mail address and answer the security question to recover password</string>
-    <string name="forgot_fragment_password_reset_processed">You will receive a notification message. Click on the notification to Reset password</string>
-
-    <!-- ResetPasswordFragment -->
-    <string name="reset_fragment_reset_text">Reset Password</string>
-    <string name="reset_fragment_password_reset_info">Enter new password for</string>
-
     <!-- SettingsActivity -->
     <string name="settings_activity_toolbar_title">Settings</string>
     <string name="settings_activity_applock_title">APP LOCK</string>
@@ -64,24 +31,6 @@
     <string name="settings_dialog_finger_not_supported">Your version of Android is not supported for this feature</string>
     <string name="settings_dialog_finger_no_fingerprint">Fingerprint not enrolled. Kindly enroll at-least one fingerprint from Android settings</string>
     <string name="settings_dialog_finger_negative_text">GOT IT</string>
-
-    <!-- UserProfileFragment-->
-    <string name="user_profile_fragment_email_icon_description">E-Mail</string>
-    <string name="user_profile_fragment_points_earned_text">Points Earned</string>
-    <string name="user_profile_fragment_points_earned_today_text">Today</string>
-    <string name="user_profile_fragment_points_earned_total_text">Total</string>
-    <string name="user_profile_fragment_dob_title_text">Date Of Birth</string>
-    <string name="user_profile_fragment_gender_title_text">Gender</string>
-    <string name="user_profile_fragment_points_text">Points</string>
-    <string name="user_profile_fragment_password_title_text">Password</string>
-    <string name="user_profile_fragment_password_change_text">Change Password</string>
-    <string name="user_profile_fragment_redeem_cash_info_text">Minimum of 400 points is required to redeem cash</string>
-    <string name="user_profile_fragment_redeem_cash_text">Redeem Cash</string>
-
-    <!-- RedeemCashFragment -->
-    <string name="user_profile_redeem_fragment_points_earned_text1">You have earned</string>
-    <string name="user_profile_redeem_fragment_points_earned_text2">Points !</string>
-    <string name="user_profile_redeem_fragment_enter_details_text">Enter your Paypal Id and verify your password to redeem cash</string>
 
     <!-- FaqQuestionFragment -->
     <string name="faq_question_fragment_question_1_text">How to reset password ?</string>
@@ -131,17 +80,23 @@
     <string name="main_screen_activity_vault_button_text">Vault</string>
     <string name="main_screen_activity_settings_button_text">Settings</string>
     <string name="main_screen_activity_loyalty_button_text">Loyalty Bonus</string>
-    <string name="main_screen_activity_user_profile_button_text">My Profile</string>
+    <string name="main_screen_activity_video_button_text">How Loyalty Bonus Works</string>
     <string name="main_screen_activity_app_name_text">LockUp</string>
     <string name="main_screen_activity_app_name_summery">Lock Apps and Hide Media</string>
+    <string name="main_screen_activity_app_info_summery">Learn more about Loyalty Bonus</string>
     <string name="main_screen_activity_app_lock_info_On">ON</string>
     <string name="main_screen_activity_app_lock_info_Off">OFF</string>
     <string name="main_screen_activity_installed_info">Installed Apps</string>
     <string name="main_screen_activity_locked_info">Locked Apps</string>
-    <string name="main_screen_activity_faq_button_text">FAQ</string>
+    <string name="main_screen_activity_faq_button_text">Tips &amp; FAQ</string>
     <string name="main_screen_activity_lock_info_message">Click to lock installed apps</string>
     <string name="main_screen_activity_ad_unit_id">ca-app-pub-4739007494599063/2472603036</string>
     <string name="main_lock_activity_forgot_button">FORGOT PASSWORD</string>
+    <string name="lockup_api_key">AIzaSyA0cMFtikQjLcu-F9Zg8RMzNCi3kHEttKQ</string>
+    <string name="watch_video_playback_error">Video-playback failed</string>
+    <string name="watch_video_playback_error_info">Refresh to play again</string>
+
+
 
     <!-- Set Pattern Screen -->
     <string name="set_pattern_fragment_title_text">Set Pattern</string>
@@ -323,6 +278,8 @@
     <string name="loyalty_bonus_signup_date_error">Choose a valid birth date</string>
     <string name="loyalty_bonus_signup_max_date_error">You must be 13 years of age to Sign-up</string>
     <string name="loyalty_bonus_signup_wait_text">Please Wait</string>
+    <string name="loyalty_bonus_signup_terms_text">I accept the Terms &amp; Conditions</string>
+    <string name="loyalty_bonus_signup_terms_error">Read and Accept the Terms &amp; Conditions</string>
 
     <string name="loyalty_bonus_signup_no_connection">Network Connection Unavailable</string>
     <string name="loyalty_bonus_signup_unknown_error">Unknown Error Occurred</string>
@@ -389,8 +346,15 @@
         <item>20</item>
         <item>50</item>
         <item>100</item>
-        <item>500</item>
     </integer-array>
+    <string-array name="loyalty_bonus_redeem_paytm_points">
+        <item>200</item>
+        <item>500</item>
+        <item>1000</item>
+        <item>2000</item>
+        <item>5000</item>
+        <item>10,000</item>
+    </string-array>
 
     <integer-array name="loyalty_bonus_redeem_paypal_credits">
         <item>4</item>
@@ -399,15 +363,23 @@
         <item>20</item>
         <item>50</item>
         <item>100</item>
-        <item>500</item>
     </integer-array>
+
+    <string-array name="loyalty_bonus_redeem_paypal_points">
+        <item>400</item>
+        <item>600</item>
+        <item>1000</item>
+        <item>2000</item>
+        <item>5000</item>
+        <item>10,000</item>
+    </string-array>
 
     <!-- Loyalty Redeem Final -->
     <string name="loyalty_redeem_final_selected_info">Selected Denomination</string>
     <string name="loyalty_redeem_final_paypal_info">Enter your Paypal ID</string>
-    <string name="loyalty_redeem_final_paytm_info">Enter your Paytm wallet ID</string>
+    <string name="loyalty_redeem_final_paytm_info">Enter your Paytm Number</string>
     <string name="loyalty_redeem_final_paypal_hint">Paypal ID</string>
-    <string name="loyalty_redeem_final_paytm_hint">Paytm ID</string>
+    <string name="loyalty_redeem_final_paytm_hint">Paytm Number</string>
     <string name="loyalty_redeem_final_redeem_button">Redeem Points</string>
     <string name="loyalty_redeem_final_redeem_title">Redeem Bonus</string>
     <string name="loyalty_redeem_final_redeem_failed">Redeem Failed</string>
@@ -434,6 +406,45 @@
         <item>Pakistan</item>
         <item>New Zealand</item>
         <item>-----------------</item>
+    </string-array>
+
+    <string-array name="tips_faq_headers_list">
+        <item>TIPS TO EARN MORE</item>
+        <item>What is loyalty Bonus in LockUp?</item>
+        <item>Why I need to signup for Getting loyalty Bonus?</item>
+        <item>How much loyalty bonus I can earn each day?</item>
+        <item>Can I get the current points back if I will change my phone?</item>
+        <item>Can I use LockUp in multiple devices?</item>
+        <item>Why am I getting Low points as compared to other user?</item>
+        <item>I logged out from loyalty bonus &amp; after some days I again logged-in. But, why my current earned points are same as before?</item>
+        <item>How can I redeem my loyalty Bonus?</item>
+        <item>Why Applock and Vault asking a multiple permission ?</item>
+        <item>Why I have to keep Facebook app installed in my device?</item>
+        <item>Why Applock stops working sometime?</item>
+        <item>What is Notification Lock and how to use it?</item>
+    </string-array>
+
+    <string-array name="tips_faq_tips_list">
+        <item>Keep the Facebook app installed in your device</item>
+        <item>Keep the internet connection enabled all time</item>
+        <item>Do not click ads unnecessarily. LockUp does not provide loyalty bonus upon ad clicks. If you do so, LockUp have rights to remove or block your account permanently.</item>
+        <item>We recommend not to clear RAM or Recent App\'s from task manager.</item>
+        <item>In Applock try to lock more number of Apps. It will help to generate more points.</item>
+    </string-array>
+
+    <string-array name="tips_faq_answers_list">
+        <item>Once you signup for loyalty bonus, you will start earning points based on the usage of Applock in LockUp. More number of apps you lock on your device, more will be your earnings.</item>
+        <item>In order to give rewards to our loyal users, we need to track the usage of lockup. If you are not logged in, we can not track the usage and hence can\'t give you points.</item>
+        <item>Loyalty bonus will give you free rewards which is hard to get. Each day bonus depends on many factors like the number of locked apps in your device, proper internet connection, installed facebook app in your device etc. We recommend you to keep the Facebook app installed, lock more number of apps in Applock, avoid clearing RAM and recent apps from task manager.</item>
+        <item>Yes, just logout from current device and use the same  login credentials in new device.</item>
+        <item>We recommend not to use it with same email id in multiple devices. If you use it with same email, your loyalty bonus may decrease due to conflict.</item>
+        <item>Your loyalty bonus depends on many aspects like daily usage, internet connectivity, availability of Facebook app in your phone and your Device manufacturer etc.</item>
+        <item>For getting loyalty bonus regularly, you must be logged-in all time.  If not, we can not track your usage of Applock hence can\'t credit you points.</item>
+        <item>Once you reach a minimum threshold of loyalty points, you can request to redeem it through PayPal or Paytm(For Indian User only). You will get the redeemed amount in your account within next 3 working days.</item>
+        <item>Granting Manual permission access depends on your Android version. If your device is having the Version  of lollipop and above then LockUp may ask you multiple permission for using it  which completely depends OS Version.</item>
+        <item>The source of ads in the lock screen and vault is from Facebook Audience Network. For displaying ads, it is necessary to keep it installed. We recommend you to keep the facebook app installed in your device so that we can give you a loyalty bonus for using it.</item>
+        <item>If lockUp stops working on clearing RAM/Recent Apps from task manager and not restarting automatically, then its must be a issue of your device Manufacturer or OS.</item>
+        <item>Most of the apps like whatsApp, Facebook Triggers push notification which are private to you sometimes. By enabling it you can protect your privacy from snoopy eyes. To enable it you must lock the app in Applock first and then enable the same under Notification lock.</item>
     </string-array>
 
 </resources>

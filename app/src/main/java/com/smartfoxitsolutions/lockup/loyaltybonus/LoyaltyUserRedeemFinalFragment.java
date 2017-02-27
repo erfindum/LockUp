@@ -53,6 +53,7 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
     private LoyaltyUserActivity activity;
     private DialogFragment redeemFinalDialog, redeemAlertDialog;
     private int[] credits;
+    private String[] points;
 
     @Nullable
     @Override
@@ -155,7 +156,8 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
             enterIdInfo.setText(getString(R.string.loyalty_redeem_final_paypal_info));
             enterIdEdit.setHint(getString(R.string.loyalty_redeem_final_paypal_hint));
             redeemTypeImage.setImageResource(R.drawable.ic_paypal_logo);
-            credits = activity.getResources().getIntArray(R.array.loyalty_bonus_redeem_paypal_credits);
+            credits = getResources().getIntArray(R.array.loyalty_bonus_redeem_paypal_credits);
+            points = getResources().getStringArray(R.array.loyalty_bonus_redeem_paypal_points);
             setDenomination(selection);
             denomination.setText(getCreditText(credits[selection]));
             redeemTypeString = "Paypal";
@@ -164,7 +166,8 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
             enterIdInfo.setText(getString(R.string.loyalty_redeem_final_paytm_info));
             enterIdEdit.setHint(getString(R.string.loyalty_redeem_final_paytm_hint));
             redeemTypeImage.setImageResource(R.drawable.ic_paytm_logo);
-            credits = activity.getResources().getIntArray(R.array.loyalty_bonus_redeem_paytm_credits);
+            credits = getResources().getIntArray(R.array.loyalty_bonus_redeem_paytm_credits);
+            points = getResources().getStringArray(R.array.loyalty_bonus_redeem_paytm_points);
             setDenomination(selection);
             denomination.setText(getCreditText(credits[selection]));
             redeemTypeString="Paytm";
@@ -178,33 +181,29 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
     private void setDenomination(int selection){
         switch (selection){
             case 0:
-                denominationPoints.setText(getString(R.string.loyalty_bonus_redeem_one_points));
+                denominationPoints.setText(points[0]);
                 return;
             case 1:
-                denominationPoints.setText(getString(R.string.loyalty_bonus_redeem_two_points));
+                denominationPoints.setText(points[1]);
                 return;
             case 2:
-                denominationPoints.setText(getString(R.string.loyalty_bonus_redeem_three_points));
+                denominationPoints.setText(points[2]);
                 return;
             case 3:
-                denominationPoints.setText(getString(R.string.loyalty_bonus_redeem_four_points));
+                denominationPoints.setText(points[3]);
                 return;
             case 4:
-                denominationPoints.setText(getString(R.string.loyalty_bonus_redeem_five_points));
+                denominationPoints.setText(points[4]);
                 return;
             case 5:
-                denominationPoints.setText(getString(R.string.loyalty_bonus_redeem_six_points));
-                return;
-            case 6:
-                denominationPoints.setText(getString(R.string.loyalty_bonus_redeem_seven_points));
-
+                denominationPoints.setText(points[5]);
         }
     }
 
     @Override
     public void requestRedeem() {
         SharedPreferences appLockPreference = activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
-        SharedPreferences loyaltyPreference = activity.getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME
+        final SharedPreferences loyaltyPreference = activity.getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME
                                                 ,Context.MODE_PRIVATE);
         ConnectivityManager connectivityManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
@@ -227,7 +226,10 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
                 if(response.isSuccessful()){
                     LoyaltyUserRedeemResponse redeemResponse = response.body();
                     if(redeemResponse.code.equals("200")){
-                        String successString = String.format(getString(R.string.loyalty_redeem_success_message),credits[selection]
+                        loyaltyPreference.edit().putString(LoyaltyBonusModel.USER_LOYALTY_BONUS,redeemResponse.BalacePoint)
+                                .apply();
+                        String successString = String.format(getString(R.string.loyalty_redeem_success_message),
+                                String.valueOf(credits[selection])
                                                 ,userEmail);
                         displayRedeemInfoDialog(RedeemErrorDialog.REDEEM_TYPE_SUCCESS
                                 ,successString);
@@ -255,19 +257,17 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
     private String getRedeemPoints(int selection){
         switch (selection){
             case 0:
-                return "200";
+                return points[0];
             case 1:
-                return "300";
+                return points[1];
             case 2:
-                return "500";
+                return points[2];
             case 3:
-                return "1000";
+                return points[3];
             case 4:
-                return "5000";
+                return points[4];
             case 5:
-                return "10000";
-            case 6:
-                return "20000";
+                return points[5];
         }
         return null;
     }

@@ -2,19 +2,24 @@ package com.smartfoxitsolutions.lockup.loyaltybonus;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBar;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -56,7 +61,7 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
     private AppCompatEditText fullName,email,password,confirmPassword;
     private Button signInButton,signUpButton;
     private LoyaltyBonusMain activity;
-    private TextView datePicker, signUpInfo;
+    private TextView datePicker, signUpInfo, terms_conditions;
     private ProgressBar signUpProgress;
     private int day = 0, month = 0,year = 0;
     private String genderText, countryText;
@@ -64,6 +69,7 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
     private ConnectivityManager connectivityManager;
     private DialogFragment errorFragment;
     private Toolbar toolbar;
+    private AppCompatCheckBox termsCheckBox;
 
     @Nullable
     @Override
@@ -80,6 +86,8 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
         signUpButton = (Button) parent.findViewById(R.id.loyalty_bonus_signup_button);
         datePicker = (TextView) parent.findViewById(R.id.loyalty_bonus_signup_dob);
         signUpInfo = (TextView) parent.findViewById(R.id.loyalty_bonus_signup_info);
+        termsCheckBox = (AppCompatCheckBox) parent.findViewById(R.id.loyalty_bonus_signup_terms_check);
+        terms_conditions = (TextView) parent.findViewById(R.id.loyalty_bonus_signup_terms_text);
         signUpProgress = (ProgressBar) parent.findViewById(R.id.loyalty_bonus_signup_progress_bar);
         toolbar = (Toolbar) parent.findViewById(R.id.loyalty_bonus_signup_tool_bar);
         if(savedInstanceState!=null){
@@ -153,13 +161,31 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
                 Color.WHITE,
                 Color.WHITE
         };
+
+        int[][] checkState = new int[][]{
+                new int[]{android.R.attr.state_checked},
+                new int[]{android.R.attr.state_focused},
+                new int[]{android.R.attr.state_pressed},
+                new int[]{android.R.attr.state_enabled},
+                new int[]{-android.R.attr.state_enabled}
+        };
+
+        int[] checkColors = new int[]{
+                Color.parseColor("#f7e830"),
+                Color.parseColor("#f7e830"),
+                Color.parseColor("#f7e830"),
+                Color.WHITE,
+                Color.WHITE
+        };
         ColorStateList colorStateList = new ColorStateList(editState,editColors);
+        ColorStateList checkColorStateList = new ColorStateList(checkState,checkColors);
         genderSpinner.setSupportBackgroundTintList(colorStateList);
         countrySpinner.setSupportBackgroundTintList(colorStateList);
         fullName.setSupportBackgroundTintList(colorStateList);
         email.setSupportBackgroundTintList(colorStateList);
         password.setSupportBackgroundTintList(colorStateList);
         confirmPassword.setSupportBackgroundTintList(colorStateList);
+        termsCheckBox.setSupportButtonTintList(checkColorStateList);
 
         email.setText(activity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE)
         .getString(LockUpSettingsActivity.RECOVERY_EMAIL_PREFERENCE_KEY,"No Email Registered"));
@@ -187,6 +213,16 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
                 if(shouldValidateUserData){
                     valtidateUserData();
                 }
+            }
+        });
+        String termsString = getString(R.string.loyalty_bonus_signup_terms_text);
+        SpannableString termsSpan = new SpannableString(termsString);
+        termsSpan.setSpan(new UnderlineSpan(),0,termsString.length(),0);
+        terms_conditions.setText(termsSpan);
+        terms_conditions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://lockup-applock.com/term-and-conditions.php")));
             }
         });
     }
@@ -274,7 +310,9 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
             displayErrorDialog(getString(R.string.loyalty_bonus_signup_date_error));
         }else if(!getValidBirthDate(month,year,day)){
             displayErrorDialog(getString(R.string.loyalty_bonus_signup_max_date_error));
-        }else{
+        }else if(!termsCheckBox.isChecked()){
+            displayErrorDialog(getString(R.string.loyalty_bonus_signup_terms_error));
+        }else {
             completeSignUp();
         }
     }

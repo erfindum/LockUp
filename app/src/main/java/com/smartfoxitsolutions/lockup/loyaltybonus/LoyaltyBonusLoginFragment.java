@@ -198,6 +198,7 @@ public class LoyaltyBonusLoginFragment extends Fragment {
                                 edit.putString(LoyaltyBonusModel.LOGIN_USER_NAME_KEY, data.fullname);
                                 edit.putBoolean(LoyaltyBonusModel.LOGIN_USER_LOGGED_IN_KEY, true);
                                 edit.putString(LoyaltyBonusModel.LOYALTY_SEND_REQUEST, data.auth_code);
+                                edit.putString(LoyaltyBonusModel.USER_LOYALTY_BONUS,data.TotalPoint);
                                 edit.apply();
                                 activity.startLoyaltyUserMain();
                                 Log.d("LoyaltyBonus", "User name " + data.fullname);
