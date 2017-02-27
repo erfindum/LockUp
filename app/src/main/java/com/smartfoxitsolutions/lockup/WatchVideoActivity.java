@@ -168,7 +168,6 @@ public class WatchVideoActivity extends YouTubeBaseActivity implements YouTubePl
         if(shouldCloseAffinity){
             finishAffinity();
         }
-        Log.d("youtube","Youtube Player Closing -------------------");
 
     }
 
