@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
-import android.widget.ImageView;
 
 import com.smartfoxitsolutions.lockup.R;
 
@@ -43,7 +42,7 @@ public class MediaPickerHolder extends RecyclerView.ViewHolder {
         setClickListener();
     }
 
-    ImageView getThumbnailView(){
+    AppCompatImageView getThumbnailView(){
         return this.thumbnailView;
     }
 
@@ -65,17 +64,17 @@ public class MediaPickerHolder extends RecyclerView.ViewHolder {
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                  sendImageSelected();
+                  sendMediaSelected();
             }
         });
     }
 
-    private void sendImageSelected(){
+    private void sendMediaSelected(){
         listener.onMediaPicked(getLayoutPosition(),this);
     }
 
     private void setItemAnimation(){
-        itemAnimator = ValueAnimator.ofInt(0,1);
+        itemAnimator = ValueAnimator.ofFloat(0,1);
         itemAnimator.setDuration(200).setInterpolator(new OvershootInterpolator());
         itemAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -96,10 +95,11 @@ public class MediaPickerHolder extends RecyclerView.ViewHolder {
         itemAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                int animationValue = (int) animation.getAnimatedValue();
+                float animationValue = (float) animation.getAnimatedValue();
                 ticker.setScaleX(animationValue);
                 ticker.setScaleY(animationValue);
             }
         });
     }
+
 }

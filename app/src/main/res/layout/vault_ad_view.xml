@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#fff"
+    app:cardCornerRadius="@dimen/fiveDpDimension"
+    android:layout_marginBottom="-7dp"
+    app:cardElevation="2dp"
+    app:cardUseCompatPadding="false"
+    >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        >
+        <ImageView
+            android:id="@+id/vault_ad_view_image"
+            android:layout_width="@dimen/vault_album_thumbnail_width"
+            android:layout_height="@dimen/vault_album_ad_height"
+            android:background="@null"
+            android:scaleType="fitXY"
+            />
+        <TextView
+            android:id="@+id/vault_ad_view_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/vault_ad_view_image"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/textDarkGrey"
+            android:textSize="@dimen/thirteenSpDimension"
+            android:layout_marginRight="@dimen/fiveDpDimension"
+            android:layout_marginEnd="@dimen/fiveDpDimension"
+            android:layout_marginLeft="@dimen/fiveDpDimension"
+            android:layout_marginStart="@dimen/fiveDpDimension"
+            android:maxWidth="@dimen/vault_album_item_text_width"
+            />
+
+        <TextView
+            android:id="@+id/vault_ad_view_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/vault_ad_view_title"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textColor="@color/textDarkGrey"
+            android:textSize="10sp"
+            android:layout_marginRight="@dimen/fiveDpDimension"
+            android:layout_marginEnd="@dimen/fiveDpDimension"
+            android:layout_marginLeft="@dimen/fiveDpDimension"
+            android:layout_marginStart="@dimen/fiveDpDimension"
+            android:maxWidth="@dimen/vault_album_item_text_width"
+            />
+
+        <TextView
+            android:id="@+id/vault_ad_view_call_to_action"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/vault_ad_view_text"
+            android:background="@drawable/img_vault_ad_call_to_action"
+            android:textColor="@color/textDarkGrey"
+            android:textSize="10sp"
+           android:padding="@dimen/threeDpDimension"
+            android:layout_marginStart="@dimen/fiveDpDimension"
+            android:layout_marginLeft="@dimen/fiveDpDimension"
+            android:layout_marginTop="@dimen/fiveDpDimension"
+            />
+        <TextView
+            android:id="@+id/vault_ad_view_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/vault_ad_view_text"
+            android:layout_marginTop="@dimen/fiveDpDimension"
+            android:layout_alignRight="@+id/vault_ad_view_text"
+            android:layout_alignEnd="@id/vault_ad_view_text"
+            android:textSize="10sp"
+            android:padding="@dimen/twoDpDimension"
+            android:textColor="@color/white"
+            android:background="@color/textDarkGrey"
+            android:text="Ad"
+            />
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

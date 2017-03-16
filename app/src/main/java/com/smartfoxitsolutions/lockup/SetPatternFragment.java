@@ -16,6 +16,11 @@ import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.TextView;
 
+import com.smartfoxitsolutions.lockup.views.PatternLockView;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 /**
  * Created by RAAJA on 7-09-2016.
  *
@@ -145,6 +150,11 @@ public class SetPatternFragment extends Fragment implements PatternLockView.OnPa
         }
     }
 
+    @Override
+    public void onErrorStop() {
+
+    }
+
     /**
      * Resets set pattern lock screen to original state
      * @param reset On of the constants used to reset partially or completely
@@ -168,18 +178,37 @@ public class SetPatternFragment extends Fragment implements PatternLockView.OnPa
     }
 
     void setPatternPassCode(String passCode){
-        if(passCode!=null && !passCode.equals("")){
-            Log.d("PatternLock",passCode + " ");
-            SharedPreferences prefs = pinPatternActivity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, Context.MODE_PRIVATE);
-            long userPassCode = Long.parseLong(patternConfirmed)*55439;
-            SharedPreferences.Editor edit = prefs.edit();
-            edit.putLong(AppLockModel.USER_SET_LOCK_PASS_CODE,userPassCode);
-            edit.putInt(AppLockModel.APP_LOCK_LOCKMODE,AppLockModel.APP_LOCK_MODE_PATTERN);
-            edit.putBoolean(AppLockModel.LOCK_UP_FIRST_LOAD_PREF_KEY,false);
-            edit.apply();
+        if(passCode!=null && !passCode.isEmpty()){
+            persistUserPin(passCode);
             pinPatternActivity.startLockUpMainActivity();
         }else{
             resetPatternView(COMPLETE_RESET_PATTERN_VIEW);
+        }
+    }
+
+    /**
+     * Saves the hashed Pin to preference
+     * @param pin pin confirmed by user
+     */
+
+    void persistUserPin(String pin) {
+        String salt = String.valueOf(System.currentTimeMillis());
+        try {
+            byte[] usePassByte = (pin+salt).getBytes("UTF-8");
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            byte[] messageDigest = digest.digest(usePassByte);
+            StringBuilder sb1 = new StringBuilder();
+            for (int i = 0; i < messageDigest.length; ++i) {
+                sb1.append(Integer.toHexString((messageDigest[i] & 0xFF) | 0x100).substring(1,3));
+            }
+            SharedPreferences prefs = pinPatternActivity.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, Context.MODE_PRIVATE);
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putString(AppLockModel.USER_SET_LOCK_PASS_CODE, sb1.toString());
+            edit.putString(AppLockModel.DEFAULT_APP_BACKGROUND_COLOR_KEY,salt);
+            edit.putInt(AppLockModel.APP_LOCK_LOCKMODE, AppLockModel.APP_LOCK_MODE_PATTERN);
+            edit.apply();
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
     }
 
@@ -187,12 +216,11 @@ public class SetPatternFragment extends Fragment implements PatternLockView.OnPa
     @Override
     public void onStop() {
         super.onStop();
-
-        Log.d("PatternLock","Selected : Called PatternView OnDestroy"  );
     }
 
     @Override
     public void onDestroy() {
+        patternLockView.closePatternView();
         super.onDestroy();
         unregisterViewListeners();
         pinPatternActivity = null;

@@ -19,20 +19,21 @@ import java.util.TreeMap;
  * Created by RAAJA on 09-09-2016.
  */
 public class AppLockModel {
-    static final String INSTALLED_APPS_SHARED_PREF_KEY = "installedAppsMap";
-    static final String CHECKED_APPS_SHARED_PREF_KEY = "checkedAppsMap";
-    static final String NOTIFICATION_CHECKED_APPS_SHARED_PREF_KEY = "notificationAppsMap";
-    static final String RECOMMENDED_APPS_SHARED_PREF_KEY = "recommendedInstallerLock";
-    static final String CHECKED_APPS_COLOR_SHARED_PREF_KEY = "checkedAppsColorMap";
-    static final String USER_SET_LOCK_PASS_CODE = "userLockPasscode";
+    public static final String INSTALLED_APPS_SHARED_PREF_KEY = "installedAppsMap";
+    public static final String CHECKED_APPS_SHARED_PREF_KEY = "checkedAppsMap";
+    public static final String NOTIFICATION_CHECKED_APPS_SHARED_PREF_KEY = "notificationAppsMap";
+    public static final String RECOMMENDED_APPS_SHARED_PREF_KEY = "recommendedInstallerLock";
+    public static final String CHECKED_APPS_COLOR_SHARED_PREF_KEY = "checkedAppsColorMap";
+
+    public static final String USER_SET_LOCK_PASS_CODE = "userLockPasscode";
+    public static final String DEFAULT_APP_BACKGROUND_COLOR_KEY = "defaultAppBackgroundColor";
 
     static final String NOTIFICATION_ACTIVITY_CHECKED_APPS_NAME_KEY = "notificationCheckedAppsName";
     static final String NOTIFICATION_ACTIVITY_CHECKED_APPS_PACKAGE_KEY = "notificationCheckedAppsPackage";
 
-    static final int QUERY_TASK_TIME = 6000;
+    public static final int QUERY_TASK_TIME = 6000;
 
-    static final String LOCK_UP_FIRST_LOAD_PREF_KEY = "lockUp_is_first_load";
-    static final String VIBRATOR_ENABLED_PREF_KEY = "app_lock_vibrator_enabled";
+    public static final String LOCK_UP_FIRST_LOAD_PREF_KEY = "lockUp_is_first_load";
 
     static final int INSTALLED_APPS_PACKAGE =1;
     static final int CHECKED_APPS_PACKAGE=2;
@@ -40,12 +41,11 @@ public class AppLockModel {
     static final int NOTIFICATION_CHECKED_APPS_PACKAGE = 6;
 
     public static final String APP_LOCK_PREFERENCE_NAME="lockUp_general_preferences";
-    static final int APP_LIST_UPDATED =3;
+    public static final int APP_LIST_UPDATED =3;
 
-    static final String APP_LOCK_LOCKMODE = "app_lock_lockmode";
-    static final int APP_LOCK_MODE_PATTERN = 54;
-    static final int APP_LOCK_MODE_PIN = 55;
-    static final int APP_LOCK_MODE_FINGER_PRINT = 80;
+    public static final String APP_LOCK_LOCKMODE = "app_lock_lockmode";
+    public static final int APP_LOCK_MODE_PATTERN = 54;
+    public static final int APP_LOCK_MODE_PIN = 55;
 
     private SharedPreferences sharedPreferences;
     private TreeMap<String,String> installedAppsMap,checkedAppsMap,notificationCheckedAppMap;
@@ -101,7 +101,7 @@ public class AppLockModel {
         }
     }
 
-    TreeMap<String,String> getCheckedAppsMap(){
+    public TreeMap<String,String> getCheckedAppsMap(){
         if(checkedAppsMap ==null){
             return new TreeMap<>();
         }else{
@@ -117,7 +117,7 @@ public class AppLockModel {
         }
     }
 
-    LinkedHashMap<String,HashMap<String,Boolean>> getRecommendedAppsMap(){
+    public LinkedHashMap<String,HashMap<String,Boolean>> getRecommendedAppsMap(){
         if(recommendedAppsMap==null){
             return new LinkedHashMap<>();
         }else{

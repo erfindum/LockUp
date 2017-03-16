@@ -1,39 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="165dp"
-    android:layout_height="165dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_marginTop="@dimen/tenDpDimension"
-    android:background="@color/white"
-    app:cardCornerRadius="@dimen/threeDpDimension"
-    app:cardElevation="@dimen/threeDpDimension"
-    app:cardUseCompatPadding="true"
+    android:background="#fff"
+    app:cardCornerRadius="@dimen/fiveDpDimension"
+    android:layout_marginBottom="-7dp"
+    app:cardElevation="2dp"
     >
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/fiveDpDimension"
-        android:layout_marginBottom="@dimen/fiveDpDimension"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         >
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/vault_album_picker_recycler_item_thumbnail"
-        android:layout_width="145dp"
-        android:layout_height="108dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:layout_width="@dimen/vault_album_thumbnail_width"
+        android:layout_height="@dimen/vault_album_thumbnail_height"
+        android:scaleType="fitXY"
         />
     <TextView
         android:id="@+id/vault_album_picker_recycler_item_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/vault_album_picker_recycler_item_thumbnail"
-        android:layout_alignLeft="@+id/vault_album_picker_recycler_item_thumbnail"
-        android:layout_alignStart="@+id/vault_album_picker_recycler_item_thumbnail"
-        android:layout_marginTop="@dimen/twoDpDimension"
-        android:maxLength="12"
         android:maxLines="1"
+        android:ellipsize="end"
         android:textColor="@color/textDarkGrey"
-        android:textSize="@dimen/twelveSpDimension"
+        android:textSize="@dimen/fifteenSpDimension"
+        android:layout_marginRight="@dimen/fiveDpDimension"
+        android:layout_marginEnd="@dimen/fiveDpDimension"
+        android:layout_marginLeft="@dimen/fiveDpDimension"
+        android:layout_marginStart="@dimen/fiveDpDimension"
+        android:maxWidth="@dimen/vault_album_item_text_width"
         />
 
         <TextView
@@ -41,12 +39,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/vault_album_picker_recycler_item_text"
-            android:layout_alignLeft="@+id/vault_album_picker_recycler_item_thumbnail"
-            android:layout_alignStart="@+id/vault_album_picker_recycler_item_thumbnail"
             android:maxLines="1"
-            android:maxLength="6"
+            android:ellipsize="end"
             android:textColor="@color/textDarkGrey"
             android:textSize="@dimen/twelveSpDimension"
+            android:layout_marginRight="@dimen/fiveDpDimension"
+            android:layout_marginEnd="@dimen/fiveDpDimension"
+            android:layout_marginLeft="@dimen/fiveDpDimension"
+            android:layout_marginStart="@dimen/fiveDpDimension"
+            android:maxWidth="@dimen/vault_album_item_text_width"
             />
     </RelativeLayout>
 

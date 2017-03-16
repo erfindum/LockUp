@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "1042243115134",
-    "firebase_url": "https://lockup-73260.firebaseio.com",
-    "project_id": "lockup-73260",
-    "storage_bucket": "lockup-73260.appspot.com"
+    "project_number": "371646499215",
+    "firebase_url": "https://lockup-3db9e.firebaseio.com",
+    "project_id": "lockup-3db9e",
+    "storage_bucket": "lockup-3db9e.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1042243115134:android:499cc59660988890",
+        "mobilesdk_app_id": "1:371646499215:android:499cc59660988890",
         "android_client_info": {
           "package_name": "com.smartfoxitsolutions.lockup"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1042243115134-7ggusp17gnln5udb5qub1vtgj2s11rku.apps.googleusercontent.com",
+          "client_id": "371646499215-95ihargevutdehfa91f91l9stob44cmi.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.smartfoxitsolutions.lockup",
@@ -23,13 +23,13 @@
           }
         },
         {
-          "client_id": "1042243115134-18pa85e8vsaf5tehbhjknm680ogp567e.apps.googleusercontent.com",
+          "client_id": "371646499215-ek3ijjqp8vpc74lfa1s9jap2tah27e6s.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCQXwhQHYKIGI1mDoLXFFjSoogxZCBltX4"
+          "current_key": "AIzaSyB_1_i4kukVMxTjP7gxaLFnvDOwhgPpSug"
         }
       ],
       "services": {
@@ -40,7 +40,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "1042243115134-18pa85e8vsaf5tehbhjknm680ogp567e.apps.googleusercontent.com",
+              "client_id": "371646499215-ek3ijjqp8vpc74lfa1s9jap2tah27e6s.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

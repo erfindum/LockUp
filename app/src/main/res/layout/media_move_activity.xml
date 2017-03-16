@@ -6,11 +6,13 @@
 
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/media_move_activity_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
         android:layout_centerHorizontal="true"
         android:layout_above="@+id/media_move_activity_move_text"
         android:layout_marginBottom="@dimen/thirtyDpDimension"
+        android:background="@null"
+        android:scaleType="fitXY"
         />
     <TextView
         android:id="@+id/media_move_activity_move_text"
@@ -31,6 +33,15 @@
         android:textSize="@dimen/fifteenSpDimension"
         android:textColor="@color/white"
         android:textAlignment="center"
+        />
+    <ProgressBar
+        android:id="@+id/media_move_activity_move_count_progress"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_below="@+id/media_move_activity_move_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/tenDpDimension"
+        android:visibility="invisible"
         />
 
     <TextView
@@ -56,6 +67,7 @@
         android:textColor="@color/colorMainPrimary"
         android:textSize="@dimen/fifteenSpDimension"
         android:text="@string/vault_move_activity_move_button"
+        android:padding="8dp"
         />
 
 </RelativeLayout>

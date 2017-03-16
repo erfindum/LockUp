@@ -10,6 +10,7 @@
         <attr name="nodeSelectedDefaultColor" format="color"/>
         <attr name="nodeColor" format="reference"/>
         <attr name="nodeSelectedColor" format="reference"/>
+        <attr name="linePaintTransparency" format="integer"/>
     </declare-styleable>
 
 </resources>

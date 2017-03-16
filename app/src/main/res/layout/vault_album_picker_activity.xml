@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
     <include
         android:id="@+id/vault_album_picker_activity_tool_bar"
@@ -21,8 +20,6 @@
             android:id="@+id/vault_album_picker_activity_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/tenDpDimension"
-            android:layout_marginStart="@dimen/tenDpDimension"
             />
         <ProgressBar
             android:id="@+id/vault_album_picker_activity_progress"
@@ -37,16 +34,19 @@
             android:layout_below="@id/vault_album_picker_activity_progress"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/twentyDpDimension"
-            android:textColor="@android:color/black"
+            android:textColor="#4770B7"
             android:textSize="@dimen/fifteenSpDimension"
             android:text="@string/vault_album_picker_load_text"
             />
 
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/vault_album_picker_activity_placeholder"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_centerInParent="true"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/vault_album_picker_activity_load_text"
+            android:scaleType="fitXY"
+            android:visibility="invisible"
             />
     </RelativeLayout>
 </RelativeLayout>

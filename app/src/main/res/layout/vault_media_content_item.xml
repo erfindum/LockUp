@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/twoFiveDpDimension"
+    android:layout_marginBottom="@dimen/twoFiveDpDimension"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/vault_media_content_item_image"
+        android:layout_width="@dimen/vault_album_content_item_size"
+        android:layout_height="@dimen/vault_album_content_item_size"
+        android:scaleType="fitXY"
+        />
+    <View
+        android:id="@+id/vault_media_content_item_selected"
+        android:layout_width="@dimen/vault_album_content_item_size"
+        android:layout_height="@dimen/vault_album_content_item_size"
+        android:background="@color/transparentBlue"
+        android:visibility="invisible"
+        />
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/vault_media_content_item_tick"
+        android:layout_width="@dimen/twentyDpDimension"
+        android:layout_height="@dimen/twentyDpDimension"
+        android:layout_centerInParent="true"
+        app:srcCompat="@drawable/ic_vault_selected_tick"
+        android:visibility="invisible"
+        />
+
+</RelativeLayout>

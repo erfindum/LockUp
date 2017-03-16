@@ -22,14 +22,14 @@ public class MediaVaultModel {
     public static String THUMBNAIL_PATH = "thumbnail_path";
 
     public static String getCreateSQLString(){
-        return "CREATE TABLE "+TABLE_NAME+"("+ID_COLUMN_NAME+" INTEGER PRIMARY KEY, "+ORIGINAL_MEDIA_PATH+ " TEXT, "
+        return "CREATE TABLE IF NOT EXISTS "+TABLE_NAME+"("+ID_COLUMN_NAME+" INTEGER PRIMARY KEY, "+ORIGINAL_MEDIA_PATH+ " TEXT, "
                 + VAULT_MEDIA_PATH+" TEXT, "+ORIGINAL_FILE_NAME+" TEXT, "+ VAULT_FILE_NAME +" TEXT, "
                 +VAULT_BUCKET_NAME+" TEXT, "+VAULT_BUCKET_ID+" TEXT, "+FILE_EXTENSION+" TEXT, "
                 + MEDIA_TYPE+" TEXT, "+TIME_STAMP+" TEXT, "+THUMBNAIL_PATH+" TEXT)";
     }
 
     public static String getUpgradeSQLString(){
-        return "CREATE TABLE "+TABLE_NAME+"("+ID_COLUMN_NAME+" INTEGER PRIMARY KEY, "+ORIGINAL_MEDIA_PATH+ " TEXT, "
+        return "DROP TABLE IF EXISTS "+TABLE_NAME+"("+ID_COLUMN_NAME+" INTEGER PRIMARY KEY, "+ORIGINAL_MEDIA_PATH+ " TEXT, "
                 + VAULT_MEDIA_PATH+" TEXT, "+ORIGINAL_FILE_NAME+" TEXT, "+ VAULT_FILE_NAME +" TEXT, "
                 +VAULT_BUCKET_NAME+" TEXT, "+VAULT_BUCKET_ID+" TEXT, "+FILE_EXTENSION+" TEXT, "
                 + MEDIA_TYPE+" TEXT, "+TIME_STAMP+" TEXT, "+THUMBNAIL_PATH+" TEXT)";

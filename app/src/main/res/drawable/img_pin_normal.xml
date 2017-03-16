@@ -4,6 +4,6 @@
     >
 <stroke android:color="@color/white" android:width="@dimen/onePointFiveDpDimension"
     />
-    <solid android:color="@color/darkBlue" />
+    <solid android:color="@color/darkBlue_pin" />
 
 </shape>

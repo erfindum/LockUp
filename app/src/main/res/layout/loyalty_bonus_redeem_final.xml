@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fillViewport="true"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:background="@color/backgroundGrey"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_alignParentTop="true"
+            android:background="@color/colorMainPrimary"
+            />
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/loyalty_bonus_redeem_final_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/tenDpDimension"
+            android:layout_marginRight="@dimen/tenDpDimension"
+            android:layout_marginTop="@dimen/loyalty_bonus_redeem_final_card_margin_top"
+            android:layout_marginBottom="@dimen/twentyDpDimension"
+            app:cardCornerRadius="@dimen/fiveDpDimension"
+            >
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.v7.widget.AppCompatImageView
+                    android:id="@+id/loyalty_bonus_redeem_final_type"
+                    android:layout_width="@dimen/loyalty_bonus_redeem_logo_size"
+                    android:layout_height="@dimen/loyalty_bonus_redeem_logo_size"
+                    android:layout_centerHorizontal="true"
+                    android:background="@null"
+                    android:scaleType="fitXY"
+                    />
+
+                <TextView
+                    android:id="@+id/loyalty_bonus_redeem_final_redeem_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/loyalty_bonus_redeem_final_type"
+                    android:textColor="@color/textSecondaryColor"
+                    android:textSize="@dimen/fifteenSpDimension"
+                    android:text="@string/loyalty_redeem_final_selected_info"
+                    />
+
+                <RelativeLayout
+                    android:id="@+id/loyalty_bonus_redeem_final_points_group"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/loyalty_bonus_redeem_final_redeem_text"
+                    android:layout_centerHorizontal="true"
+                    >
+                    <TextView
+                        android:id="@+id/loyalty_bonus_redeem_final_redeem_credit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:textSize="@dimen/twentySpDimension"
+                        android:textColor="@color/colorMainPrimary"
+                        android:layout_marginTop="@dimen/fifteenDpDimension"
+                        />
+                    <RelativeLayout
+                        android:id="@+id/loyalty_bonus_redeem_final_redeem_points"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/loyalty_bonus_redeem_final_redeem_credit"
+                        android:layout_marginTop="@dimen/tenDpDimension"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginBottom="@dimen/fifteenDpDimension"
+                        >
+                        <TextView
+                            android:id="@+id/loyalty_bonus_redeem_final_redeem_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/textSecondaryColor"
+                            android:textSize="@dimen/fifteenSpDimension"
+                            android:layout_toRightOf="@+id/loyalty_bonus_redeem_final_redeem_dot"
+                            android:layout_toEndOf="@+id/loyalty_bonus_redeem_final_redeem_dot"
+                            />
+
+                        <android.support.v7.widget.AppCompatImageView
+                            android:id="@+id/loyalty_bonus_redeem_final_redeem_dot"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:background="@null"
+                            app:srcCompat="@drawable/ic_loyalty_points_dot"
+                            android:layout_marginRight="@dimen/fiveDpDimension"
+                            android:layout_marginEnd="@dimen/fiveDpDimension"
+                            />
+                    </RelativeLayout>
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/loyalty_bonus_redeem_final_head"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/loyalty_bonus_redeem_final_points_group"
+                    android:layout_marginTop="@dimen/tenDpDimension"
+                    android:layout_marginLeft="@dimen/tenDpDimension"
+                    android:layout_marginRight="@dimen/tenDpDimension"
+                    android:layout_marginBottom="@dimen/twentyFiveDpDimension"
+                    android:textColor="@color/textPrimaryColor"
+                    android:textSize="@dimen/fifteenSpDimension"
+                    />
+
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/loyalty_bonus_redeem_final_id_edit"
+                    android:layout_width="260dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/loyalty_bonus_redeem_final_head"
+                    android:layout_marginBottom="@dimen/twentyDpDimension"
+                    android:textColor="@color/colorMainPrimary"
+                    android:textSize="@dimen/fifteenSpDimension"
+                    android:textColorHint="@color/viewPagerTabBlue"
+                    android:inputType="textEmailAddress"
+                    android:maxLines="1"
+                    android:padding="@dimen/tenDpDimension"
+                    android:imeOptions="actionDone"
+                    />
+
+                <ProgressBar
+                    android:id="@+id/loyalty_bonus_redeem_final_progress"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_below="@+id/loyalty_bonus_redeem_final_id_edit"
+                    android:layout_marginBottom="@dimen/tenDpDimension"
+                    android:layout_centerHorizontal="true"
+                    android:visibility="invisible"
+                    />
+
+                <Button
+                    android:id="@+id/loyalty_bonus_redeem_final_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/tenDpDimension"
+                    android:layout_marginLeft="@dimen/tenDpDimension"
+                    android:layout_below="@+id/loyalty_bonus_redeem_final_progress"
+                    android:background="@color/colorMainAccent"
+                    android:text="@string/loyalty_redeem_final_redeem_button"
+                    android:textColor="@color/colorMainPrimaryDark"
+                    android:textSize="@dimen/fifteenSpDimension"
+                    android:layout_marginBottom="@dimen/thirtyDpDimension"
+                    />
+
+            </RelativeLayout>
+
+        </android.support.v7.widget.CardView>
+
+    </RelativeLayout>
+
+    </ScrollView>

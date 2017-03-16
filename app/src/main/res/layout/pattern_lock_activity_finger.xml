@@ -16,7 +16,7 @@
         android:paddingLeft="@dimen/fifteenDpDimension"
         android:paddingStart="@dimen/fifteenDpDimension"
         app:srcCompat="@drawable/ic_keyboard_white_24px"
-        android:layout_alignParentTop="true"
+        android:layout_alignTop="@+id/pattern_lock_activity_finger_ad_parent"
         android:background="@android:color/transparent"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
@@ -32,7 +32,7 @@
         android:paddingStart="@dimen/fifteenDpDimension"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
+        android:layout_alignTop="@+id/pattern_lock_activity_finger_ad_parent"
         app:srcCompat="@drawable/ic_fingerprint_white_24px"
         android:background="@android:color/transparent"
         android:adjustViewBounds="true"
@@ -40,14 +40,13 @@
         android:visibility="invisible"
         />
 
-    <com.google.android.gms.ads.NativeExpressAdView
-        android:id="@+id/pattern_lock_activity_finger_ad_view"
+    <RelativeLayout
+        android:id="@+id/pattern_lock_activity_finger_ad_parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:adSize ="280x170"
-        app:adUnitId="@string/pin_lock_activity_ad_unit_id"
         android:layout_above="@+id/pattern_lock_activity_finger_app_icon_view"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/twentyDpDimension"
         />
 
     <ImageView
@@ -60,11 +59,12 @@
         android:layout_marginTop="@dimen/tenDpDimension"
         />
 
-    <com.smartfoxitsolutions.lockup.PatternLockView
+    <com.smartfoxitsolutions.lockup.views.PatternLockView
         android:id="@+id/pattern_lock_activity_finger_pattern_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:paddingLeft="@dimen/fiftyDpDimension"
         android:paddingRight="@dimen/fiftyDpDimension"
         android:paddingTop="@dimen/thirtyDpDimension"
@@ -72,8 +72,8 @@
         app:nodeCellSize="@dimen/seventyDpDimension"
         app:nodeCornerSize="3dp"
         app:nodeSelectedCornerSize="5dp"
-        app:nodeColor="@array/nodeColors"
-        app:nodeSelectedColor="@array/nodeSelectedColors"
+        app:nodeDefaultColor="#FFFFFF"
+        app:nodeSelectedDefaultColor="#FFFFFF"
         app:patternLineStroke="@dimen/sevenDpDimension"
         app:patternLineColor="@color/white"
         />
@@ -81,7 +81,8 @@
         android:id="@+id/pattern_lock_activity_finger_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_alignTop="@+id/pattern_lock_activity_finger_pattern_view"
         android:textSize="@dimen/fifteenSpDimension"
         android:textColor="@color/white"
         android:layout_marginRight="@dimen/twentyDpDimension"
@@ -105,4 +106,3 @@
         android:scaleType="fitXY"
         />
 </RelativeLayout>
-

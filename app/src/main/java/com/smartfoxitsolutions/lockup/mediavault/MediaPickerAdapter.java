@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,14 +21,14 @@ import java.util.ArrayList;
  * Created by RAAJA on 24-09-2016.
  */
 
-public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements MediaPickerHolder.OnMediaPickedListener {
+public class
+MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements MediaPickerHolder.OnMediaPickedListener {
 
     private ArrayList<MediaPickerHolder> holder;
-    private ArrayList<String> selectedMediaIds;
+    private ArrayList<String> selectedMediaIds, mediaIdList;
     private MediaPickerActivity activity;
      Cursor mediaCursor;
     private boolean selectedAll,isSelectionStarted;
-    private StringBuilder mediaIdString;
     private int itemSize;
     private Drawable placeHolder;
 
@@ -38,19 +37,33 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
          this.mediaCursor = cursor;
         holder = new ArrayList<>();
         selectedMediaIds = new ArrayList<>();
-        mediaIdString = new StringBuilder();
+         mediaIdList = new ArrayList<>();
         loadPlaceHolderImages();
+         loadCursorData();
     }
 
     void swapCursor(Cursor cursor){
         if(cursor!=null){
             this.mediaCursor = cursor;
-            notifyDataSetChanged();
+            loadCursorData();
         }
         else{
             this.mediaCursor = null;
             notifyDataSetChanged();
         }
+    }
+
+    void loadCursorData(){
+        mediaCursor.moveToFirst();
+        if(mediaCursor.getCount()>0) {
+            do {
+                int idIndex = mediaCursor.getColumnIndex(getIdIndex());
+                mediaIdList.add(mediaCursor.getString(idIndex));
+
+            } while (mediaCursor.moveToNext());
+        }
+        notifyDataSetChanged();
+        activity.loadingComplete();
     }
 
     void selectedAllImages(){
@@ -149,44 +162,43 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        mediaIdString.delete(0, mediaIdString.length());
         MediaPickerHolder mediaHolder = (MediaPickerHolder) holder;
-        mediaCursor.moveToPosition(position);
-        int mediaIdIndex = mediaCursor.getColumnIndex(getIdIndex());
-        mediaIdString.append(mediaCursor.getString(mediaIdIndex));
         Uri uri;
-        uri = Uri.parse(getExternalMediaUri()+"/"+ mediaIdString.toString());
+        uri = Uri.parse(getExternalMediaUri()+"/"+mediaIdList.get(position) );
 
         switch (activity.getMediaType()){
             case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
                 Glide.with(activity).load(uri).placeholder(getPlaceHolderImages())
                         .error(getPlaceHolderImages()).override(getItemSize(), getItemSize())
-                        .centerCrop().diskCacheStrategy(DiskCacheStrategy.ALL).crossFade()
+                        .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                         .into(mediaHolder.getThumbnailView());
                 break;
 
             case MediaAlbumPickerActivity.TYPE_VIDEO_MEDIA:
                 Glide.with(activity).load(uri).placeholder(getPlaceHolderImages())
                         .error(getPlaceHolderImages()).override(getItemSize(), getItemSize())
-                        .centerCrop().diskCacheStrategy(DiskCacheStrategy.RESULT).crossFade()
+                        .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                         .into(mediaHolder.getThumbnailView());
                 break;
 
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
                 Glide.with(activity).load(new AlbumArtModel(uri,activity)).placeholder(getPlaceHolderImages())
                         .error(getPlaceHolderImages()).override(getItemSize(), getItemSize())
-                        .centerCrop().diskCacheStrategy(DiskCacheStrategy.RESULT).crossFade()
+                        .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                         .into(mediaHolder.getThumbnailView());
         }
-        if(!selectedAll) {
-                    if (!selectedMediaIds.contains(mediaIdString.toString())) {
-                        mediaHolder.setItemDeselected();
-                    } else if (selectedMediaIds.contains(mediaIdString.toString())) {
-                        mediaHolder.setItemSelected();
-                    }
-        }else{
+
+        if (!selectedMediaIds.contains(mediaIdList.get(position))) {
+            mediaHolder.setItemDeselected();
+        } else if (selectedMediaIds.contains(mediaIdList.get(position))) {
             mediaHolder.setItemSelected();
         }
+
+      /*  if(!selectedAll) {
+
+        }else{
+            mediaHolder.setItemSelected();
+        } */
     }
 
     @Override
@@ -194,17 +206,36 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         return mediaCursor.getCount();
     }
 
+    @Override
+    public void onViewRecycled(RecyclerView.ViewHolder holder) {
+        super.onViewRecycled(holder);
+        MediaPickerHolder currentHolder = (MediaPickerHolder) holder;
+        Glide.clear(currentHolder.getThumbnailView());
+    }
+
     private void selectDeselectAllImages(){
         if(selectedAll){
             for(MediaPickerHolder imageHolder:holder){
                 imageHolder.setItemSelected();
             }
+            selectedMediaIds.clear();
+            selectedMediaIds.addAll(mediaIdList);
         }else{
             for(MediaPickerHolder imageHolder:holder){
                 imageHolder.setItemDeselected();
-                selectedMediaIds.clear();
             }
+            selectedMediaIds.clear();
         }
+    }
+
+    void clearAllSelections(){
+        if(getSelectedAll()){
+            setSelectedAll(false);
+        }
+        for(MediaPickerHolder mediaHolder:holder){
+            mediaHolder.setItemDeselected();
+        }
+        selectedMediaIds.clear();
     }
 
     @Override
@@ -213,14 +244,11 @@ public class MediaPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             isSelectionStarted = true;
             activity.startBottomBarAnimation();
         }
-        mediaCursor.moveToPosition(mediaPosition);
-        int mediaIdIndex = mediaCursor.getColumnIndex(getIdIndex());
-        String mediaId = mediaCursor.getString(mediaIdIndex);
-        if(!selectedMediaIds.contains(mediaId)){
-            selectedMediaIds.add(mediaId);
+        if(!selectedMediaIds.contains(mediaIdList.get(mediaPosition))){
+            selectedMediaIds.add(mediaIdList.get(mediaPosition));
             holder.getItemAnimator().start();
         }else{
-            selectedMediaIds.remove(mediaId);
+            selectedMediaIds.remove(mediaIdList.get(mediaPosition));
             holder.setItemDeselected();
         }
     }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -15,9 +16,6 @@ import android.view.ViewGroup;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.FileDescriptorBitmapDecoder;
-import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.smartfoxitsolutions.lockup.R;
 
 import java.util.ArrayList;
@@ -82,6 +80,7 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     private void loadAlbumData(Cursor cursor){
         cursor.moveToFirst();
+        Log.d("VaultAlbum",cursor.getCount() + " Cursor COunt ------");
         String bucketId = "";
         int bucketCount = 0;
         do{
@@ -96,8 +95,10 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
                 bucketThumbnailId.add(cursor.getString(firstImageIndex));
                 if(!cursor.isFirst()){
                     bucketCountList.add(bucketCount);
+                    Log.d("VaultAlbum",bucketCount+" count");
                     bucketCount = 0;
                 }
+                Log.d("VaultAlbum",bucketId);
             }
             bucketCount += 1;
         }while (cursor.moveToNext());
@@ -120,7 +121,7 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
                 return MediaStore.Video.Media.BUCKET_ID;
 
             case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                return MediaStore.Audio.Media.ALBUM_KEY;
+                return MediaStore.Audio.Media.ALBUM_ID;
         }
         return null;
     }
@@ -217,7 +218,7 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
                 case MediaAlbumPickerActivity.TYPE_IMAGE_MEDIA:
                     Glide.with(mediaAlbumActivity).load(uri).placeholder(getPlaceHolderImages())
                             .error(getPlaceHolderImages()).override(viewWidth, viewHeight)
-                            .centerCrop().diskCacheStrategy(DiskCacheStrategy.ALL).crossFade()
+                            .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                             .into(imageHolder.getThumbnailView());
                     break;
 
@@ -225,21 +226,29 @@ public class MediaAlbumPickerAdapter extends RecyclerView.Adapter<RecyclerView.V
                     Glide.with(mediaAlbumActivity).load(uri).asBitmap()
                             .placeholder(getPlaceHolderImages())
                             .error(getPlaceHolderImages()).override(viewWidth, viewHeight)
-                            .centerCrop().diskCacheStrategy(DiskCacheStrategy.RESULT)
+                            .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
                             .format(DecodeFormat.PREFER_ARGB_8888)
                             .into(imageHolder.getThumbnailView());
                     break;
 
                 case MediaAlbumPickerActivity.TYPE_AUDIO_MEDIA:
-                    Glide.with(mediaAlbumActivity).load(new AlbumArtModel(uri,mediaAlbumActivity.getBaseContext()))
+                    Glide.with(mediaAlbumActivity).load(new AlbumArtModel(uri,mediaAlbumActivity))
                             .placeholder(getPlaceHolderImages())
                             .error(getPlaceHolderImages()).override(viewWidth, viewHeight)
-                            .centerCrop().diskCacheStrategy(DiskCacheStrategy.RESULT).crossFade()
+                            .centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true).crossFade()
                             .into(imageHolder.getThumbnailView());
             }
 
         imageHolder.getInfoText().setText(bucketNameList.get(position));
         imageHolder.getCountText().setText("(" + bucketCountList.get(position)+")");
+    }
+
+    @Override
+    public void onViewRecycled(RecyclerView.ViewHolder holder) {
+        super.onViewRecycled(holder);
+        MediaAlbumPickerHolder mediaHolder= (MediaAlbumPickerHolder) holder;
+        Glide.clear(mediaHolder.getThumbnailView());
     }
 
     @Override

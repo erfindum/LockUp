@@ -37,7 +37,7 @@
         android:layout_marginRight="@dimen/tenDpDimension"
         />
 
-    <com.smartfoxitsolutions.lockup.PatternLockView
+    <com.smartfoxitsolutions.lockup.views.PatternLockView
         android:id="@+id/set_pattern_fragment_pattern_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

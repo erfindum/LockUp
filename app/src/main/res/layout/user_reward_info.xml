@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/user_reward_info_vision_head"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_margin="@dimen/twentyDpDimension"
+        android:text="AD Impressions"
+        android:textSize="@dimen/twentySpDimension"
+        />
+    <TextView
+        android:id="@+id/user_reward_info_vision_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_below="@+id/user_reward_info_vision_head"
+        android:textSize="@dimen/fifteenSpDimension"
+        />
+    <TextView
+        android:id="@+id/user_reward_info_physic_head"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_margin="@dimen/twentyDpDimension"
+        android:layout_below="@+id/user_reward_info_vision_info"
+        android:text="AD Clicks"
+        android:textSize="@dimen/twentySpDimension"
+        />
+    <TextView
+        android:id="@+id/user_reward_info_physic_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_below="@+id/user_reward_info_physic_head"
+        android:textSize="@dimen/fifteenSpDimension"
+        />
+
+</RelativeLayout>

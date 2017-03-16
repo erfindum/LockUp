@@ -7,15 +7,14 @@
         android:id="@+id/pattern_lock_activity_parent_view"
         >
 
-       <com.google.android.gms.ads.NativeExpressAdView
-           android:id="@+id/pattern_lock_activity_ad_view"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           app:adSize ="280x170"
-           app:adUnitId="@string/pin_lock_activity_ad_unit_id"
-           android:layout_above="@+id/pattern_lock_activity_app_icon_view"
-           android:layout_centerHorizontal="true"
-           />
+    <RelativeLayout
+        android:id="@+id/pattern_lock_activity_ad_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/pattern_lock_activity_app_icon_view"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/twentyDpDimension"
+        />
 
            <ImageView
                android:id="@+id/pattern_lock_activity_app_icon_view"
@@ -27,11 +26,12 @@
                android:layout_marginTop="@dimen/tenDpDimension"
                />
 
-           <com.smartfoxitsolutions.lockup.PatternLockView
+           <com.smartfoxitsolutions.lockup.views.PatternLockView
                android:id="@+id/pattern_lock_activity_pattern_view"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
+               android:layout_width="400dp"
+               android:layout_height="400dp"
                android:layout_alignParentBottom="true"
+               android:layout_centerHorizontal="true"
                android:paddingLeft="@dimen/fiftyDpDimension"
                android:paddingRight="@dimen/fiftyDpDimension"
                android:paddingTop="@dimen/thirtyDpDimension"
@@ -39,8 +39,8 @@
                app:nodeCellSize="@dimen/seventyDpDimension"
                app:nodeCornerSize="3dp"
                app:nodeSelectedCornerSize="5dp"
-               app:nodeColor="@array/nodeColors"
-               app:nodeSelectedColor="@array/nodeSelectedColors"
+               app:nodeDefaultColor="#FFFFFF"
+               app:nodeSelectedDefaultColor="#FFFFFF"
                app:patternLineStroke="@dimen/sevenDpDimension"
                app:patternLineColor="@color/white"
                />
