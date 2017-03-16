@@ -11,6 +11,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.AppCompatImageView;
 import android.text.Html;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -165,6 +167,9 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
         if(redeemType.equals("paytm")){
             enterIdInfo.setText(getString(R.string.loyalty_redeem_final_paytm_info));
             enterIdEdit.setHint(getString(R.string.loyalty_redeem_final_paytm_hint));
+            enterIdEdit.setMaxLines(1);
+            enterIdEdit.setInputType(InputType.TYPE_CLASS_PHONE);
+            enterIdEdit.setFilters(new InputFilter[]{new InputFilter.LengthFilter(10)});
             redeemTypeImage.setImageResource(R.drawable.ic_paytm_logo);
             credits = getResources().getIntArray(R.array.loyalty_bonus_redeem_paytm_credits);
             points = getResources().getStringArray(R.array.loyalty_bonus_redeem_paytm_points);

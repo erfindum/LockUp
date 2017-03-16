@@ -32,16 +32,6 @@
     <string name="settings_dialog_finger_no_fingerprint">Fingerprint not enrolled. Kindly enroll at-least one fingerprint from Android settings</string>
     <string name="settings_dialog_finger_negative_text">GOT IT</string>
 
-    <!-- FaqQuestionFragment -->
-    <string name="faq_question_fragment_question_1_text">How to reset password ?</string>
-    <string name="faq_question_fragment_question_2_text">How to lock apps ?</string>
-    <string name="faq_question_fragment_question_3_text">How to redeem points into cash ?</string>
-    <string name="faq_question_fragment_question_4_text">When will I receive my cash ?</string>
-    <string name="faq_question_fragment_question_5_text">What is the minimum threshold to redeem cash ?</string>
-    <string name="faq_question_fragment_question_6_text">How to reset vault password ?</string>
-    <string name="faq_question_fragment_question_7_text">How to change vault location ?</string>
-    <string name="faq_question_fragment_question_8_text">How can I save my media files into vault ?</string>
-
     <!-- Set Email Activity -->
     <string name="set_email_activity_info">LockUp recommends you to add recovery email, to reset the pin/pattern when you forget it.
                                             Note: Only recovery email is sent to the email address you provide</string>
@@ -187,9 +177,7 @@
     <string name="facebook_app_id">361979890807218</string>
 
     <!-- Pin Lock Activity -->
-    <string name="pin_lock_activity_ad_unit_id">1c2531f4f8844982a1be67c877dffc92</string>
-    <string name="pin_lock_original">1c2531f4f8844982a1be67c877dffc92</string>
-    <string name="pin_lock1">1fa4d60303ff4392a78aab50dac62c5e</string>
+    <string name="pin_lock_activity_ad_unit_id">3b8d2c8908d24f7e90c7f0e05132858b</string>
     
     <!-- Album Picker Activity-->
     <string name="vault_album_picker_load_text">Loading Albums</string>
@@ -317,10 +305,11 @@
     <string name="loyalty_user_main_lock_info_one"> protected apps</string>
     <string name="loyalty_user_main_lock_info_two">Lock more apps to get more points</string>
     <string name="loyalty_user_main_points_info_one">100 points = 1$</string>
-    <string name="loyalty_user_main_points_info_two">Points will be updated once a day</string>
+    <string name="loyalty_user_main_points_info_two">Points will be updated everyday at</string>
     <string name="loyalty_user_main_redeem_text">Redeem with</string>
     <string name="loyalty_user_main_logout">Logout</string>
     <string name="loyalty_user_main_title">Loyalty Bonus</string>
+    <string name="loyalty_user_main_request_info">Points will be updated at %1$s</string>
 
 
     <!-- Loyalty Bonus Redeem -->
@@ -446,5 +435,8 @@
         <item>If lockUp stops working on clearing RAM/Recent Apps from task manager and not restarting automatically, then its must be a issue of your device Manufacturer or OS.</item>
         <item>Most of the apps like whatsApp, Facebook Triggers push notification which are private to you sometimes. By enabling it you can protect your privacy from snoopy eyes. To enable it you must lock the app in Applock first and then enable the same under Notification lock.</item>
     </string-array>
+    <string name="faq_support_email_header">Mail us for support :</string>
+    <string name="faq_support_email">smartfoxapps@gmail.com</string>
+
 
 </resources>

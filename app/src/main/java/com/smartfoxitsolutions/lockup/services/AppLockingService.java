@@ -49,7 +49,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Executors;
@@ -64,6 +63,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     public static final String TAG = "AppLockingService";
 
     public static final String STOP_APP_LOCK_SERVICE = "stopAppLockService";
+    private static final int UNLOCK_LOCKED_APP = 5;
 
     public static boolean isAppLockRunning = false;
     public static final int RECENT_APP_INFO_V21_DOWN =2;
@@ -89,7 +89,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
     private LockPatternView patternLockView;
     private LockPatternViewFinger patternLockViewFinger;
     private boolean isFingerPrintLockActive, hasLockDisplayed ,isUserLoggedIn;
-    private boolean stopAppLock, shouldLockOnScreenOn, isScreenOn;
+    private boolean stopAppLock, shouldLockOnScreenOn, isScreenOn, hasAdTracked,hasAdFailed, hasAdRequestComplete;
     private MoPubNative moPubNative;
     private NativeAd moPubNativeAd;
     private View adView;
@@ -116,6 +116,9 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         recommendedAppsMapToken = new TypeToken<LinkedHashMap<String,HashMap<String,Boolean>>>(){}.getType();
         userReportMapToken = new TypeToken<LinkedHashMap<String,UserLoyaltyReport>>(){}.getType();
         checkedAppColorMap = new TreeMap<>();
+        hasAdTracked = true;
+        hasAdRequestComplete = false;
+        requestAd();
         scheduleAppQuery();
         appLockReceiver = new AppLockReceiver();
         IntentFilter appLockFilter = new IntentFilter();
@@ -123,7 +126,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         appLockFilter.addAction(Intent.ACTION_SCREEN_ON);
         appLockFilter.addAction(AppLockingService.STOP_APP_LOCK_SERVICE);
         registerReceiver(appLockReceiver,appLockFilter);
-        requestAd();
+
     }
 
         void setWindowLayoutParams(){
@@ -227,7 +230,6 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
 
         moPubNative.registerAdRenderer(adRenderer);
         moPubNative.makeRequest();
-        adRefreshInterval = System.currentTimeMillis() + 120000;
     }
 
     @Override
@@ -235,13 +237,20 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         if(msg.what == RECENT_APP_INFO_V21_UP){
             String[] checkedAppPackage = (String[]) msg.obj;
             if(isScreenOn){
-                checkedAppPackage[0] = NIL_APPS_LOCKED;
-                checkedAppPackage[1] = NIL_APPS_LOCKED;
+               // checkedAppPackage[0] = NIL_APPS_LOCKED;
+                //checkedAppPackage[1] = NIL_APPS_LOCKED;
                 isScreenOn=false;
                 return true;
             }
-            if (System.currentTimeMillis() > adRefreshInterval) {
-                requestAd();
+            if (hasAdTracked && hasAdRequestComplete) {
+                if(hasAdFailed && (System.currentTimeMillis() > adRefreshInterval)) {
+                    hasAdRequestComplete = false;
+                    requestAd();
+                }
+                if(!hasAdFailed){
+                    hasAdRequestComplete = false;
+                    requestAd();
+                }
             }
 
             if(checkedAppPackage[0]!=null && checkedAppPackage[1]!=null) {
@@ -261,12 +270,26 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         }
         if(msg.what == RECENT_APP_INFO_V21_DOWN){
             String checkedAppPackage = (String) msg.obj;
-            if (System.currentTimeMillis() > adRefreshInterval) {
-                requestAd();
+            if (hasAdTracked && hasAdRequestComplete) {
+                if(hasAdFailed && (System.currentTimeMillis() > adRefreshInterval)) {
+                    hasAdRequestComplete = false;
+                    requestAd();
+                }
+                if(!hasAdFailed){
+                    hasAdRequestComplete = false;
+                    requestAd();
+                }
             }
             if(checkedAppPackage!=null) {
                 lockUnlockApp_V21_Down(checkedAppPackage);
             }
+            return true;
+        }
+
+        if(msg.what == UNLOCK_LOCKED_APP){
+            removeView();
+            hasLockDisplayed = false;
+            Log.d("AppLock",System.currentTimeMillis() + " Unlocked Time");
             return true;
         }
         return false;
@@ -335,6 +358,8 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                             hasLockDisplayed = true;
                         }
                     }
+                    Log.d("AppLock",System.currentTimeMillis() + " Locked Time");
+
                 }
             } else if (recentlyLockedApp.equals(checkedAppPackage[1])) {
                 if (checkedAppPackage[0].equals(getPackageName())) {
@@ -382,8 +407,8 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
 
     @Override
     public void onPinUnlocked() {
-        removeView();
-        hasLockDisplayed = false;
+        Handler mainHandler = new Handler(this);
+        mainHandler.sendEmptyMessageDelayed(UNLOCK_LOCKED_APP,600);
     }
 
     @Override
@@ -406,6 +431,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
             edit.putString(LoyaltyBonusModel.USER_LOYALTY_REPORT,userReportUpdateString);
             edit.apply();
         }
+        hasAdTracked = true;
     }
 
     @Override
@@ -423,6 +449,7 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
             edit.putString(LoyaltyBonusModel.USER_LOYALTY_REPORT,userReportUpdateString);
             edit.apply();
         }
+        hasAdTracked = true;
     }
 
     void removeView(){
@@ -463,11 +490,17 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
         View adViewRender = moPubNativeAd.createAdView(this, null);
         adView = null;
         adView = adViewRender;
+        hasAdFailed = false;
+        hasAdTracked = false;
+        hasAdRequestComplete = true;
     }
 
     @Override
     public void onNativeFail(NativeErrorCode errorCode) {
         Log.d("LockUpMopub",errorCode+ " errorcode");
+        hasAdFailed = true;
+        adRefreshInterval = System.currentTimeMillis() + 120000;
+        hasAdRequestComplete = true;
     }
 
     private final class AppLockReceiver extends BroadcastReceiver{
@@ -480,12 +513,12 @@ public class AppLockingService extends Service implements Handler.Callback,OnPin
                 if(!appLockService.isShutdown()){
                     appLockService.shutdown();
                 }
-                if(hasLockDisplayed){
-                   removeView();
-                   recentlyLockedApp = NIL_APPS_LOCKED;
-                }
             }
             if(action.equals(Intent.ACTION_SCREEN_ON)){
+                if(hasLockDisplayed){
+                    removeView();
+                    recentlyLockedApp = NIL_APPS_LOCKED;
+                }
                 if(shouldLockOnScreenOn){
                     recentlyLockedApp = NIL_APPS_LOCKED;
                     isScreenOn = true;

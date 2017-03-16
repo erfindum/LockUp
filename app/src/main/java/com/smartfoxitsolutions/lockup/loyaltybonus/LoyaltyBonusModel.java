@@ -19,6 +19,6 @@ public class LoyaltyBonusModel {
 
     public static final String USER_LOYALTY_REPORT = "user_loyalty_report";
 
-    public static final String RECENT_REPORTED_DATE = "recent_reported_date";
+    public static final String NEXT_REPORTED_DATE = "recent_reported_date";
 
 }

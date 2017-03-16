@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -31,8 +32,11 @@ import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.loyaltybonus.receivers.UserReportBroadcastReceiver;
 
 import java.lang.reflect.Type;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,12 +57,13 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class LoyaltyUserProfileFragment extends Fragment {
 
-    private TextView fullName, noOfAppsLocked, appLockInfo,pointsEarned;
+    private TextView fullName, noOfAppsLocked, appLockInfo,pointsEarned, redeemInfo;
     private CardView paypalCard, paytmCard;
     private FloatingActionButton appLockButton;
     private LoyaltyUserActivity activity;
     private ProgressBar loadingProgress;
     public static int lockedRecommendApps,lockedApps;
+    private String pointUpdateTime;
 
     @Nullable
     @Override
@@ -70,6 +75,7 @@ public class LoyaltyUserProfileFragment extends Fragment {
         appLockInfo = (TextView) parent.findViewById(R.id.loyalty_bonus_user_main_lock_info_two);
         pointsEarned = (TextView) parent.findViewById(R.id.loyalty_bonus_user_main_point);
         loadingProgress = (ProgressBar) parent.findViewById(R.id.loyalty_bonus_user_main_progress);
+        redeemInfo = (TextView) parent.findViewById(R.id.loyalty_bonus_user_main_redeem_info_two);
 
         appLockButton = (FloatingActionButton) parent.findViewById(R.id.loyalty_bonus_user_main_lock_fab);
 
@@ -122,6 +128,11 @@ public class LoyaltyUserProfileFragment extends Fragment {
                 loyaltyPrefs.getString(LoyaltyBonusModel.LOGIN_USER_NAME_KEY,"Unknown");
         fullName.setText(welcome);
         pointsEarned.setText(loyaltyPrefs.getString(LoyaltyBonusModel.USER_LOYALTY_BONUS,"00.00"));
+        Date date = getRequestCalendarInstance().getTime();
+        DateFormat format = new SimpleDateFormat("hh:mm a");
+        pointUpdateTime = format.format(date);
+        String redeemInfoString = getString(R.string.loyalty_user_main_points_info_two)+" "+ pointUpdateTime;
+        redeemInfo.setText(redeemInfoString);
 
         String lockInfo =(lockedRecommendApps+lockedApps)+" "+getString(R.string.loyalty_user_main_lock_info_one);
         noOfAppsLocked.setText(lockInfo);
@@ -195,11 +206,13 @@ public class LoyaltyUserProfileFragment extends Fragment {
             displayPoints();
             return;
         }
-        int recentReportedDate = loyaltyPreference.getInt(LoyaltyBonusModel.RECENT_REPORTED_DATE,0000_00_00);
-        final int currentDate = calendar.get(Calendar.YEAR)+(calendar.get(Calendar.MONTH)+1)+calendar.get(Calendar.DAY_OF_MONTH);
-        if(recentReportedDate>=currentDate){
+        long nextReportedDate = loyaltyPreference.getLong(LoyaltyBonusModel.NEXT_REPORTED_DATE,00000000);
+        Log.d("LockupUserReport","Recent Request Date "+nextReportedDate+" : Current Date " + System.currentTimeMillis());
+        if(System.currentTimeMillis()<nextReportedDate){
             setAlarm(calendar);
             displayPoints();
+            String requestInfo = String.format(getString(R.string.loyalty_user_main_request_info),pointUpdateTime);
+            displayInfoToast(requestInfo);
             return;
         }
         if(connectivityInfo != null) {
@@ -207,13 +220,13 @@ public class LoyaltyUserProfileFragment extends Fragment {
                 loadingProgress.setVisibility(View.VISIBLE);
                 pointsEarned.setVisibility(View.INVISIBLE);
                 if (!userReportCurrentMap.isEmpty()) {
-                    for(UserLoyaltyReport report : userReportCurrentMap.values()){
-                        Log.d("LockupUserReport",report.getReportDate()+" Impressions: " + report.getTotalImpression()+" Clicks: "+ report.getTotalClicked());
-                    }
                     ArrayList<UserLoyaltyReport> userReportCompleteList = new ArrayList<>(userReportCurrentMap.values());
                     final UserLoyaltyReport presetDayReport = userReportCompleteList.remove(userReportCompleteList.size()-1);
                     ArrayList<String> userReportDateList = new ArrayList<>(userReportCurrentMap.keySet());
                     final String presentDateString = userReportDateList.get(userReportDateList.size()-1);
+                    for(UserLoyaltyReport report : userReportCompleteList){
+                        Log.d("LockupUserReport",report.getReportDate()+" Impressions: " + report.getTotalImpression()+" Clicks: "+ report.getTotalClicked());
+                    }
                     if(userReportCompleteList.isEmpty()){
                         setAlarm(calendar);
                         displayPoints();
@@ -244,8 +257,10 @@ public class LoyaltyUserProfileFragment extends Fragment {
                                     userReportCurrentMap.clear();
                                     userReportCurrentMap.put(presentDateString,presetDayReport);
                                     saveUserReportMap(userReportCurrentMap,gson,loyaltyPreference,userReportToken);
-                                    loyaltyPreference.edit().putInt(LoyaltyBonusModel.RECENT_REPORTED_DATE,currentDate)
+                                    loyaltyPreference.edit().putLong(LoyaltyBonusModel.NEXT_REPORTED_DATE,getRequestCalendarInstance()
+                                            .getTimeInMillis())
                                             .apply();
+                                    pointsEarned.setText(reportResponse.totalPoint);
                                     setAlarm(calendar);
                                     displayPoints();
                                     return;
@@ -258,6 +273,7 @@ public class LoyaltyUserProfileFragment extends Fragment {
                             }else{
                                 setAlarm(calendar);
                                 displayPoints();
+                                displayInfoToast(getString(R.string.loyalty_bonus_signup_unknown_error));
                                 Log.d("LockupUserReport","Report Failure --------");
                             }
                         }
@@ -266,18 +282,24 @@ public class LoyaltyUserProfileFragment extends Fragment {
                         public void onFailure(Call<UserLoyaltyReportResponse> call, Throwable t) {
                             setAlarm(calendar);
                             displayPoints();
+                            displayInfoToast(getString(R.string.loyalty_bonus_signup_unknown_error));
                             Log.d("LockupUserReport","Report Failure --------");
                         }
                     });
 
+                }else{
+                    loadingProgress.setProgress(View.INVISIBLE);
+                    pointsEarned.setVisibility(View.VISIBLE);
                 }
             } else {
                 setAlarm(calendar);
                 displayPoints();
+                displayInfoToast(getString(R.string.loyalty_bonus_signup_no_connection));
             }
         }else{
             setAlarm(calendar);
             displayPoints();
+            displayInfoToast(getString(R.string.loyalty_bonus_signup_no_connection));
         }
 
         Log.d("LockupUserReport","Report Complete --------");
@@ -286,6 +308,12 @@ public class LoyaltyUserProfileFragment extends Fragment {
     private void displayPoints(){
         pointsEarned.setVisibility(View.VISIBLE);
         loadingProgress.setVisibility(View.INVISIBLE);
+    }
+
+    private void displayInfoToast(String message){
+        if(activity!=null){
+            Toast.makeText(activity,message,Toast.LENGTH_LONG).show();
+        }
     }
 
     private Calendar getReportCalendarInstance(){
@@ -302,6 +330,14 @@ public class LoyaltyUserProfileFragment extends Fragment {
             calendar.set(Calendar.SECOND, 0);
         }
         return calendar;
+    }
+
+    private Calendar getRequestCalendarInstance(){
+        Calendar requestCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        requestCalendar.add(Calendar.DAY_OF_MONTH,1);
+        requestCalendar.set(Calendar.HOUR_OF_DAY,14);
+        requestCalendar.set(Calendar.MINUTE,30);
+        return requestCalendar;
     }
 
     private void createNewUserReport(String reportDate, Gson gson, Type userReportToken, SharedPreferences preferences){

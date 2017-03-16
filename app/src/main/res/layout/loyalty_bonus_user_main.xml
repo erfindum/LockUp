@@ -89,7 +89,6 @@
                 android:layout_marginRight="@dimen/fifteenDpDimension"
                 android:textSize="@dimen/twelveSpDimension"
                 android:textColor="@color/white"
-                android:text="@string/loyalty_user_main_points_info_two"
                 />
         </RelativeLayout>
         <android.support.v7.widget.CardView
