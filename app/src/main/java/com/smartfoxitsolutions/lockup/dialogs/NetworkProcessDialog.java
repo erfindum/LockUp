@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -25,8 +26,9 @@ import com.smartfoxitsolutions.lockup.R;
 
 public class NetworkProcessDialog extends DialogFragment {
 
-    TextView infoText,infoTextSub,negativeButton;
+    TextView infoText,infoTextSub;
     ProgressBar progressBar;
+    Button negativeButton;
 
     public static final String NETWORK_INFO_HEADER = "networkInfoHeader";
     public static final String NETWORK_INFO_MESSAGE = "networkInfoMessage";
@@ -43,7 +45,7 @@ public class NetworkProcessDialog extends DialogFragment {
         View parent = inflater.inflate(R.layout.network_dialog,container,false);
         infoText = (TextView) parent.findViewById(R.id.network_dialog_header);
         infoTextSub = (TextView) parent.findViewById(R.id.network_dialog_message);
-        negativeButton = (TextView) parent.findViewById(R.id.network_dialog_negative_button);
+        negativeButton = (Button) parent.findViewById(R.id.network_dialog_negative_button);
         progressBar = (ProgressBar) parent.findViewById(R.id.network_dialog_progress);
         View separator = parent.findViewById(R.id.network_dialog_divider);
         if(getArguments().getInt(NETWORK_DIALOG_TYPE)==NETWORK_DIALOG_TYPE_COMPLETE) {

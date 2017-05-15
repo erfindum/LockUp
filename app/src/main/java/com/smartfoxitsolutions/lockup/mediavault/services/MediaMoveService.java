@@ -21,7 +21,6 @@ import com.smartfoxitsolutions.lockup.MainLockActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.MediaAlbumPickerActivity;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
-import com.smartfoxitsolutions.lockup.mediavault.MediaVaultAlbumActivity;
 import com.smartfoxitsolutions.lockup.mediavault.SelectedMediaModel;
 import com.smartfoxitsolutions.lockup.services.AppLockForegroundService;
 

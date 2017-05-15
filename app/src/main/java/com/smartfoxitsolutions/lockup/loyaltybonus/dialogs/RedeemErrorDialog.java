@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.R;
@@ -26,7 +27,8 @@ import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyUserActivity;
 
 public class RedeemErrorDialog extends DialogFragment {
 
-    TextView infoText,infoTextSub,negativeButton;
+    TextView infoText,infoTextSub;
+    Button negativeButton;
     public static final String REDEEM_ERROR_MESSAGE = "redeemErrorMessage";
     public static final String REDEEM_DIALOG_TYPE = "redeem_dialog_type";
     public static final int REDEEM_TYPE_FAILED =35;
@@ -40,7 +42,7 @@ public class RedeemErrorDialog extends DialogFragment {
         View parent = inflater.inflate(R.layout.settings_activity_dialog,container,false);
         infoText = (TextView) parent.findViewById(R.id.settings_dialog_header);
         infoTextSub = (TextView) parent.findViewById(R.id.settings_dialog_message);
-        negativeButton = (TextView) parent.findViewById(R.id.settings_dialog_negative_button);
+        negativeButton = (Button) parent.findViewById(R.id.settings_dialog_negative_button);
         if(getArguments().getInt(REDEEM_DIALOG_TYPE)==34) {
             infoText.setText(R.string.loyalty_redeem_success_title);
         }else if(getArguments().getInt(REDEEM_DIALOG_TYPE)==35){

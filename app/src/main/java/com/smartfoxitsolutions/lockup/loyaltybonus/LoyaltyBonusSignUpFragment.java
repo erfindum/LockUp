@@ -42,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -356,6 +355,9 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
             signUpCall.enqueue(new Callback<LoyaltyBonusSignUpResponse>() {
                 @Override
                 public void onResponse(Call<LoyaltyBonusSignUpResponse> call, Response<LoyaltyBonusSignUpResponse> response) {
+                    if(activity==null){
+                        return;
+                    }
                     if(response.isSuccessful()){
                         LoyaltyBonusSignUpResponse signUpResponse = response.body();
                         if(signUpResponse!=null && signUpResponse.code.equals("200")){
@@ -380,6 +382,9 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
 
                 @Override
                 public void onFailure(Call<LoyaltyBonusSignUpResponse> call, Throwable t) {
+                    if(activity==null){
+                        return;
+                    }
                     displayErrorDialog(getString(R.string.loyalty_bonus_signup_unknown_error));
                 }
             });
@@ -405,6 +410,9 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
             signUpCall.enqueue(new Callback<LoyaltyBonusInitialPointResponse>() {
                 @Override
                 public void onResponse(Call<LoyaltyBonusInitialPointResponse> call, Response<LoyaltyBonusInitialPointResponse> response) {
+                    if(activity==null){
+                        return;
+                    }
                     if(response.isSuccessful()){
                         LoyaltyBonusInitialPointResponse initialPointResponse = response.body();
                         if(initialPointResponse!=null && initialPointResponse.code.equals("200")){
@@ -414,16 +422,15 @@ public class LoyaltyBonusSignUpFragment extends Fragment implements AdapterView.
                         }
 
                     }
-                    if(activity!=null) {
-                        activity.signUpSuccess();
-                    }
+                    activity.signUpSuccess();
                 }
 
                 @Override
                 public void onFailure(Call<LoyaltyBonusInitialPointResponse> call, Throwable t) {
-                    if(activity!=null) {
-                        activity.signUpSuccess();
+                    if(activity==null){
+                        return;
                     }
+                    activity.signUpSuccess();
                 }
             });
 

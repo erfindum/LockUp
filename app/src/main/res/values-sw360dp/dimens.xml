@@ -9,8 +9,8 @@
 
     <dimen name="vault_album_ad_height">115dp</dimen>
 
-    <dimen name="native_ad_image_width">250dp</dimen>
-    <dimen name="native_ad_image_height">140dp</dimen>
+    <dimen name="native_ad_image_width">230dp</dimen>
+    <dimen name="native_ad_image_height">120dp</dimen>
 
     <dimen name="lockup_main_info_lock_size">90dp</dimen>
     <dimen name="dialog_button_left_right_margin">12dp</dimen>
@@ -26,6 +26,13 @@
     <dimen name="lockup_main_activity_thumbnail_width">216dp</dimen>
     <dimen name="lockup_main_activity_thumbnail_play">25dp</dimen>
     <dimen name="lockup_main_activity_thumbnail_padding">7dp</dimen>
+    <dimen name="lockup_main_activity_faq_padding">15dp</dimen>
+
+    <dimen name="pin_lock_digit_size">50dp</dimen>
+    <dimen name="pin_lock_clear_size">35dp</dimen>
+    <dimen name="pin_lock_clear_margin_top">30dp</dimen>
+
+    <dimen name="loyalty_bonus_ad_margin_bottom">0dp</dimen>
 
 
 </resources>

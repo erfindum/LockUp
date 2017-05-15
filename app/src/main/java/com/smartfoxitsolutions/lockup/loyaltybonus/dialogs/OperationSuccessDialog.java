@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -26,7 +27,8 @@ import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusMain;
 
 public class OperationSuccessDialog extends DialogFragment {
 
-    TextView infoText,infoTextSub,negativeButton;
+    TextView infoText,infoTextSub;
+    Button negativeButton;
     ProgressBar progressBar;
     LoyaltyBonusMain activity;
 
@@ -46,7 +48,7 @@ public class OperationSuccessDialog extends DialogFragment {
         View parent = inflater.inflate(R.layout.network_dialog,container,false);
         infoText = (TextView) parent.findViewById(R.id.network_dialog_header);
         infoTextSub = (TextView) parent.findViewById(R.id.network_dialog_message);
-        negativeButton = (TextView) parent.findViewById(R.id.network_dialog_negative_button);
+        negativeButton = (Button) parent.findViewById(R.id.network_dialog_negative_button);
         progressBar = (ProgressBar) parent.findViewById(R.id.network_dialog_progress);
         progressBar.setVisibility(View.GONE);
         infoText.setText(getString(R.string.reset_pin_pattern_network_success_header));

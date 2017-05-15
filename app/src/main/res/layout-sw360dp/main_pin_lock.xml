@@ -2,8 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:paddingLeft="@dimen/tenDpDimension"
-    android:paddingRight="@dimen/tenDpDimension"
     >
 
     <android.support.v7.widget.AppCompatImageButton
@@ -133,7 +131,7 @@
         android:id="@+id/main_pin_lock_digit_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/main_pin_lock_ad"
         android:paddingBottom="@dimen/twentyDpDimension"
         android:paddingTop="@dimen/twentyDpDimension"
         android:clipToPadding="false"
@@ -316,6 +314,16 @@
         app:srcCompat="@drawable/ic_fingerprint_white_24px"
         android:visibility="invisible"
         android:scaleType="fitXY"
+        />
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/main_pin_lock_ad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:adUnitId="ca-app-pub-2878097117146801/1951034179"
+        app:adSize="BANNER"
+        android:layout_centerHorizontal="true"
         />
 
 </RelativeLayout>

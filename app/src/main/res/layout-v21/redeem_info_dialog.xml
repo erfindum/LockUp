@@ -2,13 +2,13 @@
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_gravity="center"
     app:cardCornerRadius="@dimen/fiveDpDimension"
-    app:cardPreventCornerOverlap="false"
     >
     <ScrollView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        >
         <RelativeLayout
             android:layout_width="250dp"
             android:layout_height="wrap_content">
@@ -62,28 +62,25 @@
                     android:background="@color/textPrimaryColor"
                     />
 
-                <TextView
+                <Button
                     android:id="@+id/redeem_dialog_positive_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/redeem_dialog_divider"
-                    android:paddingTop="@dimen/tenDpDimension"
-                    android:paddingBottom="@dimen/twentyDpDimension"
-                    android:padding="@dimen/tenDpDimension"
+                    android:layout_marginTop="@dimen/tenDpDimension"
+                    android:background="@android:color/transparent"
                     android:layout_marginEnd="@dimen/fifteenDpDimension"
                     android:layout_alignParentEnd="true"
                     android:textColor="@color/colorMainPrimary"
-                    android:textSize="@dimen/fifteenSpDimension"
                     android:text="@string/loyalty_redeem_dialog_positive_text"
                     />
-                <TextView
+                <Button
                     android:id="@+id/redeem_dialog_negative_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
                     android:layout_below="@+id/redeem_dialog_divider"
-                    android:paddingTop="@dimen/tenDpDimension"
-                    android:paddingBottom="@dimen/twentyDpDimension"
-                    android:padding="@dimen/tenDpDimension"
+                    android:layout_marginTop="@dimen/tenDpDimension"
                     android:layout_marginEnd="10dp"
                     android:layout_toStartOf="@+id/redeem_dialog_positive_button"
                     android:textColor="@color/colorMainPrimary"

@@ -103,9 +103,7 @@ public class UserReportIntentService extends IntentService {
             String dateKey = dateKeyList.get(dateKeyList.size()-1);
             UserLoyaltyReport userCurrentReport = userReportCurrentMap.get(dateKey);
             if(!reportDate.equals(userCurrentReport.getReportDate())){
-                UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate);
-                userReport.setTotalImpression(0);
-                userReport.setTotalClicked(0);
+                UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate,0,0,0,0);
                 userReportCurrentMap.put(reportDate,userReport);
                 saveUserReportMap(userReportCurrentMap,gson,preferences,userReportToken);
                 Log.d("LockupUserReport","New Report Saved --------");
@@ -116,9 +114,7 @@ public class UserReportIntentService extends IntentService {
     }
 
     private void createNewUserReport(String reportDate, Gson gson, Type reportToken, SharedPreferences preferences){
-        UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate);
-        userReport.setTotalImpression(0);
-        userReport.setTotalClicked(0);
+        UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate,0,0,0,0);
         LinkedHashMap<String,UserLoyaltyReport> userReportNewMap = new LinkedHashMap<>();
         userReportNewMap.put(reportDate,userReport);
         saveUserReportMap(userReportNewMap,gson,preferences,reportToken);

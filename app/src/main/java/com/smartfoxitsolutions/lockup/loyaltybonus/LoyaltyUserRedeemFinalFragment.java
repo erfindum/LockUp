@@ -6,11 +6,9 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.AppCompatImageView;
-import android.text.Html;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -159,7 +157,7 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
             enterIdEdit.setHint(getString(R.string.loyalty_redeem_final_paypal_hint));
             redeemTypeImage.setImageResource(R.drawable.ic_paypal_logo);
             credits = getResources().getIntArray(R.array.loyalty_bonus_redeem_paypal_credits);
-            points = getResources().getStringArray(R.array.loyalty_bonus_redeem_paypal_points);
+            points = getResources().getStringArray(R.array.loyalty_bonus_server_paypal_points);
             setDenomination(selection);
             denomination.setText(getCreditText(credits[selection]));
             redeemTypeString = "Paypal";
@@ -172,7 +170,7 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
             enterIdEdit.setFilters(new InputFilter[]{new InputFilter.LengthFilter(10)});
             redeemTypeImage.setImageResource(R.drawable.ic_paytm_logo);
             credits = getResources().getIntArray(R.array.loyalty_bonus_redeem_paytm_credits);
-            points = getResources().getStringArray(R.array.loyalty_bonus_redeem_paytm_points);
+            points = getResources().getStringArray(R.array.loyalty_bonus_server_paytm_points);
             setDenomination(selection);
             denomination.setText(getCreditText(credits[selection]));
             redeemTypeString="Paytm";
@@ -233,6 +231,9 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
                     if(redeemResponse.code.equals("200")){
                         loyaltyPreference.edit().putString(LoyaltyBonusModel.USER_LOYALTY_BONUS,redeemResponse.BalacePoint)
                                 .apply();
+                        if(activity==null){
+                            return;
+                        }
                         String successString = String.format(getString(R.string.loyalty_redeem_success_message),
                                 String.valueOf(credits[selection])
                                                 ,userEmail);
@@ -241,10 +242,16 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
                         redeemFinalProgress.setVisibility(View.INVISIBLE);
                     }
                     if(redeemResponse.code.equals("100")){
+                        if(activity==null){
+                            return;
+                        }
                         displayRedeemInfoDialog(RedeemErrorDialog.REDEEM_TYPE_FAILED
                                 ,redeemResponse.msg);
                     }
                 }else{
+                    if(activity==null){
+                        return;
+                    }
                     displayRedeemInfoDialog(RedeemErrorDialog.REDEEM_TYPE_ERROR
                             ,getString(R.string.loyalty_bonus_signup_unknown_error));
                 }
@@ -252,6 +259,9 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
 
             @Override
             public void onFailure(Call<LoyaltyUserRedeemResponse> call, Throwable t) {
+                if(activity==null){
+                    return;
+                }
                 displayRedeemInfoDialog(RedeemErrorDialog.REDEEM_TYPE_ERROR
                         ,getString(R.string.loyalty_bonus_signup_unknown_error));
             }

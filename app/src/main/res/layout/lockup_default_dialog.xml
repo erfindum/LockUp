@@ -3,7 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content" android:layout_height="wrap_content"
-    android:layout_gravity="center"
     app:cardCornerRadius="5dp"
     app:cardPreventCornerOverlap="false"
     >
@@ -79,35 +78,35 @@
                 android:layout_centerHorizontal="true"
                 />
 
-            <TextView
-                android:id="@+id/lockup_default_dialog_positive_button"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/lockup_default_dialog_bottom_divider"
-                android:layout_toRightOf="@+id/lockup_default_dialog_button_divider"
-                android:layout_toEndOf="@+id/lockup_default_dialog_button_divider"
-                android:paddingTop="@dimen/twentyDpDimension"
-                android:paddingBottom="@dimen/thirtyDpDimension"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
-                android:textColor="@color/colorMainPrimary"
-                android:textSize="@dimen/fifteenSpDimension"
-                />
+                android:layout_below="@id/lockup_default_dialog_bottom_divider"
+                >
+                <Button
+                    android:id="@+id/lockup_default_dialog_negative_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal|top"
+                    android:layout_marginTop="@dimen/tenDpDimension"
+                    android:textColor="@color/colorMainPrimary"
+                    android:textSize="@dimen/fifteenSpDimension"
+                    />
 
-            <TextView
-                android:id="@+id/lockup_default_dialog_negative_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/lockup_default_dialog_bottom_divider"
-                android:layout_toLeftOf="@+id/lockup_default_dialog_button_divider"
-                android:layout_toStartOf="@+id/lockup_default_dialog_button_divider"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
-                android:paddingTop="@dimen/twentyDpDimension"
-                android:paddingBottom="@dimen/thirtyDpDimension"
-                android:textColor="@color/colorMainPrimary"
-                android:textSize="@dimen/fifteenSpDimension"
-                />
+                <Button
+                    android:id="@+id/lockup_default_dialog_positive_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:gravity="center_horizontal|top"
+                    android:layout_weight="1"
+                    android:layout_marginTop="@dimen/tenDpDimension"
+                    android:textColor="@color/colorMainPrimary"
+                    android:textSize="@dimen/fifteenSpDimension"
+                    />
+            </LinearLayout>
         </RelativeLayout>
     </ScrollView>
 </android.support.v7.widget.CardView>

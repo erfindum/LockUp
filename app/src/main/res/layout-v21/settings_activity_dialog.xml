@@ -3,13 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content" android:layout_height="wrap_content"
-    android:layout_gravity="center"
     app:cardCornerRadius="@dimen/fiveDpDimension"
-    app:cardPreventCornerOverlap="false"
     >
     <ScrollView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        >
  <RelativeLayout
      android:layout_width="250dp"
      android:layout_height="wrap_content">
@@ -63,17 +63,15 @@
         android:background="@color/textPrimaryColor"
         />
 
-    <TextView
+    <Button
         android:id="@+id/settings_dialog_negative_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/settings_dialog_divider"
-        android:paddingTop="@dimen/fifteenDpDimension"
-        android:paddingBottom="@dimen/fifteenDpDimension"
-        android:layout_marginEnd="24dp"
+        android:background="@android:color/transparent"
+        android:layout_marginTop="@dimen/tenDpDimension"
         android:layout_alignParentEnd="true"
         android:textColor="@color/colorMainPrimary"
-        android:textSize="@dimen/fifteenSpDimension"
         android:text="@string/settings_dialog_finger_negative_text"
         />
 </RelativeLayout>

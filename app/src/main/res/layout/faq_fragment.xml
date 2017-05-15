@@ -16,6 +16,7 @@
             android:textColor="@color/colorMainPrimary"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/tenDpDimension"
+            android:layout_marginBottom="@dimen/tenDpDimension"
             android:text="@string/faq_support_email_header"
             />
         <TextView
@@ -26,14 +27,25 @@
             android:textSize="@dimen/fifteenSpDimension"
             android:textColor="@color/colorMainPrimary"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="@dimen/fifteenDpDimension"
+            android:layout_marginBottom="@dimen/tenDpDimension"
             android:text="@string/faq_support_email"
+            />
+        <TextView
+            android:id="@+id/faq_fragment_support_phone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/faq_fragment_support_mail"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/colorMainPrimary"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/fifteenDpDimension"
+            android:text="@string/faq_support_phone"
             />
         <View
             android:id="@+id/faq_fragment_support_separator"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_below="@+id/faq_fragment_support_mail"
+            android:layout_below="@+id/faq_fragment_support_phone"
             android:background="@color/colorMainAccent"
             />
         <ExpandableListView

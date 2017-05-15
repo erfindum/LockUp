@@ -1,8 +1,11 @@
 package com.smartfoxitsolutions.lockup;
 
 import android.app.Application;
+import android.content.Context;
+import android.util.Log;
 
-import com.squareup.leakcanary.LeakCanary;
+import com.mopub.nativeads.StaticNativeAd;
+//import com.squareup.leakcanary.LeakCanary;
 
 /**
  * Created by RAAJA on 20-12-2016.
@@ -17,5 +20,11 @@ public class LockUpApplication extends Application {
             return;
         }
         LeakCanary.install(this); */
+
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
     }
 }

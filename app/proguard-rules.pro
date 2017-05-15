@@ -27,7 +27,30 @@
 -keep public class * implements com.bumptech.glide.module.GlideModule
 
 -keep class com.mopub.mobileads.** {*;}
+-dontwarn com.mopub.mobileads.**
 -dontwarn com.facebook.ads.internal.**
+-keepclassmembers class com.millennialmedia** {
+public *;
+}
+-keep class com.millennialmedia**
+
+-keep class com.google.ads.mediation.admob.AdMobAdapter {
+    *;
+}
+
+-keep class com.google.ads.mediation.AdUrlAdapter {
+    *;
+}
+
+#Start-App Ad
+
+-keep class com.startapp.** {
+      *;
+}
+
+-keepattributes Exceptions, InnerClasses, Signature, Deprecated, SourceFile,LineNumberTable, *Annotation*, EnclosingMethod
+-dontwarn android.webkit.JavascriptInterface
+-dontwarn com.startapp.**
 
 # Platform calls Class.forName on types which do not exist on Android to determine platform.
 -dontnote retrofit2.Platform
@@ -39,15 +62,8 @@
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 
 -keep class com.smartfoxitsolutions.lockup.ResetPasswordResponse {*;}
--keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusLoginResponse {*;}
--keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusLoginData {*;}
--keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusRecoveryResponse {*;}
--keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusResetResponse {*;}
--keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusSignUpResponse {*;}
--keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusSignUpData {*;}
--keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusInitialPointResponse {*;}
--keep class com.smartfoxitsolutions.lockup.loyaltybonus.UserLoyaltyReportResponse {*;}
--keep class com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyUserRedeemResponse {*;}
+-keep class com.smartfoxitsolutions.lockup.loyaltybonus.** {*;}
+
 
 
 

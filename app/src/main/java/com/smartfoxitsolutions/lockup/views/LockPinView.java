@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -14,27 +15,19 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Vibrator;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
-import com.mopub.nativeads.MoPubNative;
-import com.mopub.nativeads.MoPubStaticNativeAdRenderer;
-import com.mopub.nativeads.NativeAd;
-import com.mopub.nativeads.NativeErrorCode;
-import com.mopub.nativeads.ViewBinder;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.DimensionConverter;
 import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
-import com.smartfoxitsolutions.lockup.services.AppLockingService;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -53,19 +46,19 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
     private ImageView img_trigger_one,img_trigger_two,img_trigger_three,img_trigger_four;
     private Typeface digitTypFace;
     private Vibrator pinDigitVibrator;
-    private RelativeLayout pinViewParent, pinAdParent;
-    private NativeAd moPubNativeAd;
-    private View nativeAdView;
+    private RelativeLayout pinViewParent, pinAdParent,triggerLayout;
 
     private String selectedPin, pinPassCode,salt;
     private int pinDigitCount;
-    private boolean isVibratorEnabled, isErrorConfirmed,shouldHidePinTouch;
+    private boolean isVibratorEnabled, isErrorConfirmed,shouldHidePinTouch,shouldShowBigIcon, shouldShowAd;
+
 
     ValueAnimator digitOneAnimator,digitTwoAnimator, digitThreeAnimator, digitFourAnimator,digitFiveAnimator, digitSixAnimator
             ,digitSevenAnimator,digitEightAnimator,digitNineAnimator,digitZeroAnimator;
     ValueAnimator triggerAnimator;
 
     private OnPinLockUnlockListener pinLockListener;
+    private View adView;
 
     public LockPinView(Context context, OnPinLockUnlockListener pinLockListener) {
         super(context);
@@ -104,6 +97,7 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
     }
 
     void initializeLockView(){
+        triggerLayout = (RelativeLayout) findViewById(R.id.pin_lock_activity_trigger_group);
         SharedPreferences prefs = context.getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,Context.MODE_PRIVATE);
         isVibratorEnabled = prefs.getBoolean(LockUpSettingsActivity.VIBRATOR_ENABLED_PREFERENCE_KEY,false);
         shouldHidePinTouch = prefs.getBoolean(LockUpSettingsActivity.HIDE_PIN_TOUCH_PREFERENCE_KEY,false);
@@ -121,7 +115,7 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
             appIconView.setImageDrawable(appIcon);
         }catch (PackageManager.NameNotFoundException e){
             e.printStackTrace();
-            Log.e(AppLockingService.TAG,packageName + " Not Found");
+           // Log.e(AppLockingService.TAG,packageName + " Not Found");
         }
     }
 
@@ -171,6 +165,21 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
         button_digit_nine.setOnClickListener(this);
         button_digit_zero.setOnClickListener(this);
         clear_pin_button.setOnClickListener(this);
+        final ViewTreeObserver viewTreeObserver = pinViewParent.getViewTreeObserver();
+        viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    if(shouldShowBigIcon){
+                        addBigAppIcon();
+                    }
+                    if(shouldShowAd){
+                        addAdView();
+                    }
+                    pinViewParent.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
+            }
+        });
     }
 
     void unregisterListeners(){
@@ -186,9 +195,7 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
         button_digit_zero.setOnClickListener(null);
         clear_pin_button.setOnClickListener(null);
         appIconView.setImageDrawable(null);
-        if (moPubNativeAd != null) {
-            moPubNativeAd.setMoPubNativeEventListener(null);
-        }
+
     }
 
 
@@ -262,13 +269,13 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 button_digit_one.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_one_normal);
-                Log.d("AppLock","Animation End");
+                //Log.d("AppLock","Animation End");
             }
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 button_digit_one.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_one_selected);
-                Log.d("AppLock","Animation End");
+               // Log.d("AppLock","Animation End");
             }
         });
         digitOneAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -291,13 +298,13 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 button_digit_two.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_two_normal);
-                Log.d("AppLock","Animation End");
+                //Log.d("AppLock","Animation End");
             }
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 button_digit_two.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_two_selected);
-                Log.d("AppLock","Animation End");
+                //Log.d("AppLock","Animation End");
             }
         });
         digitTwoAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -320,13 +327,13 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 button_digit_three.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_three_normal);
-                Log.d("AppLock","Animation End");
+               // Log.d("AppLock","Animation End");
             }
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 button_digit_three.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_three_selected);
-                Log.d("AppLock","Animation End");
+                //Log.d("AppLock","Animation End");
             }
         });
         digitThreeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -349,13 +356,13 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 button_digit_four.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_four_normal);
-                Log.d("AppLock","Animation End");
+                //Log.d("AppLock","Animation End");
             }
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 button_digit_four.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_four_selected);
-                Log.d("AppLock","Animation End");
+                //Log.d("AppLock","Animation End");
             }
         });
         digitFourAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -378,13 +385,13 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 button_digit_five.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_five_normal);
-                Log.d("AppLock","Animation End");
+                //Log.d("AppLock","Animation End");
             }
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 button_digit_five.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_five_selected);
-                Log.d("AppLock","Animation End");
+                //Log.d("AppLock","Animation End");
             }
         });
         digitFiveAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -407,13 +414,13 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 button_digit_six.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_six_normal);
-                Log.d("AppLock","Animation End");
+               // Log.d("AppLock","Animation End");
             }
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 button_digit_six.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_six_selected);
-                Log.d("AppLock","Animation End");
+                //Log.d("AppLock","Animation End");
             }
         });
         digitSixAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -436,13 +443,13 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 button_digit_seven.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_seven_normal);
-                Log.d("AppLock","Animation End");
+                //Log.d("AppLock","Animation End");
             }
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 button_digit_seven.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_seven_selected);
-                Log.d("AppLock","Animation End");
+                //Log.d("AppLock","Animation End");
             }
         });
         digitSevenAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -465,13 +472,13 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 button_digit_eight.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_eight_normal);
-                Log.d("AppLock","Animation End");
+               // Log.d("AppLock","Animation End");
             }
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 button_digit_eight.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_eight_selected);
-                Log.d("AppLock","Animation End");
+                //Log.d("AppLock","Animation End");
             }
         });
         digitEightAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -494,13 +501,13 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 button_digit_nine.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_nine_normal);
-                Log.d("AppLock","Animation End");
+               // Log.d("AppLock","Animation End");
             }
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 button_digit_nine.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_nine_selected);
-                Log.d("AppLock","Animation End");
+               // Log.d("AppLock","Animation End");
             }
         });
         digitNineAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -523,13 +530,13 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 button_digit_zero.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_zero_normal);
-                Log.d("AppLock","Animation End");
+               // Log.d("AppLock","Animation End");
             }
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
                 button_digit_zero.setBackgroundResource(R.drawable.img_pin_lock_activity_digit_zero_selected);
-                Log.d("AppLock","Animation End");
+               // Log.d("AppLock","Animation End");
             }
         });
         digitZeroAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -622,7 +629,7 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
     }
 
     void pinClicked(String digit){
-        Log.d("AppLock", "PinClicked .......");
+        //Log.d("AppLock", "PinClicked .......");
 
         if(!isErrorConfirmed) {
             if (pinDigitCount < 3) {
@@ -640,7 +647,7 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
                     getDigitAnimators(digit).start();
                 }
                 if (!selectedPin.equals("") && pinPassCode.equals(validatePassword(selectedPin))) {
-                    Log.d("AppLock", "Passcode is " + selectedPin + "  " );
+                   // Log.d("AppLock", "Passcode is " + selectedPin + "  " );
                     resetPinView();
                     postPinCompleted();
                 } else  {
@@ -693,36 +700,29 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
         pinLockListener.onPinUnlocked();
     }
 
-    public void addRenderedAd(View adView, NativeAd nativeAd){
-        if(adView !=null && nativeAd != null) {
-            nativeAdView = adView;
-            moPubNativeAd = nativeAd;
-            RelativeLayout.LayoutParams parms = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT
-                    , ViewGroup.LayoutParams.WRAP_CONTENT);
-            parms.addRule(RelativeLayout.CENTER_IN_PARENT);
-            pinAdParent.addView(nativeAdView, parms);
-            moPubNativeAd.renderAdView(adView);
-            moPubNativeAd.prepare(adView);
-            moPubNativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
-                @Override
-                public void onImpression(View view) {
-                    if(pinLockListener!=null){
-                        pinLockListener.onAdImpressed();
-                    }
-                    Log.d("LockUpMopub","LockUP Impression Tracked");
-                }
-
-                @Override
-                public void onClick(View view) {
-                    Log.d("LockUpMopub","LockUP Click Tracked");
-                    if(pinLockListener!=null){
-                        pinLockListener.onAdClicked();
-                    }
-                }
-            });
+    public void addRenderedAd(View ad){
+        if(ad == null){
+            shouldShowBigIcon = true;
+            return;
         }
+        shouldShowAd = true;
+        adView = ad;
     }
 
+    private void addAdView(){
+        pinAdParent.addView(adView);
+        Log.d("AppLock","Parent Height "+ getMeasuredHeight()+" " +getHeight());
+    }
+
+    private void addBigAppIcon(){
+        int size = Math.round(DimensionConverter.convertDpToPixel(60,getContext()));
+        int margin = ((pinViewParent.getBottom()-triggerLayout.getTop())/2)-(size/2);
+        RelativeLayout.LayoutParams parms = (RelativeLayout.LayoutParams) appIconView.getLayoutParams();
+        parms.height = size;
+        parms.width = size;
+        parms.bottomMargin = margin;
+        appIconView.setLayoutParams(parms);
+    }
     void startHome(){
         getContext().startActivity(new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME)
@@ -741,11 +741,9 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
 
     public void removeView(){
         unregisterListeners();
-        if(nativeAdView!=null) {
-            pinAdParent.removeView(nativeAdView);
+        if(adView!=null) {
+            pinAdParent.removeView(adView);
         }
-        nativeAdView = null;
-        moPubNativeAd = null;
         setPinLockUnlockListener(null);
         context = null;
     }

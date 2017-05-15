@@ -192,35 +192,41 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
                 @Override
                 public void onResponse(Call<LoyaltyBonusRecoveryResponse> call, Response<LoyaltyBonusRecoveryResponse> response) {
                     if(response.isSuccessful()) {
-                        LoyaltyBonusRecoveryResponse resetResponse = response.body();
-                        if(resetResponse!=null && resetResponse.code.equals("200")){
-                            SharedPreferences.Editor edit = prefs.edit();
-                            edit.putLong(LoyaltyBonusModel.RECOVERY_CODE_TIME_INTERVAL,System.currentTimeMillis());
-                            edit.apply();
-                            if(networkProcessDialog!=null){
-                                networkProcessDialog.dismiss();
-                            }
-                            displayCompleteDialog(getString(R.string.reset_pin_pattern_network_success_header)
-                                    ,getString(R.string.reset_pin_pattern_network_success_message)
-                                    ,getString(R.string.reset_pin_pattern_network_success_negative)
-                                    ,"resetSuccessResponse");
-                            activity.isRecoverySent =true;
-                            activity.shouldTrackUserPresence=false;
-                            resetPasswordGroup.setVisibility(View.VISIBLE);
-                            resetPasswordEdit.setEnabled(true);
-                            passwordEdit.setEnabled(true);
-                            confirmPasswordEdit.setEnabled(true);
+                        if(activity==null) {
+                            return;
                         }
-                        if(resetResponse!=null && resetResponse.code.equals("100")){
-                            if(networkProcessDialog!=null){
-                                networkProcessDialog.dismiss();
+                            LoyaltyBonusRecoveryResponse resetResponse = response.body();
+                            if (resetResponse != null && resetResponse.code.equals("200")) {
+                                SharedPreferences.Editor edit = prefs.edit();
+                                edit.putLong(LoyaltyBonusModel.RECOVERY_CODE_TIME_INTERVAL, System.currentTimeMillis());
+                                edit.apply();
+                                if (networkProcessDialog != null) {
+                                    networkProcessDialog.dismiss();
+                                }
+                                displayCompleteDialog(getString(R.string.reset_pin_pattern_network_success_header)
+                                        , getString(R.string.reset_pin_pattern_network_success_message)
+                                        , getString(R.string.reset_pin_pattern_network_success_negative)
+                                        , "resetSuccessResponse");
+                                activity.isRecoverySent = true;
+                                activity.shouldTrackUserPresence = false;
+                                resetPasswordGroup.setVisibility(View.VISIBLE);
+                                resetPasswordEdit.setEnabled(true);
+                                passwordEdit.setEnabled(true);
+                                confirmPasswordEdit.setEnabled(true);
                             }
-                            displayCompleteDialog(getString(R.string.reset_pin_pattern_network_failed_header)
-                                    ,resetResponse.message
-                                    ,getString(R.string.reset_pin_pattern_network_failed_negative)
-                                    ,"resetResponseFailure");
-                        }
+                            if (resetResponse != null && resetResponse.code.equals("100")) {
+                                if (networkProcessDialog != null) {
+                                    networkProcessDialog.dismiss();
+                                }
+                                displayCompleteDialog(getString(R.string.reset_pin_pattern_network_failed_header)
+                                        , resetResponse.message
+                                        , getString(R.string.reset_pin_pattern_network_failed_negative)
+                                        , "resetResponseFailure");
+                            }
                     }else {
+                        if(activity==null) {
+                            return;
+                        }
                         if (networkProcessDialog != null) {
                             networkProcessDialog.dismiss();
                         }
@@ -233,6 +239,9 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
 
                 @Override
                 public void onFailure(Call<LoyaltyBonusRecoveryResponse> call, Throwable t) {
+                    if(activity==null) {
+                        return;
+                    }
                     if(networkProcessDialog!=null){
                         networkProcessDialog.dismiss();
                     }
@@ -324,33 +333,39 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
                 @Override
                 public void onResponse(Call<LoyaltyBonusResetResponse> call, Response<LoyaltyBonusResetResponse> response) {
                     if(response.isSuccessful()) {
-                        LoyaltyBonusResetResponse resetResponse = response.body();
-                        if(resetResponse!=null && resetResponse.code.equals("200")){
-                            if(networkProcessDialog!=null){
-                                networkProcessDialog.dismiss();
-                            }
-                           displaySuccessDialog(getString(R.string.loyalty_password_recovery_reset_message),
-                                   getString(R.string.loyalty_password_recovery_reset_positive),"resetSuccess");
-                            activity.isRecoverySent =false;
-                            activity.shouldTrackUserPresence = true;
-                            resetPasswordEdit.setEnabled(false);
-                            passwordEdit.setEnabled(false);
-                            confirmPasswordEdit.setEnabled(false);
-                            resetPasswordGroup.setVisibility(View.INVISIBLE);
-                            SharedPreferences.Editor edit = prefs.edit();
-                            edit.putLong(LoyaltyBonusModel.RECOVERY_CODE_TIME_INTERVAL,0);
-                            edit.apply();
+                        if(activity==null) {
+                            return;
                         }
-                        if(resetResponse!=null && resetResponse.code.equals("100")){
-                            if(networkProcessDialog!=null){
-                                networkProcessDialog.dismiss();
+                            LoyaltyBonusResetResponse resetResponse = response.body();
+                            if (resetResponse != null && resetResponse.code.equals("200")) {
+                                if (networkProcessDialog != null) {
+                                    networkProcessDialog.dismiss();
+                                }
+                                displaySuccessDialog(getString(R.string.loyalty_password_recovery_reset_message),
+                                        getString(R.string.loyalty_password_recovery_reset_positive), "resetSuccess");
+                                activity.isRecoverySent = false;
+                                activity.shouldTrackUserPresence = true;
+                                resetPasswordEdit.setEnabled(false);
+                                passwordEdit.setEnabled(false);
+                                confirmPasswordEdit.setEnabled(false);
+                                resetPasswordGroup.setVisibility(View.INVISIBLE);
+                                SharedPreferences.Editor edit = prefs.edit();
+                                edit.putLong(LoyaltyBonusModel.RECOVERY_CODE_TIME_INTERVAL, 0);
+                                edit.apply();
                             }
-                            displayCompleteDialog(getString(R.string.reset_pin_pattern_network_failed_header)
-                                    ,resetResponse.message
-                                    ,getString(R.string.reset_pin_pattern_network_failed_negative)
-                                    ,"resetResponseFailure");
-                        }
+                            if (resetResponse != null && resetResponse.code.equals("100")) {
+                                if (networkProcessDialog != null) {
+                                    networkProcessDialog.dismiss();
+                                }
+                                displayCompleteDialog(getString(R.string.reset_pin_pattern_network_failed_header)
+                                        , resetResponse.message
+                                        , getString(R.string.reset_pin_pattern_network_failed_negative)
+                                        , "resetResponseFailure");
+                            }
                     }else {
+                        if(activity==null) {
+                            return;
+                        }
                         if (networkProcessDialog != null) {
                             networkProcessDialog.dismiss();
                         }
@@ -363,6 +378,9 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
 
                 @Override
                 public void onFailure(Call<LoyaltyBonusResetResponse> call, Throwable t) {
+                    if(activity==null) {
+                        return;
+                    }
                     if(networkProcessDialog!=null){
                         networkProcessDialog.dismiss();
                     }
@@ -385,20 +403,20 @@ public class LoyaltyBonusRecoverFragment extends Fragment {
     }
 
     private void displayCompleteDialog(String header, String message, String negative, String tag){
-        networkProcessDialog = new NetworkProcessDialog();
-        Bundle bundle = new Bundle();
-        bundle.putInt(NetworkProcessDialog.NETWORK_DIALOG_TYPE,NetworkProcessDialog.NETWORK_DIALOG_TYPE_COMPLETE);
-        bundle.putString(NetworkProcessDialog.NETWORK_INFO_HEADER
-                ,header);
-        bundle.putString(NetworkProcessDialog.NETWORK_INFO_MESSAGE
-                ,message);
-        bundle.putString(NetworkProcessDialog.NETWORK_INFO_BUTTON
-                ,negative);
-        networkProcessDialog.setArguments(bundle);
-        FragmentManager fragmentManager = activity.getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction =fragmentManager.beginTransaction();
-        fragmentTransaction.addToBackStack(tag);
-        networkProcessDialog.show(fragmentTransaction,tag);
+            networkProcessDialog = new NetworkProcessDialog();
+            Bundle bundle = new Bundle();
+            bundle.putInt(NetworkProcessDialog.NETWORK_DIALOG_TYPE, NetworkProcessDialog.NETWORK_DIALOG_TYPE_COMPLETE);
+            bundle.putString(NetworkProcessDialog.NETWORK_INFO_HEADER
+                    , header);
+            bundle.putString(NetworkProcessDialog.NETWORK_INFO_MESSAGE
+                    , message);
+            bundle.putString(NetworkProcessDialog.NETWORK_INFO_BUTTON
+                    , negative);
+            networkProcessDialog.setArguments(bundle);
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.addToBackStack(tag);
+            networkProcessDialog.show(fragmentTransaction, tag);
     }
 
     private void displaySuccessDialog(String message, String negative, String tag){

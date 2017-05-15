@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 
+import com.google.android.gms.ads.MobileAds;
 import com.smartfoxitsolutions.lockup.AppLockActivity;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
@@ -61,6 +62,11 @@ public class LoyaltyUserActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         fragmentManager = getFragmentManager();
         shouldTrackUserPresence = true;
+        try {
+            MobileAds.initialize(this.getApplicationContext());
+        }catch (Exception e){
+            Log.d("LockUp","User Profile Ad Exception : " +e);
+        }
     }
 
     void setOnRequestRedeemListener(OnRequestRedeemListener redeemListener){

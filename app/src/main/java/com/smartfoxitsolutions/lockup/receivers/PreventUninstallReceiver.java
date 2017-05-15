@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.smartfoxitsolutions.lockup.AppLockActivity;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;

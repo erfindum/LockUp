@@ -4,19 +4,18 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.AppCompatImageView;
-import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.LockUpMainActivity;
@@ -29,7 +28,8 @@ import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyUserActivity;
 public class GrantUsageAccessDialog extends DialogFragment {
 
     private AppCompatImageView dialogIcon;
-    private TextView infoText,infoTextSub, positiveButton, negativeButton;
+    private TextView infoText,infoTextSub;
+    private Button positiveButton, negativeButton;
     private String startType;
 
     @Nullable
@@ -39,8 +39,8 @@ public class GrantUsageAccessDialog extends DialogFragment {
         dialogIcon = (AppCompatImageView) parent.findViewById(R.id.lockup_permission_dialog_image);
         infoText = (TextView) parent.findViewById(R.id.lockup_permission_dialog_info_text);
         infoTextSub = (TextView) parent.findViewById(R.id.lockup_permission_dialog_info_text_sub);
-        positiveButton = (TextView) parent.findViewById(R.id.lockup_permission_dialog_positive_button);
-        negativeButton = (TextView) parent.findViewById(R.id.lockup_permission_dialog_negative_button);
+        positiveButton = (Button) parent.findViewById(R.id.lockup_permission_dialog_positive_button);
+        negativeButton = (Button) parent.findViewById(R.id.lockup_permission_dialog_negative_button);
         dialogIcon.setImageResource(R.drawable.ic_lock_usage_permission_icon);
         if(getArguments()!=null){
             startType = getArguments().getString("grandUsageStartType");

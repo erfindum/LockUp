@@ -63,14 +63,13 @@
                     android:background="@color/textPrimaryColor"
                     />
 
-                <TextView
+                <Button
                     android:id="@+id/redeem_dialog_positive_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/redeem_dialog_divider"
-                    android:paddingTop="@dimen/tenDpDimension"
-                    android:paddingBottom="@dimen/twentyDpDimension"
-                    android:padding="@dimen/tenDpDimension"
+                    android:background="@android:color/transparent"
+                    android:layout_marginTop="@dimen/tenDpDimension"
                     android:layout_marginRight="@dimen/fifteenDpDimension"
                     android:layout_marginEnd="@dimen/fifteenDpDimension"
                     android:layout_alignParentEnd="true"
@@ -79,14 +78,13 @@
                     android:textSize="@dimen/fifteenSpDimension"
                     android:text="@string/loyalty_redeem_dialog_positive_text"
                     />
-                <TextView
+                <Button
                     android:id="@+id/redeem_dialog_negative_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/redeem_dialog_divider"
-                    android:paddingTop="@dimen/tenDpDimension"
-                    android:paddingBottom="@dimen/twentyDpDimension"
-                    android:padding="@dimen/tenDpDimension"
+                    android:background="@android:color/transparent"
+                    android:layout_marginTop="@dimen/tenDpDimension"
                     android:layout_marginRight="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_toLeftOf="@+id/redeem_dialog_positive_button"

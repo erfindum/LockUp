@@ -4,9 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -20,13 +18,9 @@ import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
-import com.smartfoxitsolutions.lockup.AppLoaderActivity;
-import com.smartfoxitsolutions.lockup.AppLockModel;
-import com.smartfoxitsolutions.lockup.DimensionConverter;
 import com.smartfoxitsolutions.lockup.MainLockActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
-import com.smartfoxitsolutions.lockup.mediavault.MediaVaultAlbumActivity;
 import com.smartfoxitsolutions.lockup.services.AppLockForegroundService;
 
 import java.util.ArrayList;
