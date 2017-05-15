@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    app:cardCornerRadius="@dimen/fiveDpDimension"
+    >
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fillViewport="true">
+        <RelativeLayout
+            android:layout_width="250dp"
+            android:layout_height="wrap_content">
+            <RelativeLayout
+                android:layout_width="250dp" android:layout_height="wrap_content"
+                android:id="@+id/network_dialog_header_group"
+                android:background="@color/colorMainPrimary"
+                >
+                <TextView
+                    android:id="@+id/network_dialog_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:maxWidth="@dimen/oneHunderedAndFiftyDpDimension"
+                    android:textSize="@dimen/seventeenSpDimension"
+                    android:textColor="@color/colorMainAccent"
+                    android:layout_centerInParent="true"
+                    android:textAlignment="center"
+                    android:paddingLeft="24dp"
+                    android:paddingRight="24dp"
+                    android:paddingBottom="12dp"
+                    android:layout_marginTop="@dimen/twentyDpDimension"
+                    />
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="250dp" android:layout_height="wrap_content"
+                android:layout_below="@+id/network_dialog_header_group"
+                >
+
+                <ProgressBar
+                    android:id="@+id/network_dialog_progress"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_margin="@dimen/fifteenDpDimension"
+                    />
+
+                <TextView
+                    android:id="@+id/network_dialog_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_toEndOf="@+id/network_dialog_progress"
+                    android:textColor="@color/textDarkGrey"
+                    android:textAlignment="center"
+                    android:textSize="@dimen/fifteenSpDimension"
+                    android:maxWidth="200dp"
+                    android:paddingLeft="@dimen/tenDpDimension"
+                    android:paddingRight="@dimen/tenDpDimension"
+                    android:paddingBottom="@dimen/fifteenDpDimension"
+                    android:layout_marginTop="@dimen/fifteenDpDimension"
+                    android:layout_marginBottom="@dimen/fifteenDpDimension"
+                    android:layout_marginEnd="@dimen/fifteenDpDimension"
+                    />
+                <View
+                    android:id="@+id/network_dialog_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_below="@+id/network_dialog_message"
+                    android:layout_marginLeft="@dimen/thirtyDpDimension"
+                    android:layout_marginRight="@dimen/thirtyDpDimension"
+                    android:background="@color/textPrimaryColor"
+                    />
+
+                <Button
+                    android:id="@+id/network_dialog_negative_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/network_dialog_divider"
+                    android:background="@android:color/transparent"
+                    android:layout_marginTop="@dimen/tenDpDimension"
+                    android:layout_alignParentEnd="true"
+                    android:textColor="@color/colorMainPrimary"
+                    android:textSize="@dimen/fifteenSpDimension"
+                    />
+            </RelativeLayout>
+        </RelativeLayout>
+    </ScrollView>
+</android.support.v7.widget.CardView>

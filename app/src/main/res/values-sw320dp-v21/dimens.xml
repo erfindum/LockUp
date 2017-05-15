@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="vault_album_item_size">145dp</dimen>
+    <dimen name="vault_album_item_height">165dp</dimen>
+    <dimen name="vault_album_thumbnail_width">125dp</dimen>
+    <dimen name="vault_album_thumbnail_height">125dp</dimen>
+    <dimen name="vault_album_content_item_size">83dp</dimen>
+    <dimen name="vault_album_item_text_width">115dp</dimen>
+    
+    <dimen name="vault_album_ad_height">85dp</dimen>
+
+    <dimen name="main_activity_lock_icon_size">130dp</dimen>
+
+    <dimen name="native_ad_image_width">210dp</dimen>
+    <dimen name="native_ad_image_height">100dp</dimen>
+
+    <dimen name="lockup_main_info_lock_size">70dp</dimen>
+    <dimen name="dialog_button_left_right_margin">8dp</dimen>
+
+    <dimen name="loyalty_bonus_redeem_card_margin_top">40dp</dimen>
+    <dimen name="loyalty_bonus_redeem_logo_padding_left_right">20dp</dimen>
+    <dimen name="loyalty_bonus_redeem_logo_size">80dp</dimen>
+
+    <dimen name="loyalty_bonus_redeem_final_card_margin_top">40dp</dimen>
+
+    <dimen name="lockup_main_activity_thumbnail_margin">10dp</dimen>
+    <dimen name="lockup_main_activity_thumbnail_height">120dp</dimen>
+    <dimen name="lockup_main_activity_thumbnail_width">172dp</dimen>
+    <dimen name="lockup_main_activity_thumbnail_play">17dp</dimen>
+    <dimen name="lockup_main_activity_thumbnail_padding">4dp</dimen>
+    <dimen name="lockup_main_activity_faq_padding">10dp</dimen>
+
+    <dimen name="pin_lock_digit_size">40dp</dimen>
+    <dimen name="pin_lock_clear_size">30dp</dimen>
+    <dimen name="pin_lock_clear_margin_top">25dp</dimen>
+
+
+    <dimen name="loyalty_bonus_ad_margin_bottom">20dp</dimen>
+
+</resources>

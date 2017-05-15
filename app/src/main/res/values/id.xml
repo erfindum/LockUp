@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="AD_VIEW_TYPE" type="id"/>
+    <item name="AD_VIEW_TRACKER" type="id"/>
+</resources>
