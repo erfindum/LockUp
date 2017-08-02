@@ -74,7 +74,6 @@ public class LockUpMainActivity extends AppCompatActivity {
         watchVideo = (RelativeLayout) findViewById(R.id.lockup_main_activity_Watch_video_thumbnail);
         loyaltyBonusButton = (AppCompatImageButton) findViewById(R.id.lockup_main_activity_loyalty_button);
         SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
-        isAppLockFirstLoad = prefs.getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,true);
         setBackground();
         setImageButtonListeners();
     }
@@ -253,8 +252,9 @@ public class LockUpMainActivity extends AppCompatActivity {
         screenOffReceiver = new ScreenOffReceiver(new WeakReference<>(this));
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         registerReceiver(screenOffReceiver,filter);
-        shouldStartAppLock = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE)
-                .getBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
+        SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
+        shouldStartAppLock =prefs.getBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
+        isAppLockFirstLoad = prefs.getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,true);
     }
 
     @Override

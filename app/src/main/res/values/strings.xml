@@ -3,8 +3,11 @@
 
     <!-- SettingsActivity -->
     <string name="settings_activity_toolbar_title">Settings</string>
+    <string name="settings_activity_slide_title">SWIPE LOCK</string>
     <string name="settings_activity_applock_title">APP LOCK</string>
     <string name="settings_activity_advanced_title">ADVANCED PROTECTION</string>
+    <string name="settings_activity_activate_slide_title">Activate Slide Lock</string>
+    <string name="settings_activity_activate_slide_summery">Visible when device unlocked</string>
     <string name="settings_activity_activate_locker_title">Activate App Lock</string>
     <string name="settings_activity_activate_locker_enabled">App lock enabled</string>
     <string name="settings_activity_activate_locker_disabled">App lock disabled</string>
@@ -180,7 +183,9 @@
     <string name="lock_ad_unit_id_one">3b8d2c8908d24f7e90c7f0e05132858b</string>
     <string name="lock_ad_unit_id_two">6d14cdbc6797405da51ccc311b5a1731</string>
     <string name="lock_interstitial_ad">ca-app-pub-2878097117146801/2088047771</string>
-    <string name="lock_ad_unit_id_test">20fc49b1fc7b42f7b928aabe788e37ec</string>
+    <string name="lock_ad_unit_id_test">b2baecdb911b41b1a2d64ac5ee28e8b2</string>
+    <string name="lock_ad_unit_id_test_2">20fc49b1fc7b42f7b928aabe788e37ec</string>
+
     
     <!-- Album Picker Activity-->
     <string name="vault_album_picker_load_text">Loading Albums</string>
@@ -399,7 +404,7 @@
     <string name="loyalty_redeem_dialog_positive_text">YES</string>
     <string name="loyalty_redeem_dialog_info_message">Would you like to credit &lt;b>$%1$s &lt;/b> to your following %2$s ID &lt;b>%3$s &lt;/b></string>
     <string name="loyalty_redeem_success_title">Redeem Success</string>
-    <string name="loyalty_redeem_success_message">Hurray! &lt;b>$%1$s &lt;/b> will be credited to your account in next 3 working days, We need time to verify your earning history</string>
+    <string name="loyalty_redeem_success_message">Hurray! &lt;b>$%1$s &lt;/b> will be credited to your account in next 7 working days, We need time to verify your earning history</string>
     <string name="loyalty_redeem_paypal_id_error">Enter a valid Paypal ID</string>
 
 
@@ -420,7 +425,7 @@
     </string-array>
 
     <string-array name="tips_faq_headers_list">
-        <item>NEW RULES</item>
+        <item>HOW TO EARN</item>
         <item>What is loyalty Bonus in LockUp?</item>
         <item>Why I need to signup for Getting loyalty Bonus?</item>
         <item>How much loyalty bonus I can earn each day?</item>
@@ -435,15 +440,16 @@
     </string-array>
 
     <string-array name="tips_faq_tips_list">
-        <item>In the new system we only credit points for locking Apps, not for number of time you unlock it. \n\n
-        \t Lock First 4 frequently used App = 0.50-2 points\n\n
-         \t Lock 4-7 frequently used App = 2-3 points\n\n
-         \t Lock 7-10 frequently used App = 3-4 points\n\n
-         \t Lock 10-20 frequently used App = 4-5 points\n\n
-         \t Lock 20-30 frequently used App = 5-6 points\n\n
-         \t Lock 30+ frequently used App = 6-7 points\n\n
-            \tTips- Lock the number of app in the sequence, like you may be using WhatsApp, Facebook or camera too frequently.\n\n
-         Coming soon – Refer &amp; earn, Earn for installing Apps, Earn for watching Videos and much more.
+        <item>By AppLock: \n\n
+         - Get upto 15 points by locking 20-25+ frequently used Apps.\n\n
+         - Get up to 12 points by locking 15-20 Frequently used Apps. points\n\n
+         - Get up to 10 points by locking 10-15 Frequently used Apps.\n\n
+         - Get up to 5 points by locking 1-10 Frequently used Apps.\n\n
+         Note - This is just an estimation to help you understand the concept, your earning may differ from  given estimation.
+        </item>
+        <item>By SlideLock: \n\n
+        - Activate Slide Lock from Settings, to earn extra points.\n\n
+        - You will Earn extra 0.50 to 5 Points \n\n
         </item>
         <item>Always be logged in into Loyalty Bonus, otherwise we can’t track your usage hence won’t be able to credit your points.</item>
         <item>We recommend not to clear RAM or Recent App\'s from task manager.</item>
@@ -455,14 +461,14 @@
     </string-array>
 
     <string-array name="tips_faq_answers_list">
-        <item>Once you signup for loyalty bonus, you will start earning points based on the usage of Applock &amp; Vault. More you lock your apps in your device or Use vault, more will be your earnings.</item>
+        <item>once you signup for loyalty bonus, you will start earning points based on the usage of Applock, Vault and Slide lock. More you lock your Apps or enables slidelock more will be your earnings.</item>
         <item>In order to give rewards to our loyal users, we need to track the usage of lockup. If you are not logged in, we can not track the usage and hence can\'t give you points.</item>
         <item>Loyalty bonus will give you free rewards which is hard to get. Each day bonus depends on many factors like the number of locked apps in your device, proper internet connection etc. We recommend you to lock more number of apps in Applock, avoid clearing RAM and recent apps from task manager.</item>
         <item>Yes, just logout from current device and use the same  login credentials in new device.</item>
         <item>We recommend not to use it with same email id in multiple devices. If you use it with same email, your loyalty bonus may decrease due to conflict.</item>
         <item>Your loyalty bonus depends on many aspects like daily usage, internet connectivity your Device manufacturer etc.</item>
         <item>For getting loyalty bonus regularly, you must be logged-in all time.  If not, we can not track your usage of Applock hence can\'t credit you points.</item>
-        <item>Once you reach a minimum threshold of loyalty points, you can request to redeem it through PayPal or Paytm(For Indian User only). You will get the redeemed amount in your account within next 3 working days.</item>
+        <item>Once you reach a minimum threshold of loyalty points, you can request to redeem it through PayPal or Paytm(For Indian User only). You will get the redeemed amount in your account within next 7 working days.</item>
         <item>Granting Manual permission access depends on your Android version. If your device is having the Version  of lollipop and above then LockUp may ask you multiple permission for using it  which completely depends OS Version.</item>
         <item>If lockUp stops working on clearing RAM/Recent Apps from task manager and not restarting automatically, then its must be a issue of your device Manufacturer or OS.</item>
         <item>Most of the apps like whatsApp, Facebook Triggers push notification which are private to you sometimes. By enabling it you can protect your privacy from snoopy eyes. To enable it you must lock the app in Applock first and then enable the same under Notification lock.</item>
@@ -471,5 +477,35 @@
     <string name="faq_support_email">E-Mail- smartfoxapps@gmail.com</string>
     <string name="faq_support_phone">WhatsApp- +91&#8211;8770510145</string>
 
+    <!-- Earn More -->
+    <string name="extra_earning_title">Earn More</string>
+    <string-array name="extra_earning_fragment_title">
+    <item>Offers</item>
+    <item>Survey</item>
+    </string-array>
+
+
+
+    <!-- Survey Fragment -->
+    <string name="survey_pollfish_title">Pollfish Survey</string>
+    <string name="survey_offertoro_title">Offertoro Survey</string>
+    <string name="survey_pollfish_api_key">8b236291-b7c8-487a-8cff-d8e97c47ba23</string>
+    <string name="survey_offertoro_app_ID">3169</string>
+    <string name="survey_offertoro_app_key">76cc298dc0357347f4c1b1076f1a0cfe</string>
+    <string name="survey_pollfish_error">Pollfish Survey not available. Try again after some time</string>
+    <string name="survey_offertoro_error">Offertoro Survey not available. Try again after some time</string>
+    <string name="survey_credited">You will be credited with %1$,.2f $</string>
+    <string name="survey_process_dialog_title">Fetching Survey</string>
+    <string name="survey_process_dialog_message">Please wait</string>
+
+
+
+    <!-- Offerwall Fragment -->
+    <string name="offerwall_offertoro_title">Offertoro Offers</string>
+    <string name="offerwall_offertoro_app_ID">3170</string>
+    <string name="offerwall_offertoro_app_key">4451030293d10f99d08078739935d248</string>
+    <string name="offerwall_offertoro_error">Offertoro offers not available. Try again after some time</string>
+    <string name="offerwall_process_dialog_title">Fetching Offers</string>
+    <string name="offerwall_process_dialog_message">Please wait</string>
 
 </resources>

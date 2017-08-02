@@ -1,8 +1,10 @@
 package com.smartfoxitsolutions.lockup.services;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -19,12 +21,10 @@ import android.support.v4.app.NotificationCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.ads.AdActivity;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
@@ -35,11 +35,11 @@ import com.mopub.nativeads.MoPubStaticNativeAdRenderer;
 import com.mopub.nativeads.NativeAd;
 import com.mopub.nativeads.NativeErrorCode;
 import com.mopub.nativeads.ViewBinder;
-import com.smartfoxitsolutions.lockup.AppLoaderActivity;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.FingerPrintActivity;
 import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.SlideLockActivity;
 import com.smartfoxitsolutions.lockup.loyaltybonus.UserLoyaltyReport;
 import com.smartfoxitsolutions.lockup.receivers.AppLockServiceRestartReceiver;
 import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusModel;
@@ -48,8 +48,8 @@ import com.smartfoxitsolutions.lockup.views.LockPatternViewFinger;
 import com.smartfoxitsolutions.lockup.views.LockPinView;
 import com.smartfoxitsolutions.lockup.views.LockPinViewFinger;
 import com.smartfoxitsolutions.lockup.views.OnFingerScannerCancelListener;
+import com.smartfoxitsolutions.lockup.views.OnLockAdImpressedClicked;
 import com.smartfoxitsolutions.lockup.views.OnPinLockUnlockListener;
-import com.startapp.android.publish.adsCommon.StartAppSDK;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -65,7 +65,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by RAAJA on 11-09-2016.
  */
-public class AppLockingService extends Service implements Handler.Callback, OnPinLockUnlockListener, OnFingerScannerCancelListener {
+public class AppLockingService extends Service implements Handler.Callback, OnPinLockUnlockListener, OnFingerScannerCancelListener ,
+        OnLockAdImpressedClicked{
     public static final String TAG = "AppLockingService";
 
     public static final String STOP_APP_LOCK_SERVICE = "stopAppLockService";
@@ -87,17 +88,19 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
     private Type userReportMapToken;
     private ArrayList<String> checkedAppsList, recommendedAppsList;
     private AppLockReceiver appLockReceiver;
-    private ConcurrentLinkedQueue<View> adViewQueue;
+    private ConcurrentLinkedQueue<NativeAd> adViewQueue;
     private int appLockMode, interstitialDisplayCounter = 0;
     private TreeMap<String, Integer> checkedAppColorMap;
     private WindowManager windowManager;
+    private ActivityManager activityManager;
+    private ComponentName fingerActivity;
     private WindowManager.LayoutParams params;
     private LockPinView lockPinView;
     private LockPinViewFinger lockPinViewFinger;
     private LockPatternView patternLockView;
     private LockPatternViewFinger patternLockViewFinger;
     private boolean isFingerPrintLockActive, hasLockDisplayed, isUserLoggedIn;
-    private boolean stopAppLock, shouldLockOnScreenOn, isScreenOn, isAdClicked;
+    private boolean stopAppLock, shouldLockOnScreenOn, isScreenOn, isAdClicked, shouldSwipeLock;
     private boolean hasAdOneFailed, hasAdOneRequestComplete,hasAdTwoFailed, hasAdTwoRequestComplete, isInterstitialAdFailed,
                      shouldShowInterstitial,shouldDisplayInterstitial;
     private MoPubNative moPubNativeOne, moPubNativeTwo;
@@ -117,7 +120,9 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
         super.onCreate();
         Log.d("AppLockService", "Called Service OnCreate" + System.currentTimeMillis());
         gson = new Gson();
-        windowManager = (WindowManager) getBaseContext().getSystemService(Context.WINDOW_SERVICE);
+        windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        fingerActivity = new ComponentName(getBaseContext(),FingerPrintActivity.class);
         setWindowLayoutParams();
         checkedAppsList = new ArrayList<>();
         recommendedAppsList = new ArrayList<>();
@@ -143,8 +148,7 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
         appLockFilter.addAction(Intent.ACTION_SCREEN_ON);
         appLockFilter.addAction(AppLockingService.STOP_APP_LOCK_SERVICE);
         registerReceiver(appLockReceiver, appLockFilter);
-        //launchIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
-        StartAppSDK.init(this,"204970014",false);
+
     }
 
     void setWindowLayoutParams() {
@@ -181,6 +185,7 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
         appLockMode = prefs.getInt(AppLockModel.APP_LOCK_LOCKMODE, 54);
         isFingerPrintLockActive = prefs.getBoolean(LockUpSettingsActivity.FINGER_PRINT_LOCK_SELECTION_PREFERENCE_KEY, false);
         shouldLockOnScreenOn = prefs.getBoolean(LockUpSettingsActivity.LOCK_SCREEN_ON_PREFERENCE_KEY, false);
+        shouldSwipeLock = prefs.getBoolean(LockUpSettingsActivity.SWIPE_LOCK_PREFERENCE_KEY,true);
         String checkedAppsColorJSONString = prefs.getString(AppLockModel.CHECKED_APPS_COLOR_SHARED_PREF_KEY, null);
         String checkedAppsJSONString = prefs.getString(AppLockModel.CHECKED_APPS_SHARED_PREF_KEY, null);
         String recommendedAppsJSONString = prefs.getString(AppLockModel.RECOMMENDED_APPS_SHARED_PREF_KEY, null);
@@ -309,7 +314,7 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
                             patternLockViewFinger = new LockPatternViewFinger(getBaseContext(), this, this, isFingerPrintLockActive);
                             patternLockViewFinger.setPackageName(checkedAppPackage[0]);
                             patternLockViewFinger.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
-                            patternLockViewFinger.addRenderedAd(adViewQueue.peek());
+                            patternLockViewFinger.addNativeAd(adViewQueue.peek(),AppLockingService.this);
                             windowManager.addView(patternLockViewFinger, params);
                             hasLockDisplayed = true;
                             if (isFingerPrintLockActive) {
@@ -326,7 +331,7 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
                         patternLockView = new LockPatternView(getBaseContext(), this);
                         patternLockView.setPackageName(checkedAppPackage[0]);
                         patternLockView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
-                        patternLockView.addRenderedAd(adViewQueue.peek());
+                        patternLockView.addNativeAd(adViewQueue.peek(),AppLockingService.this);
                         windowManager.addView(patternLockView, params);
                         hasLockDisplayed = true;
 
@@ -338,7 +343,7 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
                             lockPinViewFinger = new LockPinViewFinger(getBaseContext(), this, this, isFingerPrintLockActive);
                             lockPinViewFinger.setPackageName(checkedAppPackage[0]);
                             lockPinViewFinger.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
-                            lockPinViewFinger.addRenderedAd(adViewQueue.peek());
+                            lockPinViewFinger.addNativeAd(adViewQueue.peek(),AppLockingService.this);
                             windowManager.addView(lockPinViewFinger, params);
                             hasLockDisplayed = true;
                             if (isFingerPrintLockActive) {
@@ -355,7 +360,7 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
                         lockPinView = new LockPinView(getBaseContext(), this);
                         lockPinView.setPackageName(checkedAppPackage[0]);
                         lockPinView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage[0]), displayHeight);
-                        lockPinView.addRenderedAd(adViewQueue.peek());
+                        lockPinView.addNativeAd(adViewQueue.peek(),AppLockingService.this);
                         windowManager.addView(lockPinView, params);
                         hasLockDisplayed = true;
                     }
@@ -370,15 +375,15 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
                         requestSecondAd();
                     }
                 } else {
-                    View adView = adViewQueue.peek();
-                    if (adView.getTag(R.id.AD_VIEW_TYPE).equals("one")
+                    NativeAd nativeAd = adViewQueue.peek();
+                    if (nativeAd.getAdUnitId().equals(getString(R.string.lock_ad_unit_id_one))
                             || hasAdOneFailed) {
                         if (hasAdOneRequestComplete) {
                             hasAdOneRequestComplete = false;
                             requestFirstAd();
                         }
                     }
-                    if (adView.getTag(R.id.AD_VIEW_TYPE).equals("two")
+                    if (nativeAd.getAdUnitId().equals(getString(R.string.lock_ad_unit_id_two))
                             || hasAdTwoFailed) {
                         if (hasAdTwoRequestComplete) {
                             hasAdTwoRequestComplete = false;
@@ -398,7 +403,7 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
 
             }
         } else if (recentlyLockedApp.equals(checkedAppPackage[1])) {
-            if (interstitialDisplayCounter > 9 && shouldShowInterstitial) {
+            if (interstitialDisplayCounter > 25 && shouldShowInterstitial) {
                 if (interstitialAd.isLoaded() && shouldDisplayInterstitial) {
                     Log.d("AdsLockup",interstitialAd.isLoaded() + " Loaded");
                     Handler mainHandler = new Handler(this);
@@ -407,8 +412,12 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
                 }
                 shouldShowInterstitial = false;
             }
+
             if (checkedAppPackage[0].equals(getPackageName())) {
                 if (isAdClicked) {
+                    removeLock();
+                }
+                if(SlideLockActivity.shouldCloseLock){
                     removeLock();
                 }
                 isAdClicked = false;
@@ -428,7 +437,7 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
                         patternLockView = new LockPatternView(getBaseContext(), this);
                         patternLockView.setPackageName(checkedAppPackage);
                         patternLockView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage), displayHeight);
-                        patternLockView.addRenderedAd(adViewQueue.peek());
+                        patternLockView.addNativeAd(adViewQueue.peek(),AppLockingService.this);
                         windowManager.addView(patternLockView, params);
                         hasLockDisplayed = true;
 
@@ -436,7 +445,7 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
                         lockPinView = new LockPinView(getBaseContext(), this);
                         lockPinView.setPackageName(checkedAppPackage);
                         lockPinView.setWindowBackground(checkedAppColorMap.get(checkedAppPackage), displayHeight);
-                        lockPinView.addRenderedAd(adViewQueue.peek());
+                        lockPinView.addNativeAd(adViewQueue.peek(),AppLockingService.this);
                         windowManager.addView(lockPinView, params);
                         hasLockDisplayed = true;
                     }
@@ -450,17 +459,17 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
                             requestSecondAd();
                         }
                     }else{
-                        View adView = adViewQueue.peek();
-                        if(adView.getTag(R.id.AD_VIEW_TYPE).equals("one")
-                                || hasAdOneFailed){
-                            if(hasAdOneRequestComplete) {
+                        NativeAd nativeAd = adViewQueue.peek();
+                        if (nativeAd.getAdUnitId().equals(getString(R.string.lock_ad_unit_id_one))
+                                || hasAdOneFailed) {
+                            if (hasAdOneRequestComplete) {
                                 hasAdOneRequestComplete = false;
                                 requestFirstAd();
                             }
                         }
-                        if(adView.getTag(R.id.AD_VIEW_TYPE).equals("two")
-                                || hasAdTwoFailed){
-                            if(hasAdTwoRequestComplete){
+                        if (nativeAd.getAdUnitId().equals(getString(R.string.lock_ad_unit_id_two))
+                                || hasAdTwoFailed) {
+                            if (hasAdTwoRequestComplete) {
                                 hasAdTwoRequestComplete = false;
                                 requestSecondAd();
                             }
@@ -478,7 +487,7 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
                 }
             } else {
                removeLock();
-                if (interstitialDisplayCounter > 9 && shouldShowInterstitial) {
+                if (interstitialDisplayCounter > 25 && shouldShowInterstitial) {
                     if (interstitialAd.isLoaded() && shouldDisplayInterstitial) {
                         Log.d("AdsLockup",interstitialAd.isLoaded() + " Loaded");
                         Handler mainHandler = new Handler(this);
@@ -585,15 +594,10 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
             @Override
             public void onNativeLoad(NativeAd nativeAd) {
                 Log.d("LockUpMopub", "Native Ad One Success");
-                View adViewRender = nativeAd.createAdView(getBaseContext(), null);
-                nativeAd.renderAdView(adViewRender);
-                nativeAd.prepare(adViewRender);
-                setAdTrackListener(nativeAd);
-                adViewRender.setTag(R.id.AD_VIEW_TYPE, "one");
-                adViewQueue.add(adViewRender);
+                adViewQueue.add(nativeAd);
                 hasAdOneFailed = false;
                 hasAdOneRequestComplete = true;
-                adOneTimer = System.currentTimeMillis()+120000;
+                adOneTimer = System.currentTimeMillis()+60000;
             }
 
             @Override
@@ -630,15 +634,10 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
             @Override
             public void onNativeLoad(NativeAd nativeAd) {
                 Log.d("LockUpMopub", "Native Ad Two Success");
-                View adViewRender = nativeAd.createAdView(getBaseContext(), null);
-                nativeAd.renderAdView(adViewRender);
-                nativeAd.prepare(adViewRender);
-                setAdTrackListener(nativeAd);
-                adViewRender.setTag(R.id.AD_VIEW_TYPE, "two");
-                adViewQueue.add(adViewRender);
+                adViewQueue.add(nativeAd);
                 hasAdTwoFailed = false;
                 hasAdTwoRequestComplete = true;
-                adTwoTimer = System.currentTimeMillis()+120000;
+                adTwoTimer = System.currentTimeMillis()+60000;
             }
 
             @Override
@@ -665,19 +664,7 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
         moPubNativeTwo.makeRequest();
     }
 
-    private void setAdTrackListener(NativeAd nativeAd) {
-        nativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
-            @Override
-            public void onImpression(View view) {
-                onAdImpressed();
-            }
 
-            @Override
-            public void onClick(View view) {
-                onAdClicked();
-            }
-        });
-    }
 
     private void setupInterstitialAd(){
         interstitialAd = new InterstitialAd(getBaseContext());
@@ -687,7 +674,6 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
             public void onAdClosed() {
                 super.onAdClosed();
                 Log.d("LockUpAdmob","Ad has been closed");
-                //requestInterstitialAd();
             }
 
             @Override
@@ -765,6 +751,12 @@ public class AppLockingService extends Service implements Handler.Callback, OnPi
                 if (!appLockService.isShutdown()) {
                     appLockService.shutdown();
                 }
+                if(shouldSwipeLock ){
+                    startActivity(new Intent(getBaseContext(), SlideLockActivity.class)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    );
+                }
+                Log.d("SlideLockMopub","ad Screen Off");
             }
             if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 if (hasLockDisplayed || shouldLockOnScreenOn) {

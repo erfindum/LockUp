@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.LockUpMainActivity;
+import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyUserActivity;
 
@@ -112,9 +113,13 @@ public class OverlayPermissionDialog extends DialogFragment {
         if(startType.equals("appLockStart")) {
             final LockUpMainActivity activity = (LockUpMainActivity) getActivity();
             activity.requestOverlayPermission();
-        }else
+        }
         if(startType.equals("loyaltyBonusStart")){
             final LoyaltyUserActivity activity = (LoyaltyUserActivity) getActivity();
+            activity.requestOverlayPermission();
+        }
+        if(startType.equals("settingsStart")){
+            final LockUpSettingsActivity activity = (LockUpSettingsActivity) getActivity();
             activity.requestOverlayPermission();
         }
     }

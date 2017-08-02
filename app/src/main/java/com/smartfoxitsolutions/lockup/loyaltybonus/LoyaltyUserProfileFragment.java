@@ -31,6 +31,7 @@ import com.google.gson.reflect.TypeToken;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.earnmore.EarnMoreActivity;
 import com.smartfoxitsolutions.lockup.loyaltybonus.receivers.UserReportBroadcastReceiver;
 
 import java.lang.reflect.Type;
@@ -116,6 +117,8 @@ public class LoyaltyUserProfileFragment extends Fragment {
         appLockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+               // startActivity(new Intent(activity, EarnMoreActivity.class));
+
                 if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) {
                     activity.checkAndSetUsagePermissions();
                 }else{

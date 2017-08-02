@@ -235,8 +235,7 @@ public class LoyaltyUserRedeemFinalFragment extends Fragment implements OnReques
                             return;
                         }
                         String successString = String.format(getString(R.string.loyalty_redeem_success_message),
-                                String.valueOf(credits[selection])
-                                                ,userEmail);
+                                String.valueOf(credits[selection]));
                         displayRedeemInfoDialog(RedeemErrorDialog.REDEEM_TYPE_SUCCESS
                                 ,successString);
                         redeemFinalProgress.setVisibility(View.INVISIBLE);

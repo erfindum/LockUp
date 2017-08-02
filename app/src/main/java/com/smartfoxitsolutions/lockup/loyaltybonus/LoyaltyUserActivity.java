@@ -178,29 +178,27 @@ public class LoyaltyUserActivity extends AppCompatActivity {
 
     @TargetApi(21)
     void checkAndSetUsagePermissions(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            AppOpsManager opsManager = (AppOpsManager) getApplicationContext().getSystemService(APP_OPS_SERVICE);
-            if (opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), getPackageName())
-                    == AppOpsManager.MODE_ALLOWED) {
-                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
-                    checkAndSetOverlayPermission();
-                }else{
-                    if(!hasPermissionReturned) {
-                        shouldTrackUserPresence = false;
-                        startActivity(new Intent(getBaseContext(), AppLockActivity.class));
-                    }else{
-                        shouldTrackUserPresence = false;
-                        stopTrackAfterPermission = true;
-                        startActivity(new Intent(getBaseContext(), AppLockActivity.class));
-                    }
-                }
-                Log.d(AppLockingService.TAG,String.valueOf(opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS
-                        , Process.myUid(), getPackageName())
-                        == AppOpsManager.MODE_ALLOWED));
+        AppOpsManager opsManager = (AppOpsManager) getApplicationContext().getSystemService(APP_OPS_SERVICE);
+        if (opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), getPackageName())
+                == AppOpsManager.MODE_ALLOWED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                checkAndSetOverlayPermission();
             } else {
-                startUsagePermissionDialog();
-                Log.d(AppLockingService.TAG,"No Usage");
+                if (!hasPermissionReturned) {
+                    shouldTrackUserPresence = false;
+                    startActivity(new Intent(getBaseContext(), AppLockActivity.class));
+                } else {
+                    shouldTrackUserPresence = false;
+                    stopTrackAfterPermission = true;
+                    startActivity(new Intent(getBaseContext(), AppLockActivity.class));
+                }
             }
+            Log.d(AppLockingService.TAG, String.valueOf(opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS
+                    , Process.myUid(), getPackageName())
+                    == AppOpsManager.MODE_ALLOWED));
+        } else {
+            startUsagePermissionDialog();
+            Log.d(AppLockingService.TAG, "No Usage");
         }
     }
 

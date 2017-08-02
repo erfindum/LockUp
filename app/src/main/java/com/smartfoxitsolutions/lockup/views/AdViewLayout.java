@@ -3,6 +3,7 @@ package com.smartfoxitsolutions.lockup.views;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -15,6 +16,8 @@ import com.smartfoxitsolutions.lockup.R;
 
 public class AdViewLayout extends RelativeLayout {
     int statusBarHeight, marginFive, marginTwo, requiredWidthMargin;
+    ImageView imageView;
+
     public AdViewLayout(Context context) {
         super(context);
     }
@@ -35,7 +38,7 @@ public class AdViewLayout extends RelativeLayout {
             marginTwo = getResources().getDimensionPixelSize(R.dimen.twoDpDimension);
             requiredWidthMargin = getResources().getDimensionPixelSize(R.dimen.tenDpDimension);
             if (childCount > 0) {
-                ImageView imageView = (ImageView) getChildAt(0);
+                imageView = (ImageView) getChildAt(0);
                 View callText = getChildAt(2);
                 View adInfo = getChildAt(3);
                 int height;

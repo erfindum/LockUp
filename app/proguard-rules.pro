@@ -44,13 +44,21 @@ public *;
 
 #Start-App Ad
 
--keep class com.startapp.** {
-      *;
-}
+-keep class com.startapp.** { *; }
 
 -keepattributes Exceptions, InnerClasses, Signature, Deprecated, SourceFile,LineNumberTable, *Annotation*, EnclosingMethod
 -dontwarn android.webkit.JavascriptInterface
 -dontwarn com.startapp.**
+
+#Avocarrot Ad
+-dontwarn com.avocarrot.**
+-keep class com.avocarrot.** { *; }
+-keepclassmembers class com.avocarrot.** { *; }
+-keep class com.google.android.exoplayer2.SimpleExoPlayer
+
+#Pollfish
+-dontwarn com.pollfish.**
+-keep class com.pollfish.** { *; }
 
 # Platform calls Class.forName on types which do not exist on Android to determine platform.
 -dontnote retrofit2.Platform

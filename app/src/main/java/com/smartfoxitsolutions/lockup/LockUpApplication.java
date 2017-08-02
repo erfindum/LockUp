@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.mopub.nativeads.StaticNativeAd;
+//import com.startapp.android.publish.adsCommon.StartAppSDK;
 //import com.squareup.leakcanary.LeakCanary;
 
 /**
@@ -19,7 +20,9 @@ public class LockUpApplication extends Application {
     /* if(LeakCanary.isInAnalyzerProcess(this)){
             return;
         }
-        LeakCanary.install(this); */
+        LeakCanary.install(this);
+        */
+        //StartAppSDK.init(this.getApplicationContext(), "204970014", false);
 
     }
 

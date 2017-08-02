@@ -24,6 +24,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.mopub.nativeads.NativeAd;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.DimensionConverter;
 import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
@@ -697,16 +698,41 @@ public class LockPinView extends FrameLayout implements View.OnClickListener{
     }
 
     private void postPinCompleted(){
-        pinLockListener.onPinUnlocked();
+        if(pinLockListener!=null) {
+            pinLockListener.onPinUnlocked();
+        }
     }
 
-    public void addRenderedAd(View ad){
-        if(ad == null){
+    public void addNativeAd(NativeAd nativeAd,final OnLockAdImpressedClicked onLockAdImpressedClicked){
+       if(nativeAd == null){
             shouldShowBigIcon = true;
             return;
         }
+
+        adView = nativeAd.createAdView(getContext(), null);
+        nativeAd.renderAdView(adView);
+        nativeAd.prepare(adView);
+        nativeAd.setMoPubNativeEventListener(new NativeAd.MoPubNativeEventListener() {
+            @Override
+            public void onImpression(View view) {
+                if(onLockAdImpressedClicked==null){
+                    return;
+                }
+
+                onLockAdImpressedClicked.onAdImpressed();
+            }
+
+            @Override
+            public void onClick(View view) {
+                if(onLockAdImpressedClicked==null){
+                    return;
+                }
+
+                onLockAdImpressedClicked.onAdClicked();
+            }
+        });
+
         shouldShowAd = true;
-        adView = ad;
     }
 
     private void addAdView(){

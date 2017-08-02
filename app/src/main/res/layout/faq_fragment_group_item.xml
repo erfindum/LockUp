@@ -12,5 +12,6 @@
         android:textAppearance="?android:attr/textAppearanceListItem"
         android:gravity="center_vertical"
         android:textColor="@color/colorMainPrimary"
+        android:textSize="@dimen/fifteenSpDimension"
         />
 </RelativeLayout>

@@ -35,7 +35,7 @@
                android:paddingRight="@dimen/fiftyDpDimension"
                android:paddingTop="@dimen/thirtyDpDimension"
                android:paddingBottom="@dimen/twentyDpDimension"
-               app:nodeCellSize="@dimen/seventyDpDimension"
+               app:nodeCellSize="@dimen/fiftyDpDimension"
                app:nodeCornerSize="3dp"
                app:nodeSelectedCornerSize="5dp"
                app:nodeDefaultColor="#FFFFFF"

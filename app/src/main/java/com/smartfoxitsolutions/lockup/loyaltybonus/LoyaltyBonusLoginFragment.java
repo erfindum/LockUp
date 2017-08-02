@@ -158,13 +158,11 @@ public class LoyaltyBonusLoginFragment extends Fragment {
     }
 
     void postError(String message){
-        if(activity!=null) {
-            progress.setVisibility(View.INVISIBLE);
-            loginInfo.setVisibility(View.VISIBLE);
-            shouldValidateLogin = true;
-            loginInfo.setText(message);
-            passwordEdit.setEnabled(true);
-        }
+        progress.setVisibility(View.INVISIBLE);
+        loginInfo.setVisibility(View.VISIBLE);
+        shouldValidateLogin = true;
+        loginInfo.setText(message);
+        passwordEdit.setEnabled(true);
     }
 
     void loginUser(){
@@ -202,15 +200,18 @@ public class LoyaltyBonusLoginFragment extends Fragment {
                             }
                         }
                         else {
+                            if(activity==null){return;}
                             postError("Invalid Credentials");
                         }
                     }else{
+                        if(activity==null){return;}
                         postError(getString(R.string.loyalty_bonus_signup_unknown_error));
                     }
                 }
 
                 @Override
                 public void onFailure(Call<LoyaltyBonusLoginResponse> call, Throwable t) {
+                    if(activity==null){return;}
                     postError(getString(R.string.loyalty_bonus_signup_unknown_error));
                 }
             });

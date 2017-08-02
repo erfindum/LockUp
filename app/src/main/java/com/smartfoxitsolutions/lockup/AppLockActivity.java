@@ -78,6 +78,7 @@ public class AppLockActivity extends AppCompatActivity {
             SharedPreferences.Editor edit = prefs.edit();
             edit.putBoolean(APP_LOCK_FIRST_START_PREFERENCE_KEY,false);
             edit.putBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,true);
+            edit.putBoolean(LockUpSettingsActivity.SWIPE_LOCK_PREFERENCE_KEY,true);
             edit.apply();
         }
         else{

@@ -21,7 +21,7 @@ public class MainLockActivity extends AppCompatActivity implements OnPinLockUnlo
 
     private MainPatternView patternLockView;
     private MainPinView pinLockView;
-    private boolean shouldTracUserPresence, shouldCloseAffinity;
+    private boolean shouldTracUserPresence, shouldCloseAffinity, shouldOpenSettings;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,6 +31,7 @@ public class MainLockActivity extends AppCompatActivity implements OnPinLockUnlo
         }catch (Exception e){
             Log.d("LockUp","Main Lock Exception : " + e);
         }
+        shouldOpenSettings = getIntent().getBooleanExtra("show_settings",false);
     }
 
     @Override
@@ -61,8 +62,13 @@ public class MainLockActivity extends AppCompatActivity implements OnPinLockUnlo
             pinLockView.removeView();
             pinLockView = null;
         }
-        startActivity(new Intent(getBaseContext(),LockUpMainActivity.class)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        if(shouldOpenSettings){
+            startActivity(new Intent(getBaseContext(),LockUpSettingsActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }else{
+            startActivity(new Intent(getBaseContext(),LockUpMainActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
         shouldTracUserPresence = true;
     }
 
