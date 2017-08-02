@@ -21,6 +21,7 @@
             android:layout_height="wrap_content"
             android:padding="@dimen/fifteenDpDimension"
             >
+
             <TextView
                 android:id="@+id/settings_activity_applock_header"
                 android:layout_width="wrap_content"
@@ -81,11 +82,66 @@
                     />
 
             </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/settings_activity_activate_slide_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/settings_activity_activate_lock_group"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true">
+                <TextView
+                    android:id="@+id/settings_activity_activate_slide_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:textColor="@color/textDarkGrey"
+                    android:textSize="@dimen/fifteenSpDimension"
+                    android:text="@string/settings_activity_activate_slide_title"
+                    android:layout_marginTop="@dimen/tenDpDimension"
+                    />
+
+                <TextView
+                    android:id="@+id/settings_activity_activate_slide_summery"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/settings_activity_activate_slide_title"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:textColor="@color/textSettingsSecondary"
+                    android:textSize="@dimen/twelveSpDimension"
+                    android:layout_marginTop="@dimen/fiveDpDimension"
+                    android:layout_marginBottom="@dimen/tenDpDimension"
+                    android:text="@string/settings_activity_activate_slide_summery"
+                    />
+
+                <include layout="@layout/seperator_settings"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/faq_question_line_seperator_main_1"
+                    android:layout_below="@+id/settings_activity_activate_slide_summery"
+                    />
+
+                <android.support.v7.widget.SwitchCompat
+                    android:id="@+id/settings_activity_activate_slide_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:gravity="center"
+                    android:layout_centerInParent="true"
+                    android:focusable="false"
+                    android:clickable="false"
+                    />
+
+            </RelativeLayout>
+
             <RelativeLayout
                 android:id="@+id/settings_activity_notification_lock_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/settings_activity_activate_lock_group"
+                android:layout_below="@+id/settings_activity_activate_slide_group"
                 >
                 <TextView
                     android:id="@+id/settings_activity_notification_lock_title"

@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.AppLockActivity;
@@ -27,7 +28,8 @@ import com.smartfoxitsolutions.lockup.R;
 public class NotificationPermissionDialog extends DialogFragment {
 
     AppCompatImageView dialogIcon;
-    TextView infoText,infoTextSub, positiveButton, negativeButton;
+    TextView infoText,infoTextSub;
+    private Button positiveButton, negativeButton;
 
     @Nullable
     @Override
@@ -36,8 +38,8 @@ public class NotificationPermissionDialog extends DialogFragment {
         dialogIcon = (AppCompatImageView) parent.findViewById(R.id.lockup_permission_dialog_image);
         infoText = (TextView) parent.findViewById(R.id.lockup_permission_dialog_info_text);
         infoTextSub = (TextView) parent.findViewById(R.id.lockup_permission_dialog_info_text_sub);
-        positiveButton = (TextView) parent.findViewById(R.id.lockup_permission_dialog_positive_button);
-        negativeButton = (TextView) parent.findViewById(R.id.lockup_permission_dialog_negative_button);
+        positiveButton = (Button) parent.findViewById(R.id.lockup_permission_dialog_positive_button);
+        negativeButton = (Button) parent.findViewById(R.id.lockup_permission_dialog_negative_button);
         dialogIcon.setImageResource(R.drawable.ic_lock_notif_permission_icon);
         infoText.setText(R.string.appLock_activity_notif_dialog_message);
         infoTextSub.setText(R.string.appLock_activity_notif_dialog_message_two);

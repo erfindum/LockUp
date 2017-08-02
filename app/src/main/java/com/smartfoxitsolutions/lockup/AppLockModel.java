@@ -34,6 +34,9 @@ public class AppLockModel {
     public static final int QUERY_TASK_TIME = 6000;
 
     public static final String LOCK_UP_FIRST_LOAD_PREF_KEY = "lockUp_is_first_load";
+    public static final String LOCKUP_VERSION_CODE = "lockup_version_code";
+    public static final String SWIPE_LOCK_AD_DISPLAY = "swipe_lock_ad";
+
 
     static final int INSTALLED_APPS_PACKAGE =1;
     static final int CHECKED_APPS_PACKAGE=2;

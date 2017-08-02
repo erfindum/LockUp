@@ -24,11 +24,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
+import com.smartfoxitsolutions.lockup.earnmore.EarnMoreActivity;
 import com.smartfoxitsolutions.lockup.loyaltybonus.receivers.UserReportBroadcastReceiver;
 
 import java.lang.reflect.Type;
@@ -64,6 +67,7 @@ public class LoyaltyUserProfileFragment extends Fragment {
     private ProgressBar loadingProgress;
     public static int lockedRecommendApps,lockedApps;
     private String pointUpdateTime;
+    private AdView adView;
 
     @Nullable
     @Override
@@ -81,6 +85,7 @@ public class LoyaltyUserProfileFragment extends Fragment {
 
         paypalCard = (CardView) parent.findViewById(R.id.loyalty_bonus_user_paypal_group);
         paytmCard = (CardView) parent.findViewById(R.id.loyalty_bonus_user_paytm_group);
+        adView = (AdView) parent.findViewById(R.id.loyalty_bonus_profile_ad);
         return parent;
     }
 
@@ -88,6 +93,8 @@ public class LoyaltyUserProfileFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         activity = (LoyaltyUserActivity) getActivity();
+        AdRequest request = new AdRequest.Builder().build();
+        adView.loadAd(request);
         setListeners();
         setAppLockInfo();
     }
@@ -110,6 +117,8 @@ public class LoyaltyUserProfileFragment extends Fragment {
         appLockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+               // startActivity(new Intent(activity, EarnMoreActivity.class));
+
                 if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP) {
                     activity.checkAndSetUsagePermissions();
                 }else{
@@ -225,7 +234,8 @@ public class LoyaltyUserProfileFragment extends Fragment {
                     ArrayList<String> userReportDateList = new ArrayList<>(userReportCurrentMap.keySet());
                     final String presentDateString = userReportDateList.get(userReportDateList.size()-1);
                     for(UserLoyaltyReport report : userReportCompleteList){
-                        Log.d("LockupUserReport",report.getReportDate()+" Impressions: " + report.getTotalImpression()+" Clicks: "+ report.getTotalClicked());
+                        Log.d("LockupUserReport",report.getReportDate()+" Impressions 1: " + report.getTotalImpression()+" Clicks 1: "+ report.getTotalClicked()
+                        +" Impressions 2: " + report.getTotalImpression2()+" Clicks 2: "+ report.getTotalClicked2());
                     }
                     if(userReportCompleteList.isEmpty()){
                         setAlarm(calendar);
@@ -237,7 +247,7 @@ public class LoyaltyUserProfileFragment extends Fragment {
                     String reportDataString = gson.toJson(userReportCompleteList,reportDataToken);
                     LoyaltyBonusRequest userReportRequest = LoyaltyServiceGenerator.createService(LoyaltyBonusRequest.class);
                     Call<UserLoyaltyReportResponse> userReportCall = userReportRequest.sendUserLoyaltyReport(
-                            "Report_add",
+                            "Report_addNew",
                             preferences.getString(LockUpSettingsActivity.RECOVERY_EMAIL_PREFERENCE_KEY,"nomail"),
                             loyaltyPreference.getString(LoyaltyBonusModel.LOYALTY_SEND_REQUEST,"noCode"),
                             reportDataString
@@ -251,39 +261,47 @@ public class LoyaltyUserProfileFragment extends Fragment {
                             if(response.isSuccessful()){
                                 UserLoyaltyReportResponse reportResponse = response.body();
                                 if(reportResponse.code.equals("200")){
-                                    Log.d("LockupUserReport","Report Success --------" + " " + reportResponse.totalPoint);
-                                    loyaltyPreference.edit().putString(LoyaltyBonusModel.USER_LOYALTY_BONUS
-                                            ,reportResponse.totalPoint).apply();
-                                    userReportCurrentMap.clear();
-                                    userReportCurrentMap.put(presentDateString,presetDayReport);
-                                    saveUserReportMap(userReportCurrentMap,gson,loyaltyPreference,userReportToken);
-                                    loyaltyPreference.edit().putLong(LoyaltyBonusModel.NEXT_REPORTED_DATE,getRequestCalendarInstance()
-                                            .getTimeInMillis())
-                                            .apply();
-                                    pointsEarned.setText(reportResponse.totalPoint);
-                                    setAlarm(calendar);
-                                    displayPoints();
+                                    if(activity!=null) {
+                                        Log.d("LockupUserReport", "Report Success --------" + " " + reportResponse.totalPoint);
+                                        loyaltyPreference.edit().putString(LoyaltyBonusModel.USER_LOYALTY_BONUS
+                                                , reportResponse.totalPoint).apply();
+                                        userReportCurrentMap.clear();
+                                        userReportCurrentMap.put(presentDateString, presetDayReport);
+                                        saveUserReportMap(userReportCurrentMap, gson, loyaltyPreference, userReportToken);
+                                        loyaltyPreference.edit().putLong(LoyaltyBonusModel.NEXT_REPORTED_DATE, getRequestCalendarInstance()
+                                                .getTimeInMillis())
+                                                .apply();
+                                        pointsEarned.setText(reportResponse.totalPoint);
+                                        setAlarm(calendar);
+                                        displayPoints();
+                                    }
                                     return;
                                 }
                                 if(reportResponse.code.equals("100")){
-                                    setAlarm(calendar);
-                                    displayPoints();
-                                    Log.d("LockupUserReport","Report Failure --------");
+                                    if(activity!=null) {
+                                        setAlarm(calendar);
+                                        displayPoints();
+                                        Log.d("LockupUserReport", "Report Failure --------");
+                                    }
                                 }
                             }else{
-                                setAlarm(calendar);
-                                displayPoints();
-                                displayInfoToast(getString(R.string.loyalty_bonus_signup_unknown_error));
-                                Log.d("LockupUserReport","Report Failure --------");
+                                if(activity!=null) {
+                                    setAlarm(calendar);
+                                    displayPoints();
+                                    displayInfoToast(getString(R.string.loyalty_bonus_signup_unknown_error));
+                                    Log.d("LockupUserReport", "Report Failure --------");
+                                }
                             }
                         }
 
                         @Override
                         public void onFailure(Call<UserLoyaltyReportResponse> call, Throwable t) {
-                            setAlarm(calendar);
-                            displayPoints();
-                            displayInfoToast(getString(R.string.loyalty_bonus_signup_unknown_error));
-                            Log.d("LockupUserReport","Report Failure --------");
+                            if(activity!=null) {
+                                setAlarm(calendar);
+                                displayPoints();
+                                displayInfoToast(getString(R.string.loyalty_bonus_signup_unknown_error));
+                                Log.d("LockupUserReport", "Report Failure --------");
+                            }
                         }
                     });
 
@@ -341,9 +359,7 @@ public class LoyaltyUserProfileFragment extends Fragment {
     }
 
     private void createNewUserReport(String reportDate, Gson gson, Type userReportToken, SharedPreferences preferences){
-        UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate);
-        userReport.setTotalImpression(0);
-        userReport.setTotalClicked(0);
+        UserLoyaltyReport userReport = new UserLoyaltyReport(reportDate,0,0,0,0);
         LinkedHashMap<String,UserLoyaltyReport> userReportNewMap = new LinkedHashMap<>();
         userReportNewMap.put(reportDate,userReport);
         saveUserReportMap(userReportNewMap,gson,preferences,userReportToken);
@@ -358,17 +374,17 @@ public class LoyaltyUserProfileFragment extends Fragment {
     }
 
     private void setAlarm(Calendar calendar){
-        AlarmManager alarmManager = (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
-        PendingIntent reportPendingIntent = PendingIntent.getBroadcast(
-                activity,23,new Intent(activity,UserReportBroadcastReceiver.class),0
-        );
-        alarmManager.cancel(reportPendingIntent);
-        if(Build.VERSION.SDK_INT<Build.VERSION_CODES.KITKAT){
-            alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),reportPendingIntent);
-        }else{
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),reportPendingIntent);
-        }
-        Log.d("LockupUserReport","Report Alarm Set --------");
+            AlarmManager alarmManager = (AlarmManager) activity.getSystemService(Context.ALARM_SERVICE);
+            PendingIntent reportPendingIntent = PendingIntent.getBroadcast(
+                    activity, 23, new Intent(activity, UserReportBroadcastReceiver.class), 0
+            );
+            alarmManager.cancel(reportPendingIntent);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), reportPendingIntent);
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), reportPendingIntent);
+            }
+            Log.d("LockupUserReport", "Report Alarm Set --------");
     }
 
 

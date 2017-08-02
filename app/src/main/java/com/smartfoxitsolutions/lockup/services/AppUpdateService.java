@@ -1,6 +1,5 @@
 package com.smartfoxitsolutions.lockup.services;
 
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -19,7 +18,6 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.smartfoxitsolutions.lockup.AppLoaderActivity;
 import com.smartfoxitsolutions.lockup.R;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

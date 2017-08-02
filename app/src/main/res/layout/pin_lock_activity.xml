@@ -8,11 +8,10 @@
     android:id="@+id/pin_lock_activity_parent">
     <RelativeLayout
         android:id="@+id/pin_lock_activity_ad_parent"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/pin_lock_activity_app_icon_view"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="@dimen/twentyDpDimension"
+        android:gravity="center_horizontal"
         />
 
         <ImageView
@@ -22,6 +21,7 @@
             android:layout_above="@+id/pin_lock_activity_trigger_group"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="@dimen/tenDpDimension"
+            android:layout_marginTop="@dimen/tenDpDimension"
             />
 
         <RelativeLayout
@@ -91,8 +91,8 @@
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/pin_lock_activity_digit_one"
-                android:layout_width="@dimen/fiftyDpDimension"
-                android:layout_height="@dimen/fiftyDpDimension"
+                android:layout_width="@dimen/pin_lock_digit_size"
+                android:layout_height="@dimen/pin_lock_digit_size"
                 android:layout_toLeftOf="@+id/pin_lock_activity_digit_two"
                 android:layout_toStartOf="@+id/pin_lock_activity_digit_two"
                 android:layout_marginRight="@dimen/fiftyDpDimension"
@@ -107,8 +107,8 @@
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/pin_lock_activity_digit_two"
-                android:layout_width="@dimen/fiftyDpDimension"
-                android:layout_height="@dimen/fiftyDpDimension"
+                android:layout_width="@dimen/pin_lock_digit_size"
+                android:layout_height="@dimen/pin_lock_digit_size"
                 android:layout_centerHorizontal="true"
                 android:background="@drawable/img_pin_lock_activity_digit_two_normal"
                 android:text="2"
@@ -119,8 +119,8 @@
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/pin_lock_activity_digit_three"
-                android:layout_width="@dimen/fiftyDpDimension"
-                android:layout_height="@dimen/fiftyDpDimension"
+                android:layout_width="@dimen/pin_lock_digit_size"
+                android:layout_height="@dimen/pin_lock_digit_size"
                 android:layout_toRightOf="@+id/pin_lock_activity_digit_two"
                 android:layout_toEndOf="@+id/pin_lock_activity_digit_two"
                 android:layout_marginLeft="@dimen/fiftyDpDimension"
@@ -133,8 +133,8 @@
                 />
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/pin_lock_activity_digit_four"
-                android:layout_width="@dimen/fiftyDpDimension"
-                android:layout_height="@dimen/fiftyDpDimension"
+                android:layout_width="@dimen/pin_lock_digit_size"
+                android:layout_height="@dimen/pin_lock_digit_size"
                 android:layout_below="@+id/pin_lock_activity_digit_two"
                 android:layout_toLeftOf="@+id/pin_lock_activity_digit_five"
                 android:layout_toStartOf="@+id/pin_lock_activity_digit_five"
@@ -150,8 +150,8 @@
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/pin_lock_activity_digit_five"
-                android:layout_width="@dimen/fiftyDpDimension"
-                android:layout_height="@dimen/fiftyDpDimension"
+                android:layout_width="@dimen/pin_lock_digit_size"
+                android:layout_height="@dimen/pin_lock_digit_size"
                 android:layout_below="@+id/pin_lock_activity_digit_two"
                 android:layout_marginTop="@dimen/twentyDpDimension"
                 android:layout_centerHorizontal="true"
@@ -164,8 +164,8 @@
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/pin_lock_activity_digit_six"
-                android:layout_width="@dimen/fiftyDpDimension"
-                android:layout_height="@dimen/fiftyDpDimension"
+                android:layout_width="@dimen/pin_lock_digit_size"
+                android:layout_height="@dimen/pin_lock_digit_size"
                 android:layout_below="@+id/pin_lock_activity_digit_two"
                 android:layout_toRightOf="@+id/pin_lock_activity_digit_five"
                 android:layout_toEndOf="@+id/pin_lock_activity_digit_five"
@@ -181,8 +181,8 @@
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/pin_lock_activity_digit_seven"
-                android:layout_width="@dimen/fiftyDpDimension"
-                android:layout_height="@dimen/fiftyDpDimension"
+                android:layout_width="@dimen/pin_lock_digit_size"
+                android:layout_height="@dimen/pin_lock_digit_size"
                 android:layout_below="@+id/pin_lock_activity_digit_five"
                 android:layout_toLeftOf="@+id/pin_lock_activity_digit_eight"
                 android:layout_toStartOf="@+id/pin_lock_activity_digit_eight"
@@ -198,8 +198,8 @@
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/pin_lock_activity_digit_eight"
-                android:layout_width="@dimen/fiftyDpDimension"
-                android:layout_height="@dimen/fiftyDpDimension"
+                android:layout_width="@dimen/pin_lock_digit_size"
+                android:layout_height="@dimen/pin_lock_digit_size"
                 android:layout_below="@+id/pin_lock_activity_digit_five"
                 android:layout_marginTop="@dimen/twentyDpDimension"
                 android:layout_centerHorizontal="true"
@@ -212,8 +212,8 @@
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/pin_lock_activity_digit_nine"
-                android:layout_width="@dimen/fiftyDpDimension"
-                android:layout_height="@dimen/fiftyDpDimension"
+                android:layout_width="@dimen/pin_lock_digit_size"
+                android:layout_height="@dimen/pin_lock_digit_size"
                 android:layout_below="@+id/pin_lock_activity_digit_five"
                 android:layout_toRightOf="@+id/pin_lock_activity_digit_eight"
                 android:layout_toEndOf="@+id/pin_lock_activity_digit_eight"
@@ -229,8 +229,8 @@
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/pin_lock_activity_digit_zero"
-                android:layout_width="@dimen/fiftyDpDimension"
-                android:layout_height="@dimen/fiftyDpDimension"
+                android:layout_width="@dimen/pin_lock_digit_size"
+                android:layout_height="@dimen/pin_lock_digit_size"
                 android:layout_below="@+id/pin_lock_activity_digit_eight"
                 android:layout_marginTop="@dimen/twentyDpDimension"
                 android:layout_centerHorizontal="true"
@@ -242,10 +242,10 @@
                 />
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/pin_lock_activity_digit_clear"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_width="@dimen/pin_lock_clear_size"
+                android:layout_height="@dimen/pin_lock_clear_size"
                 android:layout_below="@+id/pin_lock_activity_digit_eight"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="@dimen/pin_lock_clear_margin_top"
                 android:layout_toRightOf="@+id/pin_lock_activity_digit_zero"
                 android:layout_toEndOf="@+id/pin_lock_activity_digit_zero"
                 android:layout_marginLeft="@dimen/seventyDpDimension"

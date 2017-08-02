@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.AppCompatImageView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +31,7 @@ public class LoyaltyUserRedeemFragment extends Fragment {
     private RelativeLayout currentSelection;
     private LoyaltyUserActivity activity;
     private String type;
+    private DialogFragment errorFragment;
 
     @Nullable
     @Override
@@ -58,7 +60,6 @@ public class LoyaltyUserRedeemFragment extends Fragment {
         redeemFourPoints = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_four_info);
         redeemFivePoints = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_five_info);
         redeemSixPoints = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_six_info);
-
 
         userTotalPoints = (TextView) parent.findViewById(R.id.loyalty_bonus_redeem_points_redeem_info);
 
@@ -169,7 +170,7 @@ public class LoyaltyUserRedeemFragment extends Fragment {
                                 getString(R.string.loyalty_bonus_redeem_low_point_error));
                         errorFragment.setArguments(argBundle);
                         errorFragment.show(activity.getSupportFragmentManager(),"redeem_points_error");
-                    }*/
+                    } */
                 }
             }
         });

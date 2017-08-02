@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -57,7 +59,7 @@ public class LockUpMainActivity extends AppCompatActivity {
             isAppLockFirstLoad, hasPermissionReturned,stopTrackAfterPermission;
     private AppCompatImageButton lockButton;
     private ScreenOffReceiver screenOffReceiver;
-    private TextView faqButton;
+    private Button faqButton;
     private RelativeLayout watchVideo;
 
     @Override
@@ -68,11 +70,10 @@ public class LockUpMainActivity extends AppCompatActivity {
         vaultActivityButton = (AppCompatImageButton) findViewById(R.id.lockup_main_activity_vault_image);
         settingsButton= (AppCompatImageButton) findViewById(R.id.lockup_main_activity_settings_image);
         lockButton = (AppCompatImageButton) findViewById(R.id.lockup_main_activity_app_lock_button);
-        faqButton = (TextView) findViewById(R.id.lockup_main_activity_faq_button);
+        faqButton = (Button) findViewById(R.id.lockup_main_activity_faq_button);
         watchVideo = (RelativeLayout) findViewById(R.id.lockup_main_activity_Watch_video_thumbnail);
         loyaltyBonusButton = (AppCompatImageButton) findViewById(R.id.lockup_main_activity_loyalty_button);
         SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
-        isAppLockFirstLoad = prefs.getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,true);
         setBackground();
         setImageButtonListeners();
     }
@@ -118,10 +119,8 @@ public class LockUpMainActivity extends AppCompatActivity {
                 shouldTrackUserPresence = false;
             }
         });
-        String faqString = getString(R.string.main_screen_activity_faq_button_text);
-        SpannableString faqSpannable = new SpannableString(faqString);
-        faqSpannable.setSpan(new UnderlineSpan(),0,faqString.length(),0);
-        faqButton.setText(faqSpannable);
+        faqButton.setText(getString(R.string.main_screen_activity_faq_button_text));
+        faqButton.setPaintFlags(faqButton.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         faqButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -253,8 +252,9 @@ public class LockUpMainActivity extends AppCompatActivity {
         screenOffReceiver = new ScreenOffReceiver(new WeakReference<>(this));
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         registerReceiver(screenOffReceiver,filter);
-        shouldStartAppLock = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE)
-                .getBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
+        SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
+        shouldStartAppLock =prefs.getBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
+        isAppLockFirstLoad = prefs.getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,true);
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.smartfoxitsolutions.lockup;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
+import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -13,6 +15,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
@@ -21,17 +24,24 @@ import android.support.v4.hardware.fingerprint.FingerprintManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.smartfoxitsolutions.lockup.dialogs.FingerPrintActivateDialog;
+import com.smartfoxitsolutions.lockup.dialogs.GrantUsageAccessDialog;
+import com.smartfoxitsolutions.lockup.dialogs.OverlayPermissionDialog;
 import com.smartfoxitsolutions.lockup.receivers.PreventUninstallReceiver;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
+import com.smartfoxitsolutions.lockup.services.GetPaletteColorService;
 import com.smartfoxitsolutions.lockup.services.NotificationLockService;
 
 import java.lang.ref.WeakReference;
+
+import static com.smartfoxitsolutions.lockup.AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY;
 
 /**
  * Created by RAAJA on 18-08-2016.
@@ -42,15 +52,18 @@ public class LockUpSettingsActivity extends AppCompatActivity {
     private TextView changePinPatternText, activateAppLockText;
     private int appLockMode;
     private SwitchCompat fingerPrintSwitch, activateAppLockSwitch, vibrateSwitch, pinTouchSwitch, patternLineSwitch
-                            ,lockScreenOnSwitch, notificationLockSwitch, preventUninstallSwitch;
+                            ,lockScreenOnSwitch, notificationLockSwitch, preventUninstallSwitch, swipeLockSwitch;
     private SharedPreferences prefs;
     private boolean isFingerPrintActive, shouldAppLockStart,isVibratorEnabled,shouldHidePinTouch, shouldHidePatternLine
-                    , shouldLockScreenOn, isAppLockFirstLoad;
+                    , shouldLockScreenOn, isAppLockFirstLoad, shouldSwipeLock;
     public static boolean isPreventUninstallEnabled;
     private RelativeLayout activateAppLockItem, vibrateItem, changePinPatternItem,fingerPrintItem, pinTouchItem
-                    , patternLineItem, screenOnLockItem, notificationLockItem,preventUninstallItem;
+                    , patternLineItem, screenOnLockItem, notificationLockItem,preventUninstallItem, swipeLockItem;
     private FingerPrintActivateDialog fingerprintActivateDialog;
     private ValueAnimator textAnimator;
+    private GrantUsageAccessDialog usageDialog;
+    private OverlayPermissionDialog overlayPermissionDialog;
+    private boolean hasPermissionReturned,stopTrackAfterPermission;
 
     public static final String FINGER_PRINT_LOCK_SELECTION_PREFERENCE_KEY = "fingerPrintLockSelected";
     public static final String APP_LOCKING_SERVICE_START_PREFERENCE_KEY = "appLockStopSettings";
@@ -60,6 +73,7 @@ public class LockUpSettingsActivity extends AppCompatActivity {
     public static final String LOCK_SCREEN_ON_PREFERENCE_KEY = "lockScreenOn";
     public static final String RECOVERY_EMAIL_PREFERENCE_KEY = "recoverEmail";
     public static final String DEVICE_ADMIN_PREFERENCE_KEY = "deviceAdminStatus";
+    public static final String SWIPE_LOCK_PREFERENCE_KEY = "swipeLock";
 
     private static final String FINGERPRINT_ACTIVATE_DIALOG_TAG = "fingerprint_activate_dialog";
     private static final int SET_PIN_PATTERN_REQUEST_CODE = 44;
@@ -83,6 +97,7 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         lockScreenOnSwitch = (SwitchCompat) findViewById(R.id.settings_activity_relock_switch);
         notificationLockSwitch = (SwitchCompat) findViewById(R.id.settings_activity_notification_lock_switch);
         preventUninstallSwitch = (SwitchCompat) findViewById(R.id.settings_activity_prevent_uninstall_switch);
+        swipeLockSwitch = (SwitchCompat) findViewById(R.id.settings_activity_activate_slide_switch);
 
         activateAppLockItem = (RelativeLayout) findViewById(R.id.settings_activity_activate_lock_group);
         vibrateItem = (RelativeLayout) findViewById(R.id.settings_activity_vibrate_group);
@@ -93,6 +108,7 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         screenOnLockItem = (RelativeLayout) findViewById(R.id.settings_activity_relock_group);
         notificationLockItem = (RelativeLayout) findViewById(R.id.settings_activity_notification_lock_group);
         preventUninstallItem = (RelativeLayout) findViewById(R.id.settings_activity_prevent_uninstall_group);
+        swipeLockItem = (RelativeLayout) findViewById(R.id.settings_activity_activate_slide_group);
 
         toolbar = (Toolbar) findViewById(R.id.settings_activity_tool_bar);
         setSupportActionBar(toolbar);
@@ -108,7 +124,7 @@ public class LockUpSettingsActivity extends AppCompatActivity {
 
     void setUpPreferences(){
         shouldAppLockStart = prefs.getBoolean(APP_LOCKING_SERVICE_START_PREFERENCE_KEY,false);
-        isAppLockFirstLoad = prefs.getBoolean(AppLockActivity.APP_LOCK_FIRST_START_PREFERENCE_KEY,false);
+        isAppLockFirstLoad = prefs.getBoolean(APP_LOCK_FIRST_START_PREFERENCE_KEY,true);
         isVibratorEnabled = prefs.getBoolean(VIBRATOR_ENABLED_PREFERENCE_KEY,false);
         appLockMode = prefs.getInt(AppLockModel.APP_LOCK_LOCKMODE,0);
         if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.M) {
@@ -118,19 +134,24 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         shouldHidePatternLine = prefs.getBoolean(HIDE_PATTERN_LINE_PREFERENCE_KEY,false);
         shouldLockScreenOn = prefs.getBoolean(LOCK_SCREEN_ON_PREFERENCE_KEY,false);
         isPreventUninstallEnabled =  prefs.getBoolean(LockUpSettingsActivity.DEVICE_ADMIN_PREFERENCE_KEY,false);
+        if(shouldAppLockStart) {
+            shouldSwipeLock = prefs.getBoolean(LockUpSettingsActivity.SWIPE_LOCK_PREFERENCE_KEY, true);
+        }else{
+            shouldSwipeLock = false;
+        }
     }
     private void setupViews(){
 
         //AppLock On/Off
         if(shouldAppLockStart){
             activateAppLockText.setText(getString(R.string.settings_activity_activate_locker_enabled));
+            activateAppLockSwitch.setChecked(true);
             if(!isAppLockFirstLoad) {
-                activateAppLockSwitch.setChecked(true);
             }
         }else{
             activateAppLockText.setText(getString(R.string.settings_activity_activate_locker_disabled));
-            if(!isAppLockFirstLoad) {
-                activateAppLockSwitch.setChecked(false);
+            activateAppLockSwitch.setChecked(false);
+            if(isAppLockFirstLoad) {
             }
         }
 
@@ -192,6 +213,13 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         }else{
             preventUninstallSwitch.setChecked(false);
         }
+
+        //SwipeLock
+        if(shouldSwipeLock){
+            swipeLockSwitch.setChecked(true);
+        }else{
+            swipeLockSwitch.setChecked(false);
+        }
     }
 
     private void setListeners(){
@@ -199,20 +227,43 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         activateAppLockItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences.Editor edit = prefs.edit();
-                if(!isAppLockFirstLoad) {
-                    if (shouldAppLockStart) {
-                        startAlphaAnimation(activateAppLockText, getString(R.string.settings_activity_activate_locker_disabled));
-                        activateAppLockSwitch.setChecked(false);
-                        shouldAppLockStart = false;
-                        edit.putBoolean(APP_LOCKING_SERVICE_START_PREFERENCE_KEY, false);
-                    } else {
-                        startAlphaAnimation(activateAppLockText, getString(R.string.settings_activity_activate_locker_enabled));
-                        activateAppLockSwitch.setChecked(true);
+                if(isAppLockFirstLoad){
+                    if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+                        checkAndSetUsagePermissions();
+                    }else{
                         shouldAppLockStart = true;
-                        edit.putBoolean(APP_LOCKING_SERVICE_START_PREFERENCE_KEY, true);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putBoolean(APP_LOCK_FIRST_START_PREFERENCE_KEY,false);
+                        isAppLockFirstLoad = false;
+                        editor.putBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,true);
+                        editor.putBoolean(LockUpSettingsActivity.SWIPE_LOCK_PREFERENCE_KEY,true);
+                        editor.apply();
+                        activateAppLockSwitch.setChecked(true);
+                        swipeLockSwitch.setChecked(true);
+                        shouldSwipeLock = true;
+                        startService(new Intent(LockUpSettingsActivity.this, GetPaletteColorService.class));
                     }
+                    return;
+                }
+                SharedPreferences.Editor edit = prefs.edit();
+                if (shouldAppLockStart) {
+                    startAlphaAnimation(activateAppLockText, getString(R.string.settings_activity_activate_locker_disabled));
+                    activateAppLockSwitch.setChecked(false);
+                    shouldAppLockStart = false;
+                    edit.putBoolean(APP_LOCKING_SERVICE_START_PREFERENCE_KEY, false);
+                    edit.putBoolean(SWIPE_LOCK_PREFERENCE_KEY,false);
+                    swipeLockSwitch.setChecked(false);
                     edit.apply();
+                    shouldSwipeLock = false;
+                } else {
+                    startAlphaAnimation(activateAppLockText, getString(R.string.settings_activity_activate_locker_enabled));
+                    activateAppLockSwitch.setChecked(true);
+                    shouldAppLockStart = true;
+                    edit.putBoolean(APP_LOCKING_SERVICE_START_PREFERENCE_KEY, true);
+                    edit.putBoolean(SWIPE_LOCK_PREFERENCE_KEY,true);
+                    swipeLockSwitch.setChecked(true);
+                    edit.apply();
+                    shouldSwipeLock = true;
                 }
             }
         });
@@ -396,12 +447,40 @@ public class LockUpSettingsActivity extends AppCompatActivity {
                }
             }
         });
+
+        //SwipeLock On/Off
+        swipeLockItem.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!shouldAppLockStart){
+                    Toast.makeText(LockUpSettingsActivity.this,"Switch on AppLock first",Toast.LENGTH_LONG)
+                    .show();
+                    return;
+                }
+                SharedPreferences.Editor edit = prefs.edit();
+                if(shouldSwipeLock){
+                    edit.putBoolean(SWIPE_LOCK_PREFERENCE_KEY,false);
+                    shouldSwipeLock = false;
+                    swipeLockSwitch.setChecked(false);
+                }else{
+                    edit.putBoolean(SWIPE_LOCK_PREFERENCE_KEY,true);
+                    shouldSwipeLock = true;
+                    swipeLockSwitch.setChecked(true);
+                }
+                edit.apply();
+            }
+        });
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        shouldTrackUserPresence = true;
+        if(!stopTrackAfterPermission) {
+            shouldTrackUserPresence = true;
+        }else{
+            stopTrackAfterPermission = false;
+            hasPermissionReturned = false;
+        }
     }
 
     @Override
@@ -429,6 +508,15 @@ public class LockUpSettingsActivity extends AppCompatActivity {
         if(requestCode == AppLockActivity.NOTIFICATION_PERMISSION_REQUEST){
             shouldTrackUserPresence = true;
             return;
+        }
+
+        if(requestCode == 45){
+            checkAndSetUsagePermissions();
+            hasPermissionReturned = true;
+        }else
+        if(requestCode == 46){
+            checkAndSetOverlayPermission();
+            hasPermissionReturned = true;
         }
     }
 
@@ -476,6 +564,100 @@ public class LockUpSettingsActivity extends AppCompatActivity {
             }
         });
         textAnimator.start();
+    }
+
+    @TargetApi(21)
+    void checkAndSetUsagePermissions(){
+        AppOpsManager opsManager = (AppOpsManager) getApplicationContext().getSystemService(APP_OPS_SERVICE);
+        if (opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), getPackageName())
+                == AppOpsManager.MODE_ALLOWED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                checkAndSetOverlayPermission();
+            } else {
+                if (!hasPermissionReturned) {
+                    shouldTrackUserPresence = false;
+                } else {
+                    shouldTrackUserPresence = false;
+                    stopTrackAfterPermission = true;
+                }
+                shouldAppLockStart = true;
+                SharedPreferences.Editor edit = prefs.edit();
+                edit.putBoolean(APP_LOCK_FIRST_START_PREFERENCE_KEY,false);
+                isAppLockFirstLoad = false;
+                edit.putBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,true);
+                edit.putBoolean(LockUpSettingsActivity.SWIPE_LOCK_PREFERENCE_KEY,true);
+                edit.apply();
+                activateAppLockSwitch.setChecked(true);
+                swipeLockSwitch.setChecked(true);
+                shouldSwipeLock = true;
+                startService(new Intent(this, GetPaletteColorService.class));
+            }
+            Log.d(AppLockingService.TAG, String.valueOf(opsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS
+                    , Process.myUid(), getPackageName())
+                    == AppOpsManager.MODE_ALLOWED));
+        } else {
+            startUsagePermissionDialog();
+            Log.d(AppLockingService.TAG, "No Usage");
+        }
+    }
+
+    @TargetApi(23)
+    void checkAndSetOverlayPermission(){
+        if(Settings.canDrawOverlays(this)){
+            if(!hasPermissionReturned) {
+                shouldTrackUserPresence = false;
+            }else{
+                shouldTrackUserPresence = false;
+                stopTrackAfterPermission = true;
+            }
+            shouldAppLockStart = true;
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putBoolean(APP_LOCK_FIRST_START_PREFERENCE_KEY,false);
+            isAppLockFirstLoad = false;
+            edit.putBoolean(LockUpSettingsActivity.APP_LOCKING_SERVICE_START_PREFERENCE_KEY,true);
+            edit.putBoolean(LockUpSettingsActivity.SWIPE_LOCK_PREFERENCE_KEY,true);
+            edit.apply();
+            activateAppLockSwitch.setChecked(true);
+            swipeLockSwitch.setChecked(true);
+            shouldSwipeLock = true;
+            startService(new Intent(this, GetPaletteColorService.class));
+        }else{
+            startOverlayPermissionDialog();
+        }
+    }
+
+    void startUsagePermissionDialog(){
+        Bundle usageBundle = new Bundle();
+        usageBundle.putString("grandUsageStartType","settingsStart");
+        usageDialog = new GrantUsageAccessDialog();
+        usageDialog.setArguments(usageBundle);
+        android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
+        android.support.v4.app.FragmentTransaction fragmentTransaction =fragmentManager.beginTransaction();
+        fragmentTransaction.addToBackStack("loyaltyUsagePermission");
+        usageDialog.show(fragmentTransaction,"loyaltyUsagePermission");
+    }
+
+    void startOverlayPermissionDialog(){
+        Bundle overlayBundle = new Bundle();
+        overlayBundle.putString("overlayStartType","settingsStart");
+        overlayPermissionDialog = new OverlayPermissionDialog();
+        overlayPermissionDialog.setArguments(overlayBundle);
+        android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
+        android.support.v4.app.FragmentTransaction fragmentTransaction =fragmentManager.beginTransaction();
+        fragmentTransaction.addToBackStack("loyaltyOverlayPermission");
+        overlayPermissionDialog.show(fragmentTransaction,"loyaltyOverlayPermission");
+    }
+
+    @TargetApi(21)
+    public void startUsageAccessSettingActivity(){
+        startActivityForResult(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS),45);
+        shouldTrackUserPresence = false;
+    }
+
+    @TargetApi(23)
+    public void requestOverlayPermission(){
+        startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION),46);
+        shouldTrackUserPresence = false;
     }
 
     @Override

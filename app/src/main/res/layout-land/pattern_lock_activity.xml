@@ -9,11 +9,10 @@
 
     <RelativeLayout
         android:id="@+id/pattern_lock_activity_ad_parent"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/pattern_lock_activity_app_icon_view"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="@dimen/twentyDpDimension"
+        android:gravity="center_horizontal"
         />
 
            <ImageView
@@ -36,7 +35,7 @@
                android:paddingRight="@dimen/fiftyDpDimension"
                android:paddingTop="@dimen/thirtyDpDimension"
                android:paddingBottom="@dimen/twentyDpDimension"
-               app:nodeCellSize="@dimen/seventyDpDimension"
+               app:nodeCellSize="@dimen/fiftyDpDimension"
                app:nodeCornerSize="3dp"
                app:nodeSelectedCornerSize="5dp"
                app:nodeDefaultColor="#FFFFFF"

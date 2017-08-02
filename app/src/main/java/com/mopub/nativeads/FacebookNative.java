@@ -1,6 +1,6 @@
 package com.mopub.nativeads;
 
-import android.content.Context;
+/* import android.content.Context;
 import android.view.View;
 
 import com.facebook.ads.Ad;
@@ -25,7 +25,7 @@ import static com.mopub.nativeads.NativeImageHelper.preCacheImages;
  * Video ads will only be shown if VIDEO_ENABLED is set to true or a server configuration
  * "video_enabled" flag is set to true. The server configuration will override the local
  * configuration.
- */
+
 public class FacebookNative extends CustomEventNative {
     private static final String PLACEMENT_ID_KEY = "placement_id";
     private static final String VIDEO_ENABLED_KEY = "video_enabled";
@@ -33,7 +33,7 @@ public class FacebookNative extends CustomEventNative {
     /**
      * Sets whether or not Facebook native video ads will be shown. This value is overridden with
      * server extras.
-     */
+
     private static boolean VIDEO_ENABLED = false;
 
     /**
@@ -41,7 +41,7 @@ public class FacebookNative extends CustomEventNative {
      * default Facebook video renderer. This value can be overridden with {@link
      * FacebookNative#setVideoRendererAvailable} if there already is a custom Facebook video
      * renderer.
-     */
+
     private static Boolean sIsVideoRendererAvailable = null;
 
     // CustomEventNative implementation
@@ -90,7 +90,7 @@ public class FacebookNative extends CustomEventNative {
      * com.mopub.nativeads.FacebookAdRenderer must also be used to display video-enabled ads.
      *
      * @param videoEnabled True if you want to enable Facebook native video.
-     */
+
     public static void setVideoEnabled(final boolean videoEnabled) {
         VIDEO_ENABLED = videoEnabled;
     }
@@ -103,7 +103,7 @@ public class FacebookNative extends CustomEventNative {
      *
      * @param videoRendererAvailable Whether or not there is a renderer available for video-enabled
      *                               Facebook native ads.
-     */
+
     public static void setVideoRendererAvailable(final boolean videoRendererAvailable) {
         sIsVideoRendererAvailable = videoRendererAvailable;
     }
@@ -284,21 +284,21 @@ public class FacebookNative extends CustomEventNative {
 
         /**
          * Returns the String corresponding to the ad's title.
-         */
+
         final public String getTitle() {
             return mNativeAd.getAdTitle();
         }
 
         /**
          * Returns the String corresponding to the ad's body text. May be null.
-         */
+
         final public String getText() {
             return mNativeAd.getAdBody();
         }
 
         /**
          * Returns the String url corresponding to the ad's main image. May be null.
-         */
+
         final public String getMainImageUrl() {
             final NativeAd.Image coverImage = mNativeAd.getAdCoverImage();
             return coverImage == null ? null : coverImage.getUrl();
@@ -306,7 +306,7 @@ public class FacebookNative extends CustomEventNative {
 
         /**
          * Returns the String url corresponding to the ad's icon image. May be null.
-         */
+
         final public String getIconImageUrl() {
             final NativeAd.Image icon = mNativeAd.getAdIcon();
             return icon == null ? null : icon.getUrl();
@@ -314,7 +314,7 @@ public class FacebookNative extends CustomEventNative {
 
         /**
          * Returns the Call To Action String (i.e. "Download" or "Learn More") associated with this ad.
-         */
+
         final public String getCallToAction() {
             return mNativeAd.getAdCallToAction();
         }
@@ -323,7 +323,7 @@ public class FacebookNative extends CustomEventNative {
          * For app install ads, this returns the associated star rating (on a 5 star scale) for the
          * advertised app. Note that this method may return null if the star rating was either never set
          * or invalid.
-         */
+
         final public Double getStarRating() {
             return mStarRating;
         }
@@ -333,7 +333,7 @@ public class FacebookNative extends CustomEventNative {
          *
          * @return String representing the Privacy Information Icon click through url, or {@code null}
          * if not set.
-         */
+
         final public String getPrivacyInformationIconClickThroughUrl() {
             return mNativeAd.getAdChoicesLinkUrl();
         }
@@ -343,7 +343,7 @@ public class FacebookNative extends CustomEventNative {
          *
          * @return String representing the Privacy Information Icon click through url, or {@code
          * null} if not set.
-         */
+
         final public String getPrivacyInformationIconImageUrl() {
             return mNativeAd.getAdChoicesIcon() == null ? null : mNativeAd.getAdChoicesIcon().getUrl();
         }
@@ -432,7 +432,7 @@ public class FacebookNative extends CustomEventNative {
         /**
          * Given a particular String key, return the associated Object value from the ad's extras map.
          * See {@link StaticNativeAd#getExtras()} for more information.
-         */
+
         final public Object getExtra(final String key) {
             if (!Preconditions.NoThrow.checkNotNull(key, "getExtra key is not allowed to be null")) {
                 return null;
@@ -445,7 +445,7 @@ public class FacebookNative extends CustomEventNative {
          * of the above hardcoded setters. This is particularly useful for passing down custom fields
          * with MoPub's direct-sold native ads or from mediated networks that pass back additional
          * fields.
-         */
+
         final public Map<String, Object> getExtras() {
             return new HashMap<String, Object>(mExtras);
         }
@@ -461,7 +461,7 @@ public class FacebookNative extends CustomEventNative {
          * Attaches the native ad to the MediaView, if it exists.
          *
          * @param mediaView The View that holds the main media.
-         */
+
         public void updateMediaView(final MediaView mediaView) {
             if (mediaView != null) {
                 mediaView.setNativeAd(mNativeAd);
@@ -488,3 +488,4 @@ public class FacebookNative extends CustomEventNative {
         }
     }
 }
+*/

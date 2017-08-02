@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
+import com.google.android.gms.ads.MobileAds;
 import com.smartfoxitsolutions.lockup.views.MainPatternView;
 import com.smartfoxitsolutions.lockup.views.MainPinView;
 import com.smartfoxitsolutions.lockup.views.OnPinLockUnlockListener;
@@ -19,15 +21,25 @@ public class MainLockActivity extends AppCompatActivity implements OnPinLockUnlo
 
     private MainPatternView patternLockView;
     private MainPinView pinLockView;
-    private boolean shouldTracUserPresence, shouldCloseAffinity;
+    private boolean shouldTracUserPresence, shouldCloseAffinity, shouldOpenSettings;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        DisplayMetrics metrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        try{
+            MobileAds.initialize(this.getApplicationContext());
+        }catch (Exception e){
+            Log.d("LockUp","Main Lock Exception : " + e);
+        }
+        shouldOpenSettings = getIntent().getBooleanExtra("show_settings",false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         SharedPreferences prefs = getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE);
         boolean isFingerPrintActive = prefs.getBoolean(LockUpSettingsActivity.FINGER_PRINT_LOCK_SELECTION_PREFERENCE_KEY,false);
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
         if(prefs.getInt(AppLockModel.APP_LOCK_LOCKMODE,0)==AppLockModel.APP_LOCK_MODE_PATTERN){
             patternLockView = new MainPatternView(this,this,isFingerPrintActive);
             patternLockView.setActivityBackground(metrics.heightPixels);
@@ -50,8 +62,13 @@ public class MainLockActivity extends AppCompatActivity implements OnPinLockUnlo
             pinLockView.removeView();
             pinLockView = null;
         }
-        startActivity(new Intent(getBaseContext(),LockUpMainActivity.class)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        if(shouldOpenSettings){
+            startActivity(new Intent(getBaseContext(),LockUpSettingsActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }else{
+            startActivity(new Intent(getBaseContext(),LockUpMainActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
         shouldTracUserPresence = true;
     }
 
@@ -59,13 +76,11 @@ public class MainLockActivity extends AppCompatActivity implements OnPinLockUnlo
     public void onPinLocked(String packageName) {
     }
 
-    @Override
-    public void onAdImpressed() {
+    public void onAdImpressed(String type) {
 
     }
 
-    @Override
-    public void onAdClicked() {
+    public void onAdClicked(String type) {
 
     }
 

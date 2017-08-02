@@ -1,16 +1,12 @@
 package com.smartfoxitsolutions.lockup.loyaltybonus;
 
-import android.app.AlarmManager;
 import android.app.Fragment;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
@@ -30,9 +26,7 @@ import android.widget.TextView;
 import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
-import com.smartfoxitsolutions.lockup.loyaltybonus.receivers.UserReportBroadcastReceiver;
 
-import java.util.Calendar;
 import java.util.regex.Pattern;
 
 import retrofit2.Call;
@@ -206,15 +200,18 @@ public class LoyaltyBonusLoginFragment extends Fragment {
                             }
                         }
                         else {
+                            if(activity==null){return;}
                             postError("Invalid Credentials");
                         }
                     }else{
+                        if(activity==null){return;}
                         postError(getString(R.string.loyalty_bonus_signup_unknown_error));
                     }
                 }
 
                 @Override
                 public void onFailure(Call<LoyaltyBonusLoginResponse> call, Throwable t) {
+                    if(activity==null){return;}
                     postError(getString(R.string.loyalty_bonus_signup_unknown_error));
                 }
             });

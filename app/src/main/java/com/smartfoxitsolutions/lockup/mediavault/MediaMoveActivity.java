@@ -26,7 +26,6 @@ import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.MainLockActivity;
 import com.smartfoxitsolutions.lockup.R;
-import com.smartfoxitsolutions.lockup.mediavault.dialogs.ExternalStoragePermissionDialog;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.ShareAlertDialog;
 import com.smartfoxitsolutions.lockup.mediavault.dialogs.ShareMovePermissionDialog;
 import com.smartfoxitsolutions.lockup.mediavault.services.MediaMoveService;

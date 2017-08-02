@@ -16,7 +16,7 @@
         android:paddingLeft="@dimen/fifteenDpDimension"
         android:paddingStart="@dimen/fifteenDpDimension"
         app:srcCompat="@drawable/ic_keyboard_white_24px"
-        android:layout_alignTop="@+id/pattern_lock_activity_finger_ad_parent"
+        android:layout_alignTop="@+id/pattern_lock_activity_finger_app_icon_view"
         android:background="@android:color/transparent"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
@@ -32,7 +32,7 @@
         android:paddingStart="@dimen/fifteenDpDimension"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignTop="@+id/pattern_lock_activity_finger_ad_parent"
+        android:layout_alignTop="@+id/pattern_lock_activity_finger_app_icon_view"
         app:srcCompat="@drawable/ic_fingerprint_white_24px"
         android:background="@android:color/transparent"
         android:adjustViewBounds="true"
@@ -42,11 +42,11 @@
 
     <RelativeLayout
         android:id="@+id/pattern_lock_activity_finger_ad_parent"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/pattern_lock_activity_finger_app_icon_view"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="@dimen/twentyDpDimension"
+        android:gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/tenDpDimension"
         />
 
     <ImageView
@@ -69,7 +69,7 @@
         android:paddingRight="@dimen/fiftyDpDimension"
         android:paddingTop="@dimen/thirtyDpDimension"
         android:paddingBottom="@dimen/twentyDpDimension"
-        app:nodeCellSize="@dimen/seventyDpDimension"
+        app:nodeCellSize="@dimen/fiftyDpDimension"
         app:nodeCornerSize="3dp"
         app:nodeSelectedCornerSize="5dp"
         app:nodeDefaultColor="#FFFFFF"

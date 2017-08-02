@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.R;
@@ -24,7 +25,8 @@ import com.smartfoxitsolutions.lockup.R;
 
 public class FingerPrintActivateDialog extends DialogFragment {
 
-    TextView infoText,infoTextSub,negativeButton;
+    TextView infoText,infoTextSub;
+    Button negativeButton;
     public static final String FINGERPRINT_INFO_MESSAGE = "fingerPrintInfoMessage";
 
 
@@ -34,7 +36,7 @@ public class FingerPrintActivateDialog extends DialogFragment {
         View parent = inflater.inflate(R.layout.settings_activity_dialog,container,false);
         infoText = (TextView) parent.findViewById(R.id.settings_dialog_header);
         infoTextSub = (TextView) parent.findViewById(R.id.settings_dialog_message);
-        negativeButton = (TextView) parent.findViewById(R.id.settings_dialog_negative_button);
+        negativeButton = (Button) parent.findViewById(R.id.settings_dialog_negative_button);
         infoText.setText(R.string.settings_dialog_finger_negative_header);
         infoTextSub.setText(getArguments().getString(FINGERPRINT_INFO_MESSAGE));
         negativeButton.setText(R.string.settings_dialog_finger_negative_text);

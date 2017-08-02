@@ -12,6 +12,7 @@
     <dimen name="twelveSpDimension">12sp</dimen>
     <dimen name="seventeenSpDimension">17sp</dimen>
     <dimen name="twentySpDimension">20sp</dimen>
+    <dimen name="sixtySpDimension">60sp</dimen>
 
     <dimen name="loginLineSeperator">225dp</dimen>
 

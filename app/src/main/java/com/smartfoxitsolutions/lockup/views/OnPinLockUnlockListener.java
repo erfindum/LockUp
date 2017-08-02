@@ -9,7 +9,4 @@ public interface OnPinLockUnlockListener {
 
     void onPinLocked(String packageName);
 
-    void onAdImpressed();
-
-    void onAdClicked();
 }

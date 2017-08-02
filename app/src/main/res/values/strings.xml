@@ -3,8 +3,11 @@
 
     <!-- SettingsActivity -->
     <string name="settings_activity_toolbar_title">Settings</string>
+    <string name="settings_activity_slide_title">SWIPE LOCK</string>
     <string name="settings_activity_applock_title">APP LOCK</string>
     <string name="settings_activity_advanced_title">ADVANCED PROTECTION</string>
+    <string name="settings_activity_activate_slide_title">Activate Slide Lock</string>
+    <string name="settings_activity_activate_slide_summery">Visible when device unlocked</string>
     <string name="settings_activity_activate_locker_title">Activate App Lock</string>
     <string name="settings_activity_activate_locker_enabled">App lock enabled</string>
     <string name="settings_activity_activate_locker_disabled">App lock disabled</string>
@@ -78,7 +81,7 @@
     <string name="main_screen_activity_app_lock_info_Off">OFF</string>
     <string name="main_screen_activity_installed_info">Installed Apps</string>
     <string name="main_screen_activity_locked_info">Locked Apps</string>
-    <string name="main_screen_activity_faq_button_text">Tips &amp; FAQ</string>
+    <string name="main_screen_activity_faq_button_text">Rules &amp; FAQ</string>
     <string name="main_screen_activity_lock_info_message">Click to lock installed apps</string>
     <string name="main_screen_activity_ad_unit_id">ca-app-pub-4739007494599063/2472603036</string>
     <string name="main_lock_activity_forgot_button">FORGOT PASSWORD</string>
@@ -176,8 +179,13 @@
     <string name="pin_lock_activity_ad_app_id">ca-app-pub-2878097117146801~6210554174</string>
     <string name="facebook_app_id">361979890807218</string>
 
-    <!-- Pin Lock Activity -->
-    <string name="pin_lock_activity_ad_unit_id">3b8d2c8908d24f7e90c7f0e05132858b</string>
+    <!-- Ad Ids -->
+    <string name="lock_ad_unit_id_one">3b8d2c8908d24f7e90c7f0e05132858b</string>
+    <string name="lock_ad_unit_id_two">6d14cdbc6797405da51ccc311b5a1731</string>
+    <string name="lock_interstitial_ad">ca-app-pub-2878097117146801/2088047771</string>
+    <string name="lock_ad_unit_id_test">b2baecdb911b41b1a2d64ac5ee28e8b2</string>
+    <string name="lock_ad_unit_id_test_2">20fc49b1fc7b42f7b928aabe788e37ec</string>
+
     
     <!-- Album Picker Activity-->
     <string name="vault_album_picker_load_text">Loading Albums</string>
@@ -270,7 +278,7 @@
     <string name="loyalty_bonus_signup_terms_error">Read and Accept the Terms &amp; Conditions</string>
 
     <string name="loyalty_bonus_signup_no_connection">Network Connection Unavailable</string>
-    <string name="loyalty_bonus_signup_unknown_error">Unknown Error Occurred</string>
+    <string name="loyalty_bonus_signup_unknown_error">Server Not Responding</string>
     <string name="loyalty_bonus_signup_success_message">Successfully registered</string>
     <string name="loyalty_bonus_signup_success_positive">LOGIN</string>
 
@@ -306,10 +314,12 @@
     <string name="loyalty_user_main_lock_info_two">Lock more apps to get more points</string>
     <string name="loyalty_user_main_points_info_one">100 points = 1$</string>
     <string name="loyalty_user_main_points_info_two">Points will be updated everyday at</string>
+    <string name="loyalty_user_main_points_info_three">You may get 0.50 &#8211; 7 points a day, depends on the number of locked Apps. Check Rules &amp; FAQ</string>
     <string name="loyalty_user_main_redeem_text">Redeem with</string>
     <string name="loyalty_user_main_logout">Logout</string>
     <string name="loyalty_user_main_title">Loyalty Bonus</string>
     <string name="loyalty_user_main_request_info">Points will be updated at %1$s</string>
+
 
 
     <!-- Loyalty Bonus Redeem -->
@@ -344,6 +354,14 @@
         <item>5000</item>
         <item>10,000</item>
     </string-array>
+    <string-array name="loyalty_bonus_server_paytm_points">
+        <item>200</item>
+        <item>500</item>
+        <item>1000</item>
+        <item>2000</item>
+        <item>5000</item>
+        <item>10000</item>
+    </string-array>
 
     <integer-array name="loyalty_bonus_redeem_paypal_credits">
         <item>4</item>
@@ -363,6 +381,15 @@
         <item>10,000</item>
     </string-array>
 
+    <string-array name="loyalty_bonus_server_paypal_points">
+        <item>400</item>
+        <item>600</item>
+        <item>1000</item>
+        <item>2000</item>
+        <item>5000</item>
+        <item>10000</item>
+    </string-array>
+
     <!-- Loyalty Redeem Final -->
     <string name="loyalty_redeem_final_selected_info">Selected Denomination</string>
     <string name="loyalty_redeem_final_paypal_info">Enter your Paypal ID</string>
@@ -377,7 +404,7 @@
     <string name="loyalty_redeem_dialog_positive_text">YES</string>
     <string name="loyalty_redeem_dialog_info_message">Would you like to credit &lt;b>$%1$s &lt;/b> to your following %2$s ID &lt;b>%3$s &lt;/b></string>
     <string name="loyalty_redeem_success_title">Redeem Success</string>
-    <string name="loyalty_redeem_success_message">Hurray! &lt;b>$%1$s &lt;/b> will be credited to your account soon. A confirmation mail is sent to &lt;b>%2$s&lt;/b></string>
+    <string name="loyalty_redeem_success_message">Hurray! &lt;b>$%1$s &lt;/b> will be credited to your account in next 7 working days, We need time to verify your earning history</string>
     <string name="loyalty_redeem_paypal_id_error">Enter a valid Paypal ID</string>
 
 
@@ -398,7 +425,7 @@
     </string-array>
 
     <string-array name="tips_faq_headers_list">
-        <item>TIPS TO EARN MORE</item>
+        <item>HOW TO EARN</item>
         <item>What is loyalty Bonus in LockUp?</item>
         <item>Why I need to signup for Getting loyalty Bonus?</item>
         <item>How much loyalty bonus I can earn each day?</item>
@@ -408,35 +435,77 @@
         <item>I logged out from loyalty bonus &amp; after some days I again logged-in. But, why my current earned points are same as before?</item>
         <item>How can I redeem my loyalty Bonus?</item>
         <item>Why Applock and Vault asking a multiple permission ?</item>
-        <item>Why I have to keep Facebook app installed in my device?</item>
         <item>Why Applock stops working sometime?</item>
         <item>What is Notification Lock and how to use it?</item>
     </string-array>
 
     <string-array name="tips_faq_tips_list">
-        <item>Keep the Facebook app installed in your device</item>
-        <item>Keep the internet connection enabled all time</item>
-        <item>Do not click ads unnecessarily. LockUp does not provide loyalty bonus upon ad clicks. If you do so, LockUp have rights to remove or block your account permanently.</item>
+        <item>By AppLock: \n\n
+         - Get upto 15 points by locking 20-25+ frequently used Apps.\n\n
+         - Get up to 12 points by locking 15-20 Frequently used Apps. points\n\n
+         - Get up to 10 points by locking 10-15 Frequently used Apps.\n\n
+         - Get up to 5 points by locking 1-10 Frequently used Apps.\n\n
+         Note - This is just an estimation to help you understand the concept, your earning may differ from  given estimation.
+        </item>
+        <item>By SlideLock: \n\n
+        - Activate Slide Lock from Settings, to earn extra points.\n\n
+        - You will Earn extra 0.50 to 5 Points \n\n
+        </item>
+        <item>Always be logged in into Loyalty Bonus, otherwise we can’t track your usage hence won’t be able to credit your points.</item>
         <item>We recommend not to clear RAM or Recent App\'s from task manager.</item>
-        <item>In Applock try to lock more number of Apps. It will help to generate more points.</item>
+        <item>Keep the internet connection enabled all time</item>
+        <item>The videos in YouTube about LockUp except the video which is shown this App, are not our official videos. We request you to please avoid it, and only believe in what is written here and in Google Play.</item>
+        <item>LockUp has a Right to Remove or Ban your Account permanently for future use, if we find that you are doing such an activity which is against our and our associate’s policy.</item>
+        <item>Don’t worry if your points don’t update any particular day, it will be credit next time.</item>
+        <item>Please read FAQ for more information</item>
     </string-array>
 
     <string-array name="tips_faq_answers_list">
-        <item>Once you signup for loyalty bonus, you will start earning points based on the usage of Applock in LockUp. More number of apps you lock on your device, more will be your earnings.</item>
+        <item>once you signup for loyalty bonus, you will start earning points based on the usage of Applock, Vault and Slide lock. More you lock your Apps or enables slidelock more will be your earnings.</item>
         <item>In order to give rewards to our loyal users, we need to track the usage of lockup. If you are not logged in, we can not track the usage and hence can\'t give you points.</item>
-        <item>Loyalty bonus will give you free rewards which is hard to get. Each day bonus depends on many factors like the number of locked apps in your device, proper internet connection, installed facebook app in your device etc. We recommend you to keep the Facebook app installed, lock more number of apps in Applock, avoid clearing RAM and recent apps from task manager.</item>
+        <item>Loyalty bonus will give you free rewards which is hard to get. Each day bonus depends on many factors like the number of locked apps in your device, proper internet connection etc. We recommend you to lock more number of apps in Applock, avoid clearing RAM and recent apps from task manager.</item>
         <item>Yes, just logout from current device and use the same  login credentials in new device.</item>
         <item>We recommend not to use it with same email id in multiple devices. If you use it with same email, your loyalty bonus may decrease due to conflict.</item>
-        <item>Your loyalty bonus depends on many aspects like daily usage, internet connectivity, availability of Facebook app in your phone and your Device manufacturer etc.</item>
+        <item>Your loyalty bonus depends on many aspects like daily usage, internet connectivity your Device manufacturer etc.</item>
         <item>For getting loyalty bonus regularly, you must be logged-in all time.  If not, we can not track your usage of Applock hence can\'t credit you points.</item>
-        <item>Once you reach a minimum threshold of loyalty points, you can request to redeem it through PayPal or Paytm(For Indian User only). You will get the redeemed amount in your account within next 3 working days.</item>
+        <item>Once you reach a minimum threshold of loyalty points, you can request to redeem it through PayPal or Paytm(For Indian User only). You will get the redeemed amount in your account within next 7 working days.</item>
         <item>Granting Manual permission access depends on your Android version. If your device is having the Version  of lollipop and above then LockUp may ask you multiple permission for using it  which completely depends OS Version.</item>
-        <item>The source of ads in the lock screen and vault is from Facebook Audience Network. For displaying ads, it is necessary to keep it installed. We recommend you to keep the facebook app installed in your device so that we can give you a loyalty bonus for using it.</item>
         <item>If lockUp stops working on clearing RAM/Recent Apps from task manager and not restarting automatically, then its must be a issue of your device Manufacturer or OS.</item>
         <item>Most of the apps like whatsApp, Facebook Triggers push notification which are private to you sometimes. By enabling it you can protect your privacy from snoopy eyes. To enable it you must lock the app in Applock first and then enable the same under Notification lock.</item>
     </string-array>
-    <string name="faq_support_email_header">Mail us for support :</string>
-    <string name="faq_support_email">smartfoxapps@gmail.com</string>
+    <string name="faq_support_email_header">Contact us for support :</string>
+    <string name="faq_support_email">E-Mail- smartfoxapps@gmail.com</string>
+    <string name="faq_support_phone">WhatsApp- +91&#8211;8770510145</string>
 
+    <!-- Earn More -->
+    <string name="extra_earning_title">Earn More</string>
+    <string-array name="extra_earning_fragment_title">
+    <item>Offers</item>
+    <item>Survey</item>
+    </string-array>
+
+
+
+    <!-- Survey Fragment -->
+    <string name="survey_pollfish_title">Pollfish Survey</string>
+    <string name="survey_offertoro_title">Offertoro Survey</string>
+    <string name="survey_pollfish_api_key">8b236291-b7c8-487a-8cff-d8e97c47ba23</string>
+    <string name="survey_offertoro_app_ID">3169</string>
+    <string name="survey_offertoro_app_key">76cc298dc0357347f4c1b1076f1a0cfe</string>
+    <string name="survey_pollfish_error">Pollfish Survey not available. Try again after some time</string>
+    <string name="survey_offertoro_error">Offertoro Survey not available. Try again after some time</string>
+    <string name="survey_credited">You will be credited with %1$,.2f $</string>
+    <string name="survey_process_dialog_title">Fetching Survey</string>
+    <string name="survey_process_dialog_message">Please wait</string>
+
+
+
+    <!-- Offerwall Fragment -->
+    <string name="offerwall_offertoro_title">Offertoro Offers</string>
+    <string name="offerwall_offertoro_app_ID">3170</string>
+    <string name="offerwall_offertoro_app_key">4451030293d10f99d08078739935d248</string>
+    <string name="offerwall_offertoro_error">Offertoro offers not available. Try again after some time</string>
+    <string name="offerwall_process_dialog_title">Fetching Offers</string>
+    <string name="offerwall_process_dialog_message">Please wait</string>
 
 </resources>

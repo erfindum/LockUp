@@ -17,6 +17,7 @@
             android:layout_marginTop="@dimen/tenDpDimension"
             android:textAppearance="?android:attr/textAppearanceListItem"
             android:textColor="@color/textPrimaryColor"
+            android:textSize="@dimen/fifteenSpDimension"
             />
 
         <TextView android:id="@android:id/text2"
@@ -24,6 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@android:id/text1"
             android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textSize="@dimen/fifteenSpDimension"
             />
 
     </TwoLineListItem>

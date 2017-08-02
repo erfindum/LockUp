@@ -16,9 +16,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.LockUpMainActivity;
+import com.smartfoxitsolutions.lockup.LockUpSettingsActivity;
 import com.smartfoxitsolutions.lockup.R;
 import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyUserActivity;
 
@@ -28,8 +30,9 @@ import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyUserActivity;
 
 public class OverlayPermissionDialog extends DialogFragment {
     private AppCompatImageView dialogIcon;
-    private TextView infoText,infoTextSub, positiveButton, negativeButton;
+    private TextView infoText,infoTextSub;
     private String startType;
+    private Button positiveButton, negativeButton;
 
     @Nullable
     @Override
@@ -38,8 +41,8 @@ public class OverlayPermissionDialog extends DialogFragment {
         dialogIcon = (AppCompatImageView) parent.findViewById(R.id.lockup_permission_dialog_image);
         infoText = (TextView) parent.findViewById(R.id.lockup_permission_dialog_info_text);
         infoTextSub = (TextView) parent.findViewById(R.id.lockup_permission_dialog_info_text_sub);
-        positiveButton = (TextView) parent.findViewById(R.id.lockup_permission_dialog_positive_button);
-        negativeButton = (TextView) parent.findViewById(R.id.lockup_permission_dialog_negative_button);
+        positiveButton = (Button) parent.findViewById(R.id.lockup_permission_dialog_positive_button);
+        negativeButton = (Button) parent.findViewById(R.id.lockup_permission_dialog_negative_button);
         dialogIcon.setImageResource(R.drawable.ic_lock_overlay_permission_icon);
         if(getArguments()!=null){
             startType = getArguments().getString("overlayStartType");
@@ -110,9 +113,13 @@ public class OverlayPermissionDialog extends DialogFragment {
         if(startType.equals("appLockStart")) {
             final LockUpMainActivity activity = (LockUpMainActivity) getActivity();
             activity.requestOverlayPermission();
-        }else
+        }
         if(startType.equals("loyaltyBonusStart")){
             final LoyaltyUserActivity activity = (LoyaltyUserActivity) getActivity();
+            activity.requestOverlayPermission();
+        }
+        if(startType.equals("settingsStart")){
+            final LockUpSettingsActivity activity = (LockUpSettingsActivity) getActivity();
             activity.requestOverlayPermission();
         }
     }

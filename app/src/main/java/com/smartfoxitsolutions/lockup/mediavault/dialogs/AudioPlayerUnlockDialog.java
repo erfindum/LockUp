@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.R;
@@ -26,7 +27,8 @@ import com.smartfoxitsolutions.lockup.mediavault.VaultAudioPlayerActivity;
 
 public class AudioPlayerUnlockDialog extends DialogFragment {
     AppCompatImageView dialogIcon;
-    TextView infoText,infoTextSub, positiveButton, negativeButton;
+    TextView infoText,infoTextSub;
+    Button positiveButton, negativeButton;
 
     @Nullable
     @Override
@@ -36,8 +38,8 @@ public class AudioPlayerUnlockDialog extends DialogFragment {
         dialogIcon = (AppCompatImageView) parent.findViewById(R.id.lockup_default_dialog_image);
         infoText = (TextView) parent.findViewById(R.id.lockup_default_dialog_info_text);
         infoTextSub = (TextView) parent.findViewById(R.id.lockup_default_dialog_info_text_sub);
-        positiveButton = (TextView) parent.findViewById(R.id.lockup_default_dialog_positive_button);
-        negativeButton = (TextView) parent.findViewById(R.id.lockup_default_dialog_negative_button);
+        positiveButton = (Button) parent.findViewById(R.id.lockup_default_dialog_positive_button);
+        negativeButton = (Button) parent.findViewById(R.id.lockup_default_dialog_negative_button);
         dialogIcon.setImageResource(R.drawable.ic_lock_usage_permission_icon);
         infoText.setText(R.string.vault_move_dialog_move_out_title_text);
         infoTextSub.setText(R.string.vault_move_dialog_move_out_sub_text);

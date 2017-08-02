@@ -11,8 +11,8 @@
 
     <dimen name="main_activity_lock_icon_size">130dp</dimen>
 
-    <dimen name="native_ad_image_width">210dp</dimen>
-    <dimen name="native_ad_image_height">100dp</dimen>
+    <dimen name="native_ad_image_width">190dp</dimen>
+    <dimen name="native_ad_image_height">80dp</dimen>
 
     <dimen name="lockup_main_info_lock_size">70dp</dimen>
     <dimen name="dialog_button_left_right_margin">8dp</dimen>
@@ -28,5 +28,13 @@
     <dimen name="lockup_main_activity_thumbnail_width">172dp</dimen>
     <dimen name="lockup_main_activity_thumbnail_play">17dp</dimen>
     <dimen name="lockup_main_activity_thumbnail_padding">4dp</dimen>
+    <dimen name="lockup_main_activity_faq_padding">10dp</dimen>
+
+    <dimen name="pin_lock_digit_size">40dp</dimen>
+    <dimen name="pin_lock_clear_size">30dp</dimen>
+    <dimen name="pin_lock_clear_margin_top">25dp</dimen>
+
+
+    <dimen name="loyalty_bonus_ad_margin_bottom">20dp</dimen>
 
 </resources>

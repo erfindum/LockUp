@@ -2,8 +2,6 @@ package com.smartfoxitsolutions.lockup.mediavault;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -24,11 +22,7 @@ import android.widget.TextView;
 import com.mopub.nativeads.MoPubRecyclerAdapter;
 import com.mopub.nativeads.MoPubStaticNativeAdRenderer;
 import com.mopub.nativeads.ViewBinder;
-import com.smartfoxitsolutions.lockup.AppLoaderActivity;
-import com.smartfoxitsolutions.lockup.AppLockModel;
 import com.smartfoxitsolutions.lockup.R;
-
-import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by RAAJA on 01-10-2016.

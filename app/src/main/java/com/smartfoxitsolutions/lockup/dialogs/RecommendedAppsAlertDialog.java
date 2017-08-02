@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.AppLockActivity;
@@ -28,7 +29,8 @@ import com.smartfoxitsolutions.lockup.R;
 public class RecommendedAppsAlertDialog extends DialogFragment {
 
     AppCompatImageView dialogIcon;
-    TextView infoText,infoTextSub, positiveButton, negativeButton;
+    TextView infoText,infoTextSub;
+    Button positiveButton, negativeButton;
     private int position;
     private AppLockRecyclerViewItem itemView;
 
@@ -39,8 +41,8 @@ public class RecommendedAppsAlertDialog extends DialogFragment {
         dialogIcon = (AppCompatImageView) parent.findViewById(R.id.lockup_default_dialog_image);
         infoText = (TextView) parent.findViewById(R.id.lockup_default_dialog_info_text);
         infoTextSub = (TextView) parent.findViewById(R.id.lockup_default_dialog_info_text_sub);
-        positiveButton = (TextView) parent.findViewById(R.id.lockup_default_dialog_positive_button);
-        negativeButton = (TextView) parent.findViewById(R.id.lockup_default_dialog_negative_button);
+        positiveButton = (Button) parent.findViewById(R.id.lockup_default_dialog_positive_button);
+        negativeButton = (Button) parent.findViewById(R.id.lockup_default_dialog_negative_button);
         dialogIcon.setImageResource(R.drawable.ic_app_lock_activity_alert);
         infoText.setText(R.string.recommended_unlock_alert_text);
         infoTextSub.setVisibility(View.GONE);

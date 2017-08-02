@@ -1,7 +1,5 @@
 package com.smartfoxitsolutions.lockup.views;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;

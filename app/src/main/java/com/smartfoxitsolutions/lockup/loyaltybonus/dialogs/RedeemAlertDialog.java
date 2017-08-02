@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.smartfoxitsolutions.lockup.R;
@@ -27,7 +28,8 @@ import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyUserActivity;
 
 public class RedeemAlertDialog extends DialogFragment {
 
-    TextView infoText,infoTextSub,negativeButton,positiveButton;
+    TextView infoText,infoTextSub;
+    Button negativeButton,positiveButton;
     public static final String REDEEM_ERROR_MESSAGE = "redeemErrorMessage";
     LoyaltyUserActivity activity;
 
@@ -37,8 +39,8 @@ public class RedeemAlertDialog extends DialogFragment {
         View parent = inflater.inflate(R.layout.redeem_info_dialog,container,false);
         infoText = (TextView) parent.findViewById(R.id.redeem_dialog_header);
         infoTextSub = (TextView) parent.findViewById(R.id.redeem_dialog_message);
-        negativeButton = (TextView) parent.findViewById(R.id.redeem_dialog_negative_button);
-        positiveButton = (TextView) parent.findViewById(R.id.redeem_dialog_positive_button);
+        negativeButton = (Button) parent.findViewById(R.id.redeem_dialog_negative_button);
+        positiveButton = (Button) parent.findViewById(R.id.redeem_dialog_positive_button);
         infoText.setText(R.string.loyalty_redeem_final_redeem_button);
         String infoString = Html.fromHtml(getArguments().getString(REDEEM_ERROR_MESSAGE)).toString();
         infoTextSub.setText(infoString);

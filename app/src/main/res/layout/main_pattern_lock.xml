@@ -82,8 +82,7 @@
         android:id="@+id/main_pattern_lock_pattern_view"
         android:layout_width="400dp"
         android:layout_height="400dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/tenDpDimension"
+        android:layout_above="@+id/main_pattern_lock_ad"
         android:layout_centerHorizontal="true"
         android:paddingLeft="@dimen/fiftyDpDimension"
         android:paddingRight="@dimen/fiftyDpDimension"
@@ -93,9 +92,20 @@
         app:nodeCornerSize="3dp"
         app:nodeSelectedCornerSize="5dp"
         app:nodeDefaultColor="#E6FFFFFF"
+
         app:nodeSelectedDefaultColor="#E6f7e830"
         app:patternLineStroke="@dimen/sevenDpDimension"
         app:patternLineColor="@color/white"
+        />
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/main_pattern_lock_ad"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:adUnitId="ca-app-pub-2878097117146801/1951034179"
+        app:adSize="BANNER"
+        android:layout_centerHorizontal="true"
         />
 
     <TextView

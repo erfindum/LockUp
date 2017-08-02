@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" android:maxSdkVersion="22"/>
     <supports-screens android:smallScreens="false" android:normalScreens="true" android:largeScreens="true"
         android:xlargeScreens="true" android:anyDensity="true"/>
 
@@ -51,9 +52,13 @@
             android:excludeFromRecents="true"
             />
         <activity android:name=".MainLockActivity"
-            android:excludeFromRecents="true"/>
+            android:excludeFromRecents="true"
+            android:screenOrientation="portrait"
+            />
         <activity android:name=".ResetPasswordActivity"
-            android:excludeFromRecents="true"/>
+            android:excludeFromRecents="true"
+            android:screenOrientation="portrait"
+            />
         <activity android:name=".SetEmailActivity"
             android:excludeFromRecents="true"
             android:screenOrientation="portrait"
@@ -116,11 +121,30 @@
             android:launchMode="singleTask"
             android:taskAffinity="com.smartfoxitsolutions.lockup.FingerPrintActivity"
             />
+        <activity android:name=".SlideLockActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:taskAffinity="com.smartfoxitsolutions.lockup.SlideLockActivity"
+            />
+        <activity android:name=".earnmore.EarnMoreActivity"
+            android:excludeFromRecents="true"
+            android:screenOrientation="portrait"
+            />
+
         <activity android:name="com.mopub.common.MoPubBrowser"
             android:configChanges="keyboardHidden|orientation|screenSize"
             />
         <activity android:name="com.mopub.mobileads.MraidVideoPlayerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
+
+        <activity android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:theme="@android:style/Theme.Translucent"
+            android:noHistory="true"
+            />
+
         <activity android:name=".loyaltybonus.LoyaltyBonusMain"
             android:excludeFromRecents="true"
             android:screenOrientation="portrait"
@@ -190,5 +214,6 @@
         </receiver>
         <receiver android:name=".loyaltybonus.receivers.UserReportBroadcastReceiver"/>
     </application>
+
 
 </manifest>

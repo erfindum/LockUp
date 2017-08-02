@@ -141,10 +141,12 @@
        android:textColor="@color/mainScreenText"
        />
 
-   <TextView
+   <Button
        android:id="@+id/lockup_main_activity_app_settings_text"
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
+       android:background="@android:color/transparent"
+       android:padding="@dimen/lockup_main_activity_faq_padding"
        android:layout_below="@+id/lockup_main_activity_settings_image"
        android:layout_toRightOf="@+id/main_screen_activity_app_vault_text"
        android:layout_toEndOf="@id/main_screen_activity_app_vault_text"

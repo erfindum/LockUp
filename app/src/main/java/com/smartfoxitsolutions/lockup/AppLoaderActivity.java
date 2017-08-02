@@ -1,5 +1,6 @@
 package com.smartfoxitsolutions.lockup;
 
+import android.app.Application;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -15,13 +16,19 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.smartfoxitsolutions.lockup.loyaltybonus.LoyaltyBonusModel;
+import com.smartfoxitsolutions.lockup.loyaltybonus.UserLoyaltyReport;
 import com.smartfoxitsolutions.lockup.mediavault.MediaMoveActivity;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -31,6 +38,7 @@ public class AppLoaderActivity extends AppCompatActivity {
 
     private static final int REQUEST_START_ACTIVITY_FIRST_LOAD =2;
     private static final int REQUEST_START_LOCKUP_ACTIVITY = 3;
+    public static final String PREVIOUS_VERSION_CODE = "previous_version_code";
     public static final String MEDIA_THUMBNAIL_WIDTH_KEY = "thumbnail_width_key";
     public static final String MEDIA_THUMBNAIL_HEIGHT_KEY = "thumbnail_height_key";
     public static final String ALBUM_THUMBNAIL_WIDTH = "album_thumbnail_width";
@@ -95,6 +103,17 @@ public class AppLoaderActivity extends AppCompatActivity {
             pkgManager.setComponentEnabledSetting(mediaMoveActivityComponent,PackageManager.COMPONENT_ENABLED_STATE_DISABLED
                     ,PackageManager.DONT_KILL_APP);
         }
+
+        try {
+            int currentVersionCode = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_META_DATA)
+                    .versionCode;
+            if (currentVersionCode > getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME, MODE_PRIVATE)
+                    .getInt(AppLockModel.LOCKUP_VERSION_CODE, 0))
+                generateNewVersionReports(currentVersionCode);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         LinkedList<String> recommendedAddedList = new LinkedList<>();
         installedAppMap = appLockModel.getInstalledAppsMap();
         checkedAppMap = appLockModel.getCheckedAppsMap();
@@ -108,7 +127,7 @@ public class AppLoaderActivity extends AppCompatActivity {
 
         Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
         installIntent.addCategory(Intent.CATEGORY_DEFAULT);
-        installIntent.setDataAndType(Uri.parse("file:///"),"application/vnd.android.package-archive");
+        installIntent.setData(Uri.parse("package:"+"no_package"));
         List<ResolveInfo> installerPackages = pkgManager.queryIntentActivities(installIntent,PackageManager.GET_META_DATA);
 
         if(installerPackages!=null && !installerPackages.isEmpty()){
@@ -210,13 +229,40 @@ public class AppLoaderActivity extends AppCompatActivity {
         startMainActivity();
     }
 
+    private void generateNewVersionReports(int currentAppVersionCode){
+        SharedPreferences prefs = getSharedPreferences(LoyaltyBonusModel.LOYALTY_BONUS_PREFERENCE_NAME,MODE_PRIVATE);
+
+        String userReportString =prefs.getString(LoyaltyBonusModel.USER_LOYALTY_REPORT,null);
+        if(userReportString !=null){
+            Type userToken = new TypeToken<LinkedHashMap<String,UserLoyaltyReport>>(){}.getType();
+            Gson gson =new Gson();
+            LinkedHashMap<String, UserLoyaltyReport> userReportCurrentMap = gson.fromJson(userReportString,userToken);
+            if(userReportCurrentMap!=null && !userReportCurrentMap.isEmpty()){
+                LinkedHashMap<String,UserLoyaltyReport> userNewReportMap = new LinkedHashMap<>();
+                for(Map.Entry<String,UserLoyaltyReport> entry : userReportCurrentMap.entrySet()){
+                    UserLoyaltyReport oldReport = entry.getValue();
+                    UserLoyaltyReport newReport = new UserLoyaltyReport(oldReport.getReportDate(),0,0,0,0);
+                    newReport.setTotalImpression(Integer.parseInt(oldReport.getTotalImpression()));
+                    newReport.setTotalClicked(Integer.parseInt(oldReport.getTotalClicked()));
+                    userNewReportMap.put(oldReport.getReportDate(),newReport);
+                }
+                String userNewReportString = gson.toJson(userNewReportMap,userToken);
+                SharedPreferences.Editor edit = prefs.edit();
+                edit.putString(LoyaltyBonusModel.USER_LOYALTY_REPORT,userNewReportString);
+                edit.apply();
+            }
+        }
+        getSharedPreferences(AppLockModel.APP_LOCK_PREFERENCE_NAME,MODE_PRIVATE).edit()
+                .putInt(AppLockModel.LOCKUP_VERSION_CODE,currentAppVersionCode).apply();
+    }
+
     void startMainActivity(){
         if (isLockUpFirstLoad()){
             startActivityForResult(new Intent(this,SetPinPatternActivity.class)
                     .putExtra(SetPinPatternActivity.INTENT_PIN_PATTERN_START_TYPE_KEY,SetPinPatternActivity.INTENT_APP_LOADER)
                     ,REQUEST_START_ACTIVITY_FIRST_LOAD);
         }else{
-            startActivityForResult(new Intent(this,MainLockActivity.class),REQUEST_START_LOCKUP_ACTIVITY);
+           startActivityForResult(new Intent(this,MainLockActivity.class),REQUEST_START_LOCKUP_ACTIVITY);
         }
 
     }

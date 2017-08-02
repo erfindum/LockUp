@@ -75,13 +75,13 @@
                     android:background="@color/textPrimaryColor"
                     />
 
-                <TextView
+                <Button
                     android:id="@+id/network_dialog_negative_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/network_dialog_divider"
-                    android:paddingTop="@dimen/tenDpDimension"
-                    android:paddingBottom="@dimen/twentyDpDimension"
+                    android:background="@android:color/transparent"
+                    android:layout_marginTop="@dimen/tenDpDimension"
                     android:layout_marginRight="24dp"
                     android:layout_marginEnd="24dp"
                     android:layout_alignParentEnd="true"

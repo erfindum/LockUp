@@ -229,11 +229,13 @@
         android:textColor="@color/mainScreenText"
         />
 </RelativeLayout>
-    <TextView
+    <Button
         android:id="@+id/lockup_main_activity_faq_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/fiveDpDimension"
+        android:background="@android:color/transparent"
+        android:padding="@dimen/lockup_main_activity_faq_padding"
         android:layout_below="@+id/lockup_main_activity_button_row_two"
         android:layout_toRightOf="@+id/lockup_main_activity_main_seperator"
         android:layout_toEndOf="@id/lockup_main_activity_main_seperator"
