@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/layout_offertoro_offerwall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/text_offertoro_offerwall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/twentyDpDimension"
+            android:layout_marginBottom="@dimen/twentyDpDimension"
+            android:layout_marginStart="@dimen/twentyDpDimension"
+            android:layout_marginLeft="@dimen/twentyDpDimension"
+            android:textSize="@dimen/fifteenSpDimension"
+            android:textColor="@color/textDarkGrey"
+            android:text="@string/offerwall_offertoro_title"
+            />
+
+        <include layout="@layout/seperator_settings"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_below="@+id/text_offertoro_offerwall"
+            />
+
+    </RelativeLayout>
+
+</RelativeLayout>
