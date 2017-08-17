@@ -8,7 +8,7 @@ android {
         applicationId "com.smartfoxitsolutions.lockup"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 20170710
+        versionCode 20170817
         versionName "2.4.9"
         vectorDrawables.useSupportLibrary =  true
     }

@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.hardware.fingerprint.FingerprintManagerCompat;
@@ -34,6 +35,7 @@ import android.widget.Toast;
 import com.smartfoxitsolutions.lockup.dialogs.FingerPrintActivateDialog;
 import com.smartfoxitsolutions.lockup.dialogs.GrantUsageAccessDialog;
 import com.smartfoxitsolutions.lockup.dialogs.OverlayPermissionDialog;
+import com.smartfoxitsolutions.lockup.dialogs.SettingsAlerDialog;
 import com.smartfoxitsolutions.lockup.receivers.PreventUninstallReceiver;
 import com.smartfoxitsolutions.lockup.services.AppLockingService;
 import com.smartfoxitsolutions.lockup.services.GetPaletteColorService;
@@ -437,13 +439,7 @@ public class LockUpSettingsActivity extends AppCompatActivity {
                    manager.removeActiveAdmin(new ComponentName(getBaseContext(),PreventUninstallReceiver.class));
                    preventUninstallSwitch.setChecked(false);
                }else{
-                   Intent enableDeviceIntent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-                   ComponentName componentName = new ComponentName(getBaseContext(),PreventUninstallReceiver.class);
-                   enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName);
-                   enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                           getResources().getString(R.string.appLock_activity_prevent_uninstall_message_text));
-                   startActivity(enableDeviceIntent);
-                   shouldTrackUserPresence = false;
+                   new SettingsAlerDialog().show(getSupportFragmentManager(),"prevent_uninstall_alert");
                }
             }
         });
@@ -470,6 +466,16 @@ public class LockUpSettingsActivity extends AppCompatActivity {
                 edit.apply();
             }
         });
+    }
+
+    public void openDeviceAdminPermission(){
+        Intent enableDeviceIntent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+        ComponentName componentName = new ComponentName(getBaseContext(),PreventUninstallReceiver.class);
+        enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, componentName);
+        enableDeviceIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                getResources().getString(R.string.appLock_activity_prevent_uninstall_message_text));
+        startActivity(enableDeviceIntent);
+        shouldTrackUserPresence = false;
     }
 
     @Override

@@ -27,6 +27,13 @@
     <string name="settings_activity_prevent_uninstall_title">Prevent LockUp Uninstall</string>
     <string name="settings_activity_prevent_uninstall_summery">It is highly recommended to enable this protection. This prevents
     unauthorized users or apps from uninstalling LockUp </string>
+    <string name="settings_prevent_uninstall_alert_title">Device Administrator Permission Required</string>
+    <string name="settings_prevent_uninstall_alert_message">By enabling this permission no user sensitive data or password is changed or deleted by Lockup.
+    The sole purpose for enabling this permission, is to prevent other 3rd party apps to uninstall Lockup by mistake.
+    \n\n Note: The Device Administrator permission can be disabled anytime inside Lockup by navigating to Lockup Settings and disabling
+        \"Prevent Lockup Uninstall\" option.
+    </string>
+    <string name="settings_prevent_uninstall_positive">ACTIVATE</string>
 
     <!-- SettingsActivityDialog -->
     <string name="settings_dialog_finger_negative_header">Unable to switch on</string>
